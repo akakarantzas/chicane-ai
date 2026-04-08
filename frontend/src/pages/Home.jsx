@@ -24,6 +24,12 @@ export default function Home({ onNavigate }) {
             >
               Predictions
             </button>
+            <button
+              onClick={() => onNavigate('history')}
+              className="hover:text-white transition-colors"
+            >
+              History
+            </button>
             <a href="#how-it-works" className="hover:text-white transition-colors">
               How it works
             </a>
