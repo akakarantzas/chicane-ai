@@ -14,7 +14,7 @@ function barColor(index, total) {
   return `hsl(${hue}, ${sat}%, ${light}%)`
 }
 
-export default function Predictions() {
+export default function Predictions({ onNavigate }) {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -62,9 +62,12 @@ export default function Predictions() {
       <div className="max-w-2xl mx-auto px-6 py-12">
         {/* Header */}
         <div className="mb-10">
-          <p className="text-xs font-semibold tracking-widest text-gray-500 uppercase mb-1">
-            Chicane.ai
-          </p>
+          <button
+            onClick={() => onNavigate?.('home')}
+            className="text-xs font-semibold tracking-widest text-gray-500 uppercase mb-1 hover:text-gray-300 transition-colors"
+          >
+            ← Chicane.ai
+          </button>
           <h1 className="text-3xl font-bold tracking-tight">
             {race !== 'TBD' ? race : 'Next Race'} Predictions
           </h1>
