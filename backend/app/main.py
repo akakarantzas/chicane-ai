@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.routers import predictions, races
+
 app = FastAPI(title="Chicane.ai API")
 
 app.add_middleware(
@@ -10,6 +12,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+app.include_router(predictions.router)
+app.include_router(races.router)
 
 
 @app.get("/api/health")
