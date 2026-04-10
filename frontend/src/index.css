@@ -1,3 +1,30 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+  font-family: Helvetica, Arial, sans-serif;
+}
+
+.calendar-scroll::-webkit-scrollbar {
+  height: 4px;
+}
+
+.calendar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.calendar-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+}
+
+.calendar-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.stat-card:hover {
+  box-shadow: 0 4px 28px rgba(232, 0, 45, 0.15), 0 2px 16px rgba(0,0,0,0.5);
+  border-color: rgba(232, 0, 45, 0.25) !important;
+  transform: translateY(-2px);
+}
