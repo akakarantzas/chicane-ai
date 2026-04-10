@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  overflow-y: scroll;
+}
+
 body {
   font-family: Helvetica, Arial, sans-serif;
 }

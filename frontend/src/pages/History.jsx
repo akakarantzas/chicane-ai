@@ -8,33 +8,39 @@ const ACTUAL = [
 
 export default function History({ onNavigate }) {
   return (
-    <div className="min-h-screen bg-[#0C0C0E] text-[#F4F4F5] flex flex-col">
+    <div
+      className="relative min-h-screen text-[#F4F4F5] flex flex-col"
+      style={{
+        backgroundImage: 'url(/f1red.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+        backgroundColor: '#0C0C0E',
+      }}
+    >
+      {/* Dark overlay */}
+      <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to bottom, rgba(12,12,14,0.72) 0%, rgba(12,12,14,0.88) 50%, rgba(12,12,14,0.97) 100%)', zIndex: 0 }} />
 
       {/* Navbar */}
-      <nav className="border-b border-white/[0.06] px-6 py-4">
-        <div className="max-w-3xl mx-auto flex items-center justify-between">
-          <button
-            onClick={() => onNavigate('home')}
-            className="flex items-center hover:opacity-80 transition-opacity"
-          >
-            <img src="/logo-mark.png" alt="" style={{ height: '60px', width: '60px', objectFit: 'contain', marginRight: '-14px' }} />
-            <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontStyle: 'italic', letterSpacing: '-0.05em', fontSize: '1.9rem', color: '#F4F4F5' }}>Chicane.ai</span>
-          </button>
-          <div className="flex items-center gap-6 text-[#A1A1AA]" style={{ fontSize: '1.05rem', fontWeight: 500 }}>
-            <button onClick={() => onNavigate('predictions')} className="hover:text-[#F4F4F5] transition-colors">
-              Predictions
-            </button>
-            <button onClick={() => onNavigate('history')} className="text-[#F4F4F5]">
-              History
-            </button>
-            <button onClick={() => onNavigate('season')} className="hover:text-[#F4F4F5] transition-colors">
-              Season
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/[0.06] px-6" style={{ backgroundColor: 'transparent' }}>
+        <div className="flex items-center h-16 max-w-7xl mx-auto">
+          <div className="flex-1 flex items-center">
+            <button onClick={() => onNavigate('home')} className="flex items-center hover:opacity-80 transition-opacity">
+              <img src="/logo-mark.png" alt="" style={{ height: '60px', width: '60px', objectFit: 'contain', marginRight: '-14px' }} />
+              <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontStyle: 'italic', letterSpacing: '-0.05em', fontSize: '1.9rem', color: '#F4F4F5' }}>Chicane.ai</span>
             </button>
           </div>
+          <div className="flex items-center gap-8 text-[#A1A1AA]" style={{ fontSize: '1.05rem', fontWeight: 500 }}>
+            <button onClick={() => onNavigate('predictions')} className="hover:text-[#F4F4F5] transition-colors">Predictions</button>
+            <button onClick={() => onNavigate('history')} className="text-[#F4F4F5]">History</button>
+            <button onClick={() => onNavigate('season')} className="hover:text-[#F4F4F5] transition-colors">Season</button>
+            <a href="#how-it-works" className="hover:text-[#F4F4F5] transition-colors">How it works</a>
+          </div>
+          <div className="flex-1" />
         </div>
       </nav>
 
-      <main className="flex-1 px-6 py-12">
+      <main className="flex-1 px-6 pb-12 relative" style={{ paddingTop: '80px', zIndex: 1 }}>
         <div className="max-w-3xl mx-auto">
 
           {/* Page header */}
@@ -112,7 +118,7 @@ export default function History({ onNavigate }) {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-white/[0.06]" style={{ padding: '28px 32px' }}>
+      <footer className="border-t border-white/[0.06] relative" style={{ zIndex: 1 }} style={{ padding: '28px 32px' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <span style={{ fontSize: '1rem', fontWeight: 600, color: '#A1A1AA' }}>Chicane.ai</span>
           <span style={{ fontSize: '1rem', color: '#A1A1AA' }}>Built by Apostolos Kakarantzas</span>

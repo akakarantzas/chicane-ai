@@ -105,44 +105,26 @@ export default function Home({ onNavigate }) {
       {/* Navbar */}
       <nav
         className="fixed top-0 left-0 right-0 z-50 border-b border-white/[0.06] px-6"
-        style={{ backgroundColor: '#0C0C0E' }}
+        style={{ backgroundColor: 'transparent' }}
       >
-        <div className="relative flex items-center justify-between h-16 max-w-7xl mx-auto">
+        <div className="flex items-center h-16 max-w-7xl mx-auto">
 
           {/* Left: logo */}
-          <div className="flex items-center shrink-0">
+          <div className="flex-1 flex items-center">
             <img src="/logo-mark.png" alt="" style={{ height: '60px', width: '60px', objectFit: 'contain', marginRight: '-14px' }} />
             <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontStyle: 'italic', letterSpacing: '-0.05em', fontSize: '1.9rem', color: '#F4F4F5' }}>Chicane.ai</span>
           </div>
 
-          {/* Center: nav links — absolutely centered */}
-          <div
-            className="absolute left-1/2 -translate-x-1/2 flex items-center gap-8 text-[#A1A1AA]"
-            style={{ fontSize: '1.05rem', fontWeight: 500 }}
-          >
-            <button onClick={() => onNavigate('predictions')} className="hover:text-[#F4F4F5] transition-colors">
-              Predictions
-            </button>
-            <button onClick={() => onNavigate('history')} className="hover:text-[#F4F4F5] transition-colors">
-              History
-            </button>
-            <button onClick={() => onNavigate('season')} className="hover:text-[#F4F4F5] transition-colors">
-              Season
-            </button>
-            <a href="#how-it-works" className="hover:text-[#F4F4F5] transition-colors">
-              How it works
-            </a>
+          {/* Center: nav links */}
+          <div className="flex items-center gap-8 text-[#A1A1AA]" style={{ fontSize: '1.05rem', fontWeight: 500 }}>
+            <button onClick={() => onNavigate('predictions')} className="hover:text-[#F4F4F5] transition-colors">Predictions</button>
+            <button onClick={() => onNavigate('history')} className="hover:text-[#F4F4F5] transition-colors">History</button>
+            <button onClick={() => onNavigate('season')} className="hover:text-[#F4F4F5] transition-colors">Season</button>
+            <a href="#how-it-works" className="hover:text-[#F4F4F5] transition-colors">How it works</a>
           </div>
 
-          {/* Right: Pro button */}
-          <div className="shrink-0">
-            <button
-              className="text-[#F4F4F5] rounded px-4 py-1.5 transition-opacity hover:opacity-90"
-              style={{ backgroundColor: '#E8002D', fontSize: '0.95rem', fontWeight: 500 }}
-            >
-              Pro
-            </button>
-          </div>
+          {/* Right: spacer */}
+          <div className="flex-1" />
 
         </div>
       </nav>
@@ -163,8 +145,7 @@ export default function Home({ onNavigate }) {
         {/* Content */}
         <div className="relative max-w-2xl mx-auto space-y-6" style={{ zIndex: 2 }}>
           {/* Badge */}
-          <span className="inline-flex items-center gap-1.5 bg-green-900/40 text-green-400 font-medium rounded-full border border-green-800/50" style={{ fontSize: '0.9rem', padding: '6px 14px' }}>
-            <span className="w-1.5 h-1.5 rounded-full bg-green-400 shrink-0" />
+          <span className="inline-flex items-center bg-green-900/40 text-green-400 font-medium rounded-full border border-green-800/50" style={{ fontSize: '0.9rem', padding: '6px 14px' }}>
             Correctly identified all 4 top finishers at Monaco 2025
           </span>
 
