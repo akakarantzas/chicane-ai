@@ -71,7 +71,7 @@ export default function Predictions({ onNavigate }) {
       <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to bottom, rgba(12,12,14,0.72) 0%, rgba(12,12,14,0.88) 50%, rgba(12,12,14,0.97) 100%)', zIndex: 0 }} />
 
       {/* Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/[0.06] px-6" style={{ backgroundColor: 'transparent' }}>
+      <nav className="relative z-10 border-b border-white/[0.06] px-6" style={{ backgroundColor: 'transparent' }}>
         <div className="flex items-center h-16 max-w-7xl mx-auto">
           <div className="flex-1 flex items-center">
             <button onClick={() => onNavigate?.('home')} className="flex items-center hover:opacity-80 transition-opacity">
@@ -79,21 +79,21 @@ export default function Predictions({ onNavigate }) {
               <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontStyle: 'italic', letterSpacing: '-0.05em', fontSize: '1.9rem', color: '#F4F4F5' }}>Chicane.ai</span>
             </button>
           </div>
-          <div className="flex items-center gap-8 text-[#A1A1AA]" style={{ fontSize: '1.05rem', fontWeight: 500 }}>
+          <div className="flex items-center gap-8 text-[#A1A1AA]" style={{ fontSize: '1.2rem', fontWeight: 500 }}>
             <button onClick={() => onNavigate?.('predictions')} className="text-[#F4F4F5]">Predictions</button>
             <button onClick={() => onNavigate?.('history')} className="hover:text-[#F4F4F5] transition-colors">History</button>
-            <button onClick={() => onNavigate?.('season')} className="hover:text-[#F4F4F5] transition-colors">Season</button>
+            <button onClick={() => onNavigate?.('season')} className="hover:text-[#F4F4F5] transition-colors">Calendar</button>
 
           </div>
           <div className="flex-1" />
         </div>
       </nav>
 
-      <div className="max-w-2xl mx-auto px-6 pb-12 w-full relative" style={{ paddingTop: '80px', zIndex: 1 }}>
+      <div className="max-w-2xl mx-auto px-6 pb-12 w-full relative" style={{ zIndex: 1, paddingTop: '64px' }}>
         {/* Header */}
         <div className="mb-10">
           <h1 style={{ fontSize: '2.5rem', fontWeight: 800, letterSpacing: '-0.02em' }}>
-            {race !== 'TBD' ? race : 'Next Race'} Predictions
+            {race !== 'TBD' ? race : 'Next Race'} Winner Predictions
           </h1>
           {circuit !== 'TBD' && (
             <p className="text-[#A1A1AA] mt-1" style={{ fontSize: '1.1rem' }}>{circuit}</p>

@@ -17,7 +17,7 @@ def _load_predictions():
 def get_next_race_prediction():
     predictions = _load_predictions()
     return {
-        "race": "Miami Grand Prix",
+        "race": "Miami GP",
         "circuit": "Miami International Autodrome",
         "predictions": predictions,
         "model_version": "2.0",

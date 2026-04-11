@@ -1,10 +1,12 @@
+import { useEffect, useRef } from 'react'
+
 const RACES = [
   { round: 1,  code: 'AU', name: 'Australian GP',    country: 'Australia',     date: 'Mar 8',  status: 'completed' },
   { round: 2,  code: 'CN', name: 'Chinese GP',        country: 'China',         date: 'Mar 15', status: 'completed' },
   { round: 3,  code: 'JP', name: 'Japanese GP',       country: 'Japan',         date: 'Mar 29', status: 'completed' },
-  { round: 4,  code: 'BH', name: 'Bahrain GP',        country: 'Bahrain',       date: 'Apr 12', status: 'current'   },
-  { round: 5,  code: 'SA', name: 'Saudi Arabian GP',  country: 'Saudi Arabia',  date: 'Apr 19', status: 'upcoming'  },
-  { round: 6,  code: 'US', name: 'Miami GP',          country: 'United States', date: 'May 3',  status: 'upcoming'  },
+  { round: 4,  code: 'BH', name: 'Bahrain GP',        country: 'Bahrain',       date: 'Apr 12', status: 'completed' },
+  { round: 5,  code: 'SA', name: 'Saudi Arabian GP',  country: 'Saudi Arabia',  date: 'Apr 19', status: 'completed' },
+  { round: 6,  code: 'US', name: 'Miami GP',          country: 'United States', date: 'May 3',  status: 'current'   },
   { round: 7,  code: 'CA', name: 'Canadian GP',       country: 'Canada',        date: 'May 24', status: 'upcoming'  },
   { round: 8,  code: 'MC', name: 'Monaco GP',         country: 'Monaco',        date: 'Jun 7',  status: 'upcoming'  },
   { round: 9,  code: 'ES', name: 'Spanish GP',        country: 'Spain',         date: 'Jun 14', status: 'upcoming'  },
@@ -25,29 +27,36 @@ const RACES = [
   { round: 24, code: 'AE', name: 'Abu Dhabi GP',      country: 'UAE',           date: 'Dec 6',  status: 'upcoming'  },
 ]
 
-function RaceCard({ round, code, name, country, date, status }) {
+function RaceCard({ round, code, name, country, date, status, cardRef }) {
   const isCurrent   = status === 'current'
   const isCompleted = status === 'completed'
 
   return (
     <div
-      className={`shrink-0 w-48 bg-[#141418] border rounded-xl px-5 py-5 flex flex-col gap-2 ${
+      ref={cardRef}
+      className={`shrink-0 w-64 bg-[#141418] border rounded-xl px-6 py-6 flex flex-col gap-3 ${
         isCurrent ? 'border-[#E8002D]' : 'border-white/[0.06]'
       } ${isCompleted ? 'opacity-60' : 'opacity-100'}`}
       style={isCurrent ? { boxShadow: '0 0 0 1px #E8002D, 0 4px 24px rgba(232, 0, 45, 0.35)' } : {}}
     >
       <div className="flex items-center justify-between">
-        <span className="text-[#A1A1AA] font-medium" style={{ fontSize: '0.8rem' }}>R{round}</span>
-        <span className="text-[#A1A1AA] font-medium" style={{ fontSize: '0.8rem' }}>{code}</span>
+        <span className="text-[#A1A1AA] font-medium" style={{ fontSize: '0.95rem' }}>R{round}</span>
+        <span className="text-[#A1A1AA] font-medium" style={{ fontSize: '0.95rem' }}>{code}</span>
       </div>
-      <p className="font-bold leading-snug text-[#F4F4F5]" style={{ fontSize: '1rem' }}>{name}</p>
-      <p className="text-[#A1A1AA]" style={{ fontSize: '0.85rem' }}>{country}</p>
-      <p className="text-[#A1A1AA] mt-auto" style={{ fontSize: '0.85rem' }}>{date}</p>
+      <p className="font-bold leading-snug text-[#F4F4F5]" style={{ fontSize: '1.2rem' }}>{name}</p>
+      <p className="text-[#A1A1AA]" style={{ fontSize: '1rem' }}>{country}</p>
+      <p className="text-[#A1A1AA] mt-auto" style={{ fontSize: '1rem' }}>{date}</p>
     </div>
   )
 }
 
 export default function Season({ onNavigate }) {
+  const currentRef = useRef(null)
+
+  useEffect(() => {
+    currentRef.current?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })
+  }, [])
+
   return (
     <div
       className="relative min-h-screen text-[#F4F4F5] flex flex-col"
@@ -63,7 +72,7 @@ export default function Season({ onNavigate }) {
       <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to bottom, rgba(12,12,14,0.72) 0%, rgba(12,12,14,0.88) 50%, rgba(12,12,14,0.97) 100%)', zIndex: 0 }} />
 
       {/* Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/[0.06] px-6" style={{ backgroundColor: 'transparent' }}>
+      <nav className="relative z-10 border-b border-white/[0.06] px-6" style={{ backgroundColor: 'transparent' }}>
         <div className="flex items-center h-16 max-w-7xl mx-auto">
           <div className="flex-1 flex items-center">
             <button onClick={() => onNavigate('home')} className="flex items-center hover:opacity-80 transition-opacity">
@@ -71,23 +80,23 @@ export default function Season({ onNavigate }) {
               <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontStyle: 'italic', letterSpacing: '-0.05em', fontSize: '1.9rem', color: '#F4F4F5' }}>Chicane.ai</span>
             </button>
           </div>
-          <div className="flex items-center gap-8 text-[#A1A1AA]" style={{ fontSize: '1.05rem', fontWeight: 500 }}>
+          <div className="flex items-center gap-8 text-[#A1A1AA]" style={{ fontSize: '1.2rem', fontWeight: 500 }}>
             <button onClick={() => onNavigate('predictions')} className="hover:text-[#F4F4F5] transition-colors">Predictions</button>
             <button onClick={() => onNavigate('history')} className="hover:text-[#F4F4F5] transition-colors">History</button>
-            <button onClick={() => onNavigate('season')} className="text-[#F4F4F5]">Season</button>
+            <button onClick={() => onNavigate('season')} className="text-[#F4F4F5]">Calendar</button>
 
           </div>
           <div className="flex-1" />
         </div>
       </nav>
 
-      <main className="flex-1 px-6 pb-12 flex flex-col relative" style={{ paddingTop: '80px', zIndex: 1 }}>
+      <main className="flex-1 px-6 pb-12 flex flex-col relative" style={{ zIndex: 1, paddingTop: '64px' }}>
         <div className="max-w-5xl mx-auto w-full">
 
           {/* Header */}
           <div className="mb-10">
-            <h1 style={{ fontSize: '2.5rem', fontWeight: 800, letterSpacing: '-0.02em' }}>2026 Season</h1>
-            <p className="text-[#A1A1AA] mt-2" style={{ fontSize: '1.1rem' }}>Formula 1 World Championship</p>
+            <h1 style={{ fontSize: '2.5rem', fontWeight: 800, letterSpacing: '-0.02em' }}>Race Calendar</h1>
+            <p className="text-[#A1A1AA] mt-2" style={{ fontSize: '1.1rem' }}>2026 Schedule</p>
           </div>
 
           {/* Legend */}
@@ -110,7 +119,7 @@ export default function Season({ onNavigate }) {
           <div className="calendar-scroll overflow-x-auto pb-4 -mx-6 px-6">
             <div className="flex gap-3" style={{ width: 'max-content' }}>
               {RACES.map((race) => (
-                <RaceCard key={race.round} {...race} />
+                <RaceCard key={race.round} {...race} cardRef={race.status === 'current' ? currentRef : null} />
               ))}
             </div>
           </div>
@@ -119,7 +128,7 @@ export default function Season({ onNavigate }) {
       </main>
 
       <footer className="border-t border-white/[0.06] relative" style={{ zIndex: 1 }} style={{ padding: '28px 32px' }}>
-        <p style={{ fontSize: '14px', color: '#A1A1AA', textAlign: 'center', margin: 0 }}>© 2026 Chicane.ai. All rights reserved.</p>
+        <p style={{ fontSize: '14px', color: '#A1A1AA', textAlign: 'center', margin: 0 }}>© 2026 Chicane.ai, All rights reserved.</p>
       </footer>
 
     </div>

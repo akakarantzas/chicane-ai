@@ -2,6 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0C0C0E;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #E8002D;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #ff1a3d;
+}
+
 html {
   overflow-y: scroll;
 }

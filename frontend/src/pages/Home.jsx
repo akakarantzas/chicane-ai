@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 const RACES = [
   { round: 1,  code: 'AU', name: 'Australian GP',    country: 'Australia',     date: 'Mar 8',  status: 'completed' },
   { round: 2,  code: 'CN', name: 'Chinese GP',        country: 'China',         date: 'Mar 15', status: 'completed' },
   { round: 3,  code: 'JP', name: 'Japanese GP',       country: 'Japan',         date: 'Mar 29', status: 'completed' },
-  { round: 4,  code: 'BH', name: 'Bahrain GP',        country: 'Bahrain',       date: 'Apr 12', status: 'current'   },
-  { round: 5,  code: 'SA', name: 'Saudi Arabian GP',  country: 'Saudi Arabia',  date: 'Apr 19', status: 'upcoming'  },
-  { round: 6,  code: 'US', name: 'Miami GP',          country: 'United States', date: 'May 3',  status: 'upcoming'  },
+  { round: 4,  code: 'BH', name: 'Bahrain GP',        country: 'Bahrain',       date: 'Apr 12', status: 'completed' },
+  { round: 5,  code: 'SA', name: 'Saudi Arabian GP',  country: 'Saudi Arabia',  date: 'Apr 19', status: 'completed' },
+  { round: 6,  code: 'US', name: 'Miami GP',          country: 'United States', date: 'May 3',  status: 'current'   },
   { round: 7,  code: 'CA', name: 'Canadian GP',       country: 'Canada',        date: 'May 24', status: 'upcoming'  },
   { round: 8,  code: 'MC', name: 'Monaco GP',         country: 'Monaco',        date: 'Jun 7',  status: 'upcoming'  },
   { round: 9,  code: 'ES', name: 'Spanish GP',        country: 'Spain',         date: 'Jun 14', status: 'upcoming'  },
@@ -27,11 +27,12 @@ const RACES = [
   { round: 24, code: 'AE', name: 'Abu Dhabi GP',      country: 'UAE',           date: 'Dec 6',  status: 'upcoming'  },
 ]
 
-function RaceCard({ round, code, name, country, date, status }) {
+function RaceCard({ round, code, name, country, date, status, cardRef }) {
   const isCurrent   = status === 'current'
   const isCompleted = status === 'completed'
   return (
     <div
+      ref={cardRef}
       className={`shrink-0 w-48 bg-[#141418] border rounded-xl px-5 py-5 flex flex-col gap-2 ${
         isCurrent ? 'border-[#E8002D]' : 'border-white/[0.06]'
       } ${isCompleted ? 'opacity-60' : 'opacity-100'}`}
@@ -49,14 +50,14 @@ function RaceCard({ round, code, name, country, date, status }) {
 }
 
 const TOP3 = [
-  { driver: 'Verstappen', probability: 0.5 },
-  { driver: 'Leclerc', probability: 0.47 },
-  { driver: 'Norris', probability: 0.28 },
+  { driver: 'Antonelli', probability: 0.7091 },
+  { driver: 'Russell',   probability: 0.1787 },
+  { driver: 'Leclerc',   probability: 0.0606 },
 ]
 
 const BAR_COLORS = ['#E8002D', '#f97316', '#eab308']
 
-const RACE_DATE = new Date('2026-04-12T15:00:00Z')
+const RACE_DATE = new Date('2026-05-03T19:30:00Z')
 
 function useCountdown(target) {
   const [timeLeft, setTimeLeft] = useState(() => Math.max(0, target - Date.now()))
@@ -98,13 +99,24 @@ function CountdownUnit({ value, label }) {
 
 export default function Home({ onNavigate }) {
   const { days, hours, minutes, seconds } = useCountdown(RACE_DATE.getTime())
+  const currentRaceRef = useRef(null)
+  const calendarScrollRef = useRef(null)
+
+  useEffect(() => {
+    const card = currentRaceRef.current
+    const container = calendarScrollRef.current
+    if (!card || !container) return
+    const cardRect = card.getBoundingClientRect()
+    const containerRect = container.getBoundingClientRect()
+    container.scrollLeft += cardRect.left - containerRect.left - containerRect.width / 2 + cardRect.width / 2
+  }, [])
 
   return (
     <div className="min-h-screen bg-[#0C0C0E] text-[#F4F4F5] flex flex-col">
 
       {/* Navbar */}
       <nav
-        className="fixed top-0 left-0 right-0 z-50 border-b border-white/[0.06] px-6"
+        className="relative z-10 border-b border-white/[0.06] px-6"
         style={{ backgroundColor: 'transparent' }}
       >
         <div className="flex items-center h-16 max-w-7xl mx-auto">
@@ -116,10 +128,10 @@ export default function Home({ onNavigate }) {
           </div>
 
           {/* Center: nav links */}
-          <div className="flex items-center gap-8 text-[#A1A1AA]" style={{ fontSize: '1.05rem', fontWeight: 500 }}>
+          <div className="flex items-center gap-8 text-[#A1A1AA]" style={{ fontSize: '1.2rem', fontWeight: 500 }}>
             <button onClick={() => onNavigate('predictions')} className="hover:text-[#F4F4F5] transition-colors">Predictions</button>
             <button onClick={() => onNavigate('history')} className="hover:text-[#F4F4F5] transition-colors">History</button>
-            <button onClick={() => onNavigate('season')} className="hover:text-[#F4F4F5] transition-colors">Season</button>
+            <button onClick={() => onNavigate('season')} className="hover:text-[#F4F4F5] transition-colors">Calendar</button>
 
           </div>
 
@@ -130,7 +142,7 @@ export default function Home({ onNavigate }) {
       </nav>
 
       {/* Hero */}
-      <section className="flex-1 flex flex-col items-center justify-center text-center px-6" style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden', backgroundColor: '#0C0C0E', paddingTop: '80px', paddingBottom: '80px' }}>
+      <section className="flex-1 flex flex-col items-center justify-center text-center px-6" style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden', backgroundColor: '#0C0C0E', paddingBottom: '80px' }}>
         {/* Background video */}
         <video
           src="/hero-video.mp4"
@@ -146,7 +158,7 @@ export default function Home({ onNavigate }) {
         <div className="relative max-w-2xl mx-auto space-y-6" style={{ zIndex: 2 }}>
           {/* Badge */}
           <span className="inline-flex items-center bg-green-900/40 text-green-400 font-medium rounded-full border border-green-800/50" style={{ fontSize: '0.9rem', padding: '6px 14px' }}>
-            Correctly identified all 4 top finishers at Monaco 2025
+            Miami GP predictions now live
           </span>
 
           <h1 className="tracking-tight" style={{ fontSize: '4.5rem', fontWeight: 800, lineHeight: 1.1 }}>
@@ -165,22 +177,6 @@ export default function Home({ onNavigate }) {
             >
               See predictions
             </button>
-          </div>
-        </div>
-      </section>
-
-      {/* Stats bar */}
-      <section style={{ borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '80px 32px' }}>
-          <div className="grid grid-cols-2 divide-x divide-white/[0.06] text-center">
-            <div className="px-4">
-              <p className="font-bold text-[#F4F4F5]" style={{ fontSize: '3rem', fontWeight: 700 }}>74%</p>
-              <p className="text-[#A1A1AA] mt-1" style={{ fontSize: '0.95rem' }}>Top-3 prediction accuracy</p>
-            </div>
-            <div className="px-4">
-              <p className="font-bold text-[#F4F4F5]" style={{ fontSize: '3rem', fontWeight: 700 }}>1</p>
-              <p className="text-[#A1A1AA] mt-1" style={{ fontSize: '0.95rem' }}>Race predicted</p>
-            </div>
           </div>
         </div>
       </section>
@@ -220,12 +216,12 @@ export default function Home({ onNavigate }) {
                 ))}
               </div>
               {/* Race info */}
-              <div style={{ fontSize: '13px', color: '#E8002D', fontWeight: '600', letterSpacing: '0.08em', marginBottom: '12px', textTransform: 'uppercase' }}>Round 4 · 2026</div>
-              <h2 style={{ fontSize: '36px', fontWeight: '700', color: '#F4F4F5', lineHeight: '1.1', margin: '0 0 12px 0' }}>Bahrain Grand Prix</h2>
-              <p style={{ fontSize: '16px', color: '#A1A1AA', margin: '0 0 24px 0' }}>Bahrain International Circuit · April 12, 2026</p>
+              <div style={{ fontSize: '13px', color: '#E8002D', fontWeight: '600', letterSpacing: '0.08em', marginBottom: '12px', textTransform: 'uppercase' }}>Round 6 · 2026</div>
+              <h2 style={{ fontSize: '36px', fontWeight: '700', color: '#F4F4F5', lineHeight: '1.1', margin: '0 0 12px 0' }}>Miami Grand Prix</h2>
+              <p style={{ fontSize: '16px', color: '#A1A1AA', margin: '0 0 24px 0' }}>Miami International Autodrome · May 3, 2026</p>
               <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                <span style={{ backgroundColor: 'rgba(232,0,45,0.1)', color: '#E8002D', border: '1px solid rgba(232,0,45,0.2)', borderRadius: '6px', padding: '6px 14px', fontSize: '13px', fontWeight: '600' }}>Race Weekend</span>
-                <span style={{ backgroundColor: 'rgba(255,255,255,0.05)', color: '#A1A1AA', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '6px', padding: '6px 14px', fontSize: '13px' }}>Bahrain · BH</span>
+                <span style={{ backgroundColor: 'rgba(232,0,45,0.1)', color: '#E8002D', border: '1px solid rgba(232,0,45,0.2)', borderRadius: '6px', padding: '6px 14px', fontSize: '13px', fontWeight: '600' }}>Pre-Qualifying</span>
+                <span style={{ backgroundColor: 'rgba(255,255,255,0.05)', color: '#A1A1AA', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '6px', padding: '6px 14px', fontSize: '13px' }}>Miami · US</span>
               </div>
             </div>
           </div>
@@ -236,12 +232,12 @@ export default function Home({ onNavigate }) {
       <section style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '80px 32px' }}>
           <h2 style={{ fontSize: '30px', fontWeight: 700, color: '#F4F4F5', marginBottom: '32px' }}>
-            2026 Season Calendar
+            Race Calendar
           </h2>
-          <div className="calendar-scroll overflow-x-auto pb-2">
+          <div className="calendar-scroll overflow-x-auto pb-2" ref={calendarScrollRef}>
             <div className="flex gap-3" style={{ width: 'max-content' }}>
               {RACES.map((race) => (
-                <RaceCard key={race.round} {...race} />
+                <RaceCard key={race.round} {...race} cardRef={race.status === 'current' ? currentRaceRef : null} />
               ))}
             </div>
           </div>
@@ -340,7 +336,7 @@ export default function Home({ onNavigate }) {
 
       {/* Footer */}
       <footer className="border-t border-white/[0.06]" style={{ padding: '28px 32px' }}>
-        <p style={{ fontSize: '14px', color: '#A1A1AA', textAlign: 'center', margin: 0 }}>© 2026 Chicane.ai. All rights reserved.</p>
+        <p style={{ fontSize: '14px', color: '#A1A1AA', textAlign: 'center', margin: 0 }}>© 2026 Chicane.ai, All rights reserved.</p>
       </footer>
 
     </div>
