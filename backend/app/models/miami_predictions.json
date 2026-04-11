@@ -1,0 +1,52 @@
+[
+  {
+    "driver": "ANT",
+    "team": "Mercedes",
+    "probability": 0.7091
+  },
+  {
+    "driver": "RUS",
+    "team": "Mercedes",
+    "probability": 0.1787
+  },
+  {
+    "driver": "LEC",
+    "team": "Ferrari",
+    "probability": 0.0606
+  },
+  {
+    "driver": "HAM",
+    "team": "Ferrari",
+    "probability": 0.0134
+  },
+  {
+    "driver": "VER",
+    "team": "Red Bull Racing",
+    "probability": 0.0129
+  },
+  {
+    "driver": "NOR",
+    "team": "McLaren",
+    "probability": 0.0063
+  },
+  {
+    "driver": "PIA",
+    "team": "McLaren",
+    "probability": 0.0063
+  },
+  {
+    "driver": "HAD",
+    "team": "Red Bull Racing",
+    "probability": 0.0042
+  },
+  {
+    "driver": "GAS",
+    "team": "Alpine",
+    "probability": 0.0042
+  },
+  {
+    "driver": "BEA",
+    "team": "Haas F1 Team",
+    "probability": 0.0042
+  }
+]

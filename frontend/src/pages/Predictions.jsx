@@ -83,7 +83,7 @@ export default function Predictions({ onNavigate }) {
             <button onClick={() => onNavigate?.('predictions')} className="text-[#F4F4F5]">Predictions</button>
             <button onClick={() => onNavigate?.('history')} className="hover:text-[#F4F4F5] transition-colors">History</button>
             <button onClick={() => onNavigate?.('season')} className="hover:text-[#F4F4F5] transition-colors">Season</button>
-            <a href="#how-it-works" className="hover:text-[#F4F4F5] transition-colors">How it works</a>
+
           </div>
           <div className="flex-1" />
         </div>

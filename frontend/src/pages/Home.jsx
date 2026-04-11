@@ -120,7 +120,7 @@ export default function Home({ onNavigate }) {
             <button onClick={() => onNavigate('predictions')} className="hover:text-[#F4F4F5] transition-colors">Predictions</button>
             <button onClick={() => onNavigate('history')} className="hover:text-[#F4F4F5] transition-colors">History</button>
             <button onClick={() => onNavigate('season')} className="hover:text-[#F4F4F5] transition-colors">Season</button>
-            <a href="#how-it-works" className="hover:text-[#F4F4F5] transition-colors">How it works</a>
+
           </div>
 
           {/* Right: spacer */}
@@ -165,13 +165,6 @@ export default function Home({ onNavigate }) {
             >
               See predictions
             </button>
-            <a
-              href="#how-it-works"
-              className="border border-white/[0.06] hover:border-white/20 font-medium rounded-lg transition-colors"
-              style={{ fontSize: '1rem', padding: '14px 28px' }}
-            >
-              How it works
-            </a>
           </div>
         </div>
       </section>
@@ -347,10 +340,7 @@ export default function Home({ onNavigate }) {
 
       {/* Footer */}
       <footer className="border-t border-white/[0.06]" style={{ padding: '28px 32px' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: '1rem', fontWeight: 600, color: '#A1A1AA' }}>Chicane.ai</span>
-          <span style={{ fontSize: '1rem', color: '#A1A1AA' }}>Built by Apostolos Kakarantzas</span>
-        </div>
+        <p style={{ fontSize: '14px', color: '#A1A1AA', textAlign: 'center', margin: 0 }}>© 2026 Chicane.ai. All rights reserved.</p>
       </footer>
 
     </div>
