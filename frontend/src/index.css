@@ -317,13 +317,13 @@ button:active { transform: translateY(0px); opacity: 1; }
 
   .hero-section {
     min-height: 88vh !important;
-    padding-left: 16px !important;
-    padding-right: 16px !important;
+    padding-left: 20px !important;
+    padding-right: 20px !important;
     padding-bottom: 48px !important;
   }
 
   .hero-title {
-    font-size: 3rem !important;
+    font-size: 42px !important;
   }
 
   .hero-actions {
@@ -335,14 +335,14 @@ button:active { transform: translateY(0px); opacity: 1; }
   }
 
   .countdown-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 12px !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 8px !important;
     width: 100%;
   }
 
   .countdown-card {
     min-height: 104px !important;
-    padding: 18px 12px !important;
+    padding: 12px !important;
   }
 
   .countdown-value {
@@ -423,14 +423,5 @@ button:active { transform: translateY(0px); opacity: 1; }
     text-align: center;
     padding-left: 4px;
     padding-right: 4px;
-  }
-
-  .hero-title {
-    font-size: 2.5rem !important;
-  }
-
-  .countdown-grid,
-  .stats-grid {
-    grid-template-columns: 1fr !important;
   }
 }

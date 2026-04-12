@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
+import NextRaceCircuitCard from '../components/NextRaceCircuitCard'
+import { nextRaceCircuit } from '../data/circuits'
 
 const RACES = [
   { round: 1,  code: 'AU', name: 'Australian GP',    country: 'Australia',     date: 'Mar 8',  status: 'completed' },
@@ -27,7 +29,76 @@ const RACES = [
   { round: 24, code: 'AE', name: 'Abu Dhabi GP',      country: 'UAE',           date: 'Dec 6',  status: 'upcoming'  },
 ]
 
-function RaceCard({ round, code, name, country, date, status, cardRef }) {
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768)
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  return isMobile
+}
+
+function HamburgerButton({ onClick, isOpen }) {
+  return (
+    <button
+      onClick={onClick}
+      aria-label={isOpen ? 'Close navigation menu' : 'Open navigation menu'}
+      aria-expanded={isOpen}
+      style={{
+        width: '44px',
+        height: '44px',
+        borderRadius: '8px',
+        border: '1px solid rgba(255,255,255,0.1)',
+        backgroundColor: 'transparent',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '5px',
+        flexShrink: 0,
+      }}
+    >
+      {[0, 1, 2].map((line) => (
+        <span
+          key={line}
+          style={{
+            width: '20px',
+            height: '2px',
+            borderRadius: '2px',
+            backgroundColor: '#F4F4F5',
+            display: 'block',
+          }}
+        />
+      ))}
+    </button>
+  )
+}
+
+function MobileNavDropdown({ onNavigate }) {
+  const navigate = (page) => {
+    onNavigate(page)
+  }
+
+  return (
+    <div style={{
+      width: '100%',
+      borderTop: '1px solid rgba(255,255,255,0.06)',
+      padding: '8px 0 12px',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '4px',
+    }}>
+      <button onClick={() => navigate('predictions')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>Predictions</button>
+      <button onClick={() => navigate('history')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>History</button>
+      <button onClick={() => navigate('season')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>Calendar</button>
+    </div>
+  )
+}
+
+function RaceCard({ round, code, name, country, date, status, cardRef, isMobile }) {
   const isCurrent   = status === 'current'
   const isCompleted = status === 'completed'
   const [isHovered, setIsHovered] = useState(false)
@@ -42,6 +113,7 @@ function RaceCard({ round, code, name, country, date, status, cardRef }) {
       onMouseLeave={() => setIsHovered(false)}
       style={{
         backgroundColor: isHovered ? '#1F1F24' : '#141418',
+        width: isMobile ? '168px' : '192px',
         cursor: 'pointer',
         transition: 'background-color 0.2s ease, border-color 0.2s ease',
         ...(isCurrent ? { boxShadow: '0 0 0 1px #E8002D, 0 4px 24px rgba(232, 0, 45, 0.35)' } : {}),
@@ -58,7 +130,7 @@ function RaceCard({ round, code, name, country, date, status, cardRef }) {
   )
 }
 
-function CountdownCard({ value, label }) {
+function CountdownCard({ value, label, isMobile }) {
   const [isHovered, setIsHovered] = useState(false)
 
   return (
@@ -69,7 +141,7 @@ function CountdownCard({ value, label }) {
       style={{
         backgroundColor: isHovered ? '#222228' : '#1A1A1F',
         borderRadius: '12px',
-        padding: '24px',
+        padding: isMobile ? '12px' : '24px',
         textAlign: 'center',
         borderTop: '2px solid #E8002D',
         minHeight: '120px',
@@ -86,7 +158,7 @@ function CountdownCard({ value, label }) {
   )
 }
 
-function LatestPredictionCard({ prediction, index }) {
+function LatestPredictionCard({ prediction, index, isMobile }) {
   const [isHovered, setIsHovered] = useState(false)
   const pct = (prediction.probability * 100).toFixed(1)
   const barWidth = `${(prediction.probability / TOP3[0].probability) * 100}%`
@@ -100,7 +172,7 @@ function LatestPredictionCard({ prediction, index }) {
       style={{
         backgroundColor: isHovered ? '#222228' : '#1A1A1F',
         borderRadius: '12px',
-        padding: '24px',
+        padding: isMobile ? '16px' : '24px',
         marginBottom: '10px',
         display: 'flex',
         alignItems: 'center',
@@ -191,26 +263,9 @@ function useCountdown(target) {
   return { days, hours, minutes, seconds }
 }
 
-function CountdownUnit({ value, label }) {
-  return (
-    <div style={{
-      backgroundColor: '#1A1A1F',
-      borderRadius: '14px',
-      padding: '24px',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minWidth: '100px',
-      flex: 1,
-    }}>
-      <p className="tabular-nums text-[#F4F4F5]" style={{ fontSize: '3.5rem', fontWeight: 700, lineHeight: 1 }}>{String(value).padStart(2, '0')}</p>
-      <p className="text-[#A1A1AA] uppercase" style={{ fontSize: '0.75rem', letterSpacing: '0.12em', marginTop: '10px' }}>{label}</p>
-    </div>
-  )
-}
-
 export default function Home({ onNavigate }) {
+  const isMobile = useIsMobile()
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { days, hours, minutes, seconds } = useCountdown(RACE_DATE.getTime())
   const currentRaceRef = useRef(null)
   const calendarScrollRef = useRef(null)
@@ -228,11 +283,11 @@ export default function Home({ onNavigate }) {
     <div className="min-h-screen bg-[#0C0C0E] text-[#F4F4F5] flex flex-col">
 
       {/* Navbar */}
-      <nav className="app-nav">
-        <div className="app-nav-inner">
+      <nav className="app-nav" style={{ padding: isMobile ? '0 16px' : '0 24px' }}>
+        <div className="app-nav-inner" style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: '64px', gap: '16px' }}>
 
           {/* Left: logo */}
-          <div className="brand-wrap">
+          <div className="brand-wrap" style={{ flex: isMobile ? '0 1 auto' : 1 }}>
             <button onClick={() => onNavigate('home')} className="brand-button" aria-label="Go to home">
               <img src="/logo-mark.png" alt="" className="brand-logo" />
               <span className="brand-wordmark">Chicane.ai</span>
@@ -240,21 +295,29 @@ export default function Home({ onNavigate }) {
           </div>
 
           {/* Center: nav links */}
-          <div className="nav-links">
+          <div className="nav-links" style={{ display: isMobile ? 'none' : 'flex' }}>
             <button onClick={() => onNavigate('predictions')} className="nav-link">Predictions</button>
             <button onClick={() => onNavigate('history')} className="nav-link">History</button>
             <button onClick={() => onNavigate('season')} className="nav-link">Calendar</button>
 
           </div>
 
+          {isMobile && (
+            <HamburgerButton
+              isOpen={isMenuOpen}
+              onClick={() => setIsMenuOpen((open) => !open)}
+            />
+          )}
+
           {/* Right: spacer */}
-          <div className="nav-spacer flex-1" />
+          <div className="nav-spacer flex-1" style={{ display: isMobile ? 'none' : 'block' }} />
 
         </div>
+        {isMobile && isMenuOpen && <MobileNavDropdown onNavigate={onNavigate} />}
       </nav>
 
       {/* Hero */}
-      <section className="hero-section flex-1 flex flex-col items-center justify-center text-center px-6" style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden', backgroundColor: '#0C0C0E', paddingBottom: '80px' }}>
+      <section className="hero-section flex-1 flex flex-col items-center justify-center text-center px-6" style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden', backgroundColor: '#0C0C0E', paddingBottom: isMobile ? '40px' : '80px', paddingLeft: isMobile ? '20px' : '80px', paddingRight: isMobile ? '20px' : '80px', textAlign: 'center' }}>
         {/* Background video */}
         <video
           src="/hero-video.mp4"
@@ -267,13 +330,13 @@ export default function Home({ onNavigate }) {
         {/* Dark overlay */}
         <div style={{ position: 'absolute', inset: 0, zIndex: 1, background: 'linear-gradient(to bottom, rgba(12,12,14,0.4) 0%, rgba(12,12,14,0.8) 100%)' }} />
         {/* Content */}
-        <div className="relative max-w-2xl mx-auto space-y-6" style={{ zIndex: 2, paddingTop: '80px' }}>
+        <div className="relative max-w-2xl mx-auto space-y-6" style={{ zIndex: 2, paddingTop: '80px', textAlign: 'center' }}>
           {/* Badge */}
           <span className="inline-flex items-center bg-green-900/40 text-green-400 font-medium rounded-full border border-green-800/50" style={{ fontSize: '0.9rem', padding: '6px 14px' }}>
             Miami GP predictions now live!
           </span>
 
-          <h1 className="hero-title tracking-tight">
+          <h1 className="hero-title tracking-tight" style={{ fontSize: isMobile ? '42px' : '72px' }}>
             Predict. Verify. Repeat.
           </h1>
 
@@ -293,46 +356,45 @@ export default function Home({ onNavigate }) {
       </section>
 
       {/* Next Race countdown */}
-      <section className="section-band">
-        <div className="section-shell">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#E8002D' }}></div>
-              <span style={{ fontSize: '13px', fontWeight: 500, color: '#A1A1AA', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Next Race</span>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+      <section className="section-band" style={{ paddingTop: isMobile ? '40px' : '80px', paddingBottom: isMobile ? '40px' : '80px' }}>
+        <div className="section-shell" style={{ padding: isMobile ? '0 16px' : '0 32px' }}>
+            <NextRaceCircuitCard
+              raceName="Miami Grand Prix"
+              round="Round 6 · 2026"
+              venue="Miami International Autodrome"
+              date="May 3, 2026"
+              status="Pre-Qualifying"
+              countryLabel="Miami · US"
+              circuitPath={nextRaceCircuit.path}
+              viewBox={nextRaceCircuit.viewBox}
+              start={nextRaceCircuit.start}
+            />
+            <div style={{ marginTop: isMobile ? '24px' : '32px' }}>
               {/* Countdown grid */}
-              <div className="countdown-grid">
+              <div className="countdown-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', gap: isMobile ? '8px' : '20px', marginBottom: 0, order: 2 }}>
                 {[
                   { value: days,    label: 'Days'    },
                   { value: hours,   label: 'Hours'   },
                   { value: minutes, label: 'Minutes' },
                   { value: seconds, label: 'Seconds' },
                 ].map((item) => (
-                  <CountdownCard key={item.label} {...item} />
+                  <CountdownCard key={item.label} {...item} isMobile={isMobile} />
                 ))}
-              </div>
-              {/* Race info */}
-              <div style={{ fontSize: '13px', color: '#E8002D', fontWeight: '600', letterSpacing: '0.08em', marginBottom: '12px', textTransform: 'uppercase' }}>Round 6 · 2026</div>
-              <h2 style={{ fontSize: '36px', fontWeight: '700', color: '#F4F4F5', lineHeight: '1.1', margin: '0 0 12px 0' }}>Miami Grand Prix</h2>
-              <p style={{ fontSize: '16px', color: '#A1A1AA', margin: '0 0 24px 0' }}>Miami International Autodrome · May 3, 2026</p>
-              <div className="race-meta-pills" style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                <span style={{ backgroundColor: 'rgba(232,0,45,0.1)', color: '#E8002D', border: '1px solid rgba(232,0,45,0.2)', borderRadius: '6px', padding: '6px 14px', fontSize: '13px', fontWeight: '600' }}>Pre-Qualifying</span>
-                <span style={{ backgroundColor: 'rgba(255,255,255,0.05)', color: '#A1A1AA', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '6px', padding: '6px 14px', fontSize: '13px' }}>Miami · US</span>
               </div>
             </div>
         </div>
       </section>
 
       {/* 2026 Calendar */}
-      <section className="section-band">
-        <div className="section-shell">
+      <section className="section-band" style={{ paddingTop: isMobile ? '40px' : '80px', paddingBottom: isMobile ? '40px' : '80px' }}>
+        <div className="section-shell" style={{ padding: isMobile ? '0 16px' : '0 32px' }}>
           <h2 style={{ fontSize: '30px', fontWeight: 700, color: '#F4F4F5', marginBottom: '32px' }}>
             Race Calendar
           </h2>
           <div className="calendar-scroll overflow-x-auto pb-2" ref={calendarScrollRef}>
             <div className="flex gap-3" style={{ width: 'max-content' }}>
               {RACES.map((race) => (
-                <RaceCard key={race.round} {...race} cardRef={race.status === 'current' ? currentRaceRef : null} />
+                <RaceCard key={race.round} {...race} cardRef={race.status === 'current' ? currentRaceRef : null} isMobile={isMobile} />
               ))}
             </div>
           </div>
@@ -340,8 +402,8 @@ export default function Home({ onNavigate }) {
       </section>
 
       {/* Latest Prediction */}
-      <section className="section-band">
-        <div className="section-shell">
+      <section className="section-band" style={{ paddingTop: isMobile ? '40px' : '80px', paddingBottom: isMobile ? '40px' : '80px' }}>
+        <div className="section-shell" style={{ padding: isMobile ? '0 16px' : '0 32px' }}>
 
           {/* Section label */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
@@ -352,7 +414,7 @@ export default function Home({ onNavigate }) {
 
           {/* Driver cards */}
           {TOP3.map((p, i) => (
-            <LatestPredictionCard key={p.driver} prediction={p} index={i} />
+            <LatestPredictionCard key={p.driver} prediction={p} index={i} isMobile={isMobile} />
           ))}
 
           <button
@@ -373,9 +435,9 @@ export default function Home({ onNavigate }) {
       </section>
 
       {/* Season stats */}
-      <section className="section-band">
-        <div className="section-shell">
-          <div className="stats-grid">
+      <section className="section-band" style={{ paddingTop: isMobile ? '40px' : '80px', paddingBottom: isMobile ? '40px' : '80px' }}>
+        <div className="section-shell" style={{ padding: isMobile ? '0 16px' : '0 32px' }}>
+          <div className="stats-grid" style={{ gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)' }}>
               {[
                 { number: '24', label: 'Races' },
                 { number: '11', label: 'Teams' },

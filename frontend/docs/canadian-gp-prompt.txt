@@ -1,0 +1,126 @@
+Inspect my React + Tailwind frontend and add the next F1 circuit: Canadian Grand Prix (Circuit Gilles Villeneuve) using the same system as Miami.
+
+--------------------------------------------------
+GOAL
+--------------------------------------------------
+
+Add a new circuit that:
+- Uses a PNG as the visible track
+- Uses an SVG path overlay for animation
+- Has a perfectly aligned moving marker
+- Matches the same quality and structure as the Miami circuit implementation
+
+--------------------------------------------------
+ASSET
+--------------------------------------------------
+
+I have already added the PNG here:
+
+src/assets/circuits/canada-track-white.png
+
+Use this as the visible circuit.
+Do NOT generate a new track shape.
+
+--------------------------------------------------
+TASKS
+--------------------------------------------------
+
+1. Locate the existing Miami circuit implementation
+2. Duplicate the same structure for the Canadian GP
+3. Replace the image import with:
+
+import canadaTrack from "@/assets/circuits/canada-track-white.png"
+
+4. Render:
+
+<img
+  src={canadaTrack}
+  alt="Canadian GP Circuit"
+  className="w-full h-auto opacity-90"
+/>
+
+--------------------------------------------------
+SVG OVERLAY (REQUIRED)
+--------------------------------------------------
+
+Overlay an SVG exactly like Miami:
+
+<svg
+  viewBox="0 0 800 420"
+  className="absolute inset-0 w-full h-full"
+  preserveAspectRatio="none"
+>
+  <path
+    ref={pathRef}
+    d={canadaPath}
+    stroke="transparent"
+    strokeWidth="20"
+    fill="none"
+  />
+
+  <circle cx={marker.x} cy={marker.y} r="4" fill="white" />
+  <circle cx={marker.x} cy={marker.y} r="10" fill="rgba(255,255,255,0.15)" />
+</svg>
+
+--------------------------------------------------
+CRITICAL — PATH CREATION
+--------------------------------------------------
+
+You must generate a NEW path called:
+
+const canadaPath = "..."
+
+Requirements:
+- Trace the Canadian GP circuit shape (Circuit Gilles Villeneuve)
+- Match the PNG layout visually
+- Follow the center of the track line
+- One continuous path
+- Smooth curves (C commands)
+- No approximations or generic shapes
+
+--------------------------------------------------
+ALIGNMENT (VERY IMPORTANT)
+--------------------------------------------------
+
+- The path MUST match the PNG exactly
+- Use debug mode:
+
+<path d={canadaPath} stroke="red" strokeWidth="2" />
+
+- Adjust until the red line perfectly overlays the track
+- Then set stroke back to transparent
+
+--------------------------------------------------
+ANIMATION
+--------------------------------------------------
+
+- Use existing animation logic from Miami
+- Use getTotalLength()
+- Use getPointAtLength()
+- Loop smoothly
+
+--------------------------------------------------
+UI CONSISTENCY
+--------------------------------------------------
+
+- Match styling from Miami
+- Keep same layout, spacing, and glow style
+- Keep marker consistent
+
+--------------------------------------------------
+DO NOT
+--------------------------------------------------
+
+- Do not reuse Miami path
+- Do not guess the shape
+- Do not change unrelated components
+
+--------------------------------------------------
+OUTPUT
+--------------------------------------------------
+
+Show:
+1. New canadaPath
+2. Updated component code
+3. Import statements
+4. Confirmation that marker follows track correctly

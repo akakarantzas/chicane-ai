@@ -27,7 +27,56 @@ const RACES = [
   { round: 24, code: 'AE', name: 'Abu Dhabi GP',      country: 'UAE',           date: 'Dec 6',  status: 'upcoming'  },
 ]
 
-function RaceCard({ round, code, name, country, date, status, cardRef }) {
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768)
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  return isMobile
+}
+
+function HamburgerButton({ onClick, isOpen }) {
+  return (
+    <button
+      onClick={onClick}
+      aria-label={isOpen ? 'Close navigation menu' : 'Open navigation menu'}
+      aria-expanded={isOpen}
+      style={{
+        width: '44px',
+        height: '44px',
+        borderRadius: '8px',
+        border: '1px solid rgba(255,255,255,0.1)',
+        backgroundColor: 'transparent',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '5px',
+        flexShrink: 0,
+      }}
+    >
+      {[0, 1, 2].map((line) => (
+        <span key={line} style={{ width: '20px', height: '2px', borderRadius: '2px', backgroundColor: '#F4F4F5', display: 'block' }} />
+      ))}
+    </button>
+  )
+}
+
+function MobileNavDropdown({ onNavigate }) {
+  return (
+    <div style={{ width: '100%', borderTop: '1px solid rgba(255,255,255,0.06)', padding: '8px 0 12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+      <button onClick={() => onNavigate('predictions')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>Predictions</button>
+      <button onClick={() => onNavigate('history')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>History</button>
+      <button onClick={() => onNavigate('season')} className="nav-link nav-link-active" style={{ width: '100%', textAlign: 'left', padding: '12px 4px' }}>Calendar</button>
+    </div>
+  )
+}
+
+function RaceCard({ round, code, name, country, date, status, cardRef, isMobile }) {
   const isCurrent   = status === 'current'
   const isCompleted = status === 'completed'
   const [isHovered, setIsHovered] = useState(false)
@@ -43,6 +92,7 @@ function RaceCard({ round, code, name, country, date, status, cardRef }) {
       style={{
         backgroundColor: isHovered ? '#1F1F24' : '#141418',
         borderColor: isHovered ? 'rgba(232, 0, 45, 0.35)' : undefined,
+        width: isMobile ? '224px' : '256px',
         cursor: 'pointer',
         transition: 'background-color 0.2s ease, border-color 0.2s ease',
         ...(isCurrent ? { boxShadow: '0 0 0 1px #E8002D, 0 4px 24px rgba(232, 0, 45, 0.35)' } : {}),
@@ -60,6 +110,8 @@ function RaceCard({ round, code, name, country, date, status, cardRef }) {
 }
 
 export default function Season({ onNavigate }) {
+  const isMobile = useIsMobile()
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const currentRef = useRef(null)
 
   useEffect(() => {
@@ -77,25 +129,32 @@ export default function Season({ onNavigate }) {
       <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to bottom, rgba(12,12,14,0.72) 0%, rgba(12,12,14,0.88) 50%, rgba(12,12,14,0.97) 100%)', zIndex: 0 }} />
 
       {/* Navbar */}
-      <nav className="app-nav">
-        <div className="app-nav-inner">
-          <div className="brand-wrap">
+      <nav className="app-nav" style={{ padding: isMobile ? '0 16px' : '0 24px' }}>
+        <div className="app-nav-inner" style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: '64px', gap: '16px' }}>
+          <div className="brand-wrap" style={{ flex: isMobile ? '0 1 auto' : 1 }}>
             <button onClick={() => onNavigate('home')} className="brand-button">
               <img src="/logo-mark.png" alt="" className="brand-logo" />
               <span className="brand-wordmark">Chicane.ai</span>
             </button>
           </div>
-          <div className="nav-links">
+          <div className="nav-links" style={{ display: isMobile ? 'none' : 'flex' }}>
             <button onClick={() => onNavigate('predictions')} className="nav-link">Predictions</button>
             <button onClick={() => onNavigate('history')} className="nav-link">History</button>
             <button onClick={() => onNavigate('season')} className="nav-link nav-link-active">Calendar</button>
 
           </div>
-          <div className="nav-spacer flex-1" />
+          {isMobile && (
+            <HamburgerButton
+              isOpen={isMenuOpen}
+              onClick={() => setIsMenuOpen((open) => !open)}
+            />
+          )}
+          <div className="nav-spacer flex-1" style={{ display: isMobile ? 'none' : 'block' }} />
         </div>
+        {isMobile && isMenuOpen && <MobileNavDropdown onNavigate={onNavigate} />}
       </nav>
 
-      <main className="page-shell flex-1 px-6 flex flex-col">
+      <main className="page-shell flex-1 px-6 flex flex-col" style={{ paddingLeft: isMobile ? '16px' : '32px', paddingRight: isMobile ? '16px' : '32px', paddingTop: isMobile ? '40px' : '64px' }}>
         <div className="max-w-5xl mx-auto w-full">
 
           {/* Header */}
@@ -124,7 +183,7 @@ export default function Season({ onNavigate }) {
           <div className="calendar-scroll overflow-x-auto pb-4 -mx-6 px-6">
             <div className="flex gap-3" style={{ width: 'max-content' }}>
               {RACES.map((race) => (
-                <RaceCard key={race.round} {...race} cardRef={race.status === 'current' ? currentRef : null} />
+                <RaceCard key={race.round} {...race} cardRef={race.status === 'current' ? currentRef : null} isMobile={isMobile} />
               ))}
             </div>
           </div>

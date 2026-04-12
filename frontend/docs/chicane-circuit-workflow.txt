@@ -1,0 +1,196 @@
+🏁 Chicane.ai Circuit Integration System (FAST WORKFLOW GUIDE)
+
+This is your optimized, repeatable system for adding ANY F1 circuit quickly.
+
+--------------------------------------------------
+⚡ CORE IDEA
+--------------------------------------------------
+
+1. The IMAGE (PNG) = visual truth
+2. The PATH (SVG) = animation truth
+3. They must match EXACTLY
+
+If they don’t → animation breaks
+
+--------------------------------------------------
+🚀 FAST WORKFLOW (5–10 MIN PROCESS)
+--------------------------------------------------
+
+STEP 1 — Get Circuit Image
+- Find official or clean map
+- Screenshot or export
+- Ask AI to turn into a white line
+
+STEP 2 — Clean Image
+- Remove background (AI can do it)
+- Keep ONLY track line
+- Export as PNG (transparent)
+
+TOOLS:
+- remove.bg
+- Photoshop
+- Figma
+
+--------------------------------------------------
+STEP 3 — Place in Project
+--------------------------------------------------
+
+Location:
+src/assets/circuits/
+
+Example:
+monaco-track-white.png
+
+--------------------------------------------------
+STEP 4 — Convert to Path (CRITICAL)
+--------------------------------------------------
+
+Best options:
+
+1. Figma (BEST)
+   - Import PNG
+   - Trace with Pen tool
+   - Export SVG
+   - Copy path
+
+2. Vectorizer (FAST)
+   - Upload PNG
+   - Export SVG
+   - Clean path
+
+GOAL:
+- One continuous path
+- Clean curves
+- No noise
+
+OR CHATGPT!!
+
+--------------------------------------------------
+STEP 5 — Add to Component
+--------------------------------------------------
+
+<div className="relative w-full">
+  <img src={trackImage} className="w-full h-auto" />
+
+  <svg
+    viewBox="0 0 800 420"
+    className="absolute inset-0 w-full h-full"
+    preserveAspectRatio="none"
+  >
+    <path
+      ref={pathRef}
+      d={trackPath}
+      stroke="transparent"
+      strokeWidth="20"
+      fill="none"
+    />
+
+    <circle cx={marker.x} cy={marker.y} r="4" fill="white" />
+    <circle cx={marker.x} cy={marker.y} r="10" fill="rgba(255,255,255,0.15)" />
+  </svg>
+</div>
+
+--------------------------------------------------
+STEP 6 — Align Path (DEBUG)
+--------------------------------------------------
+
+TEMP:
+
+<path d={trackPath} stroke="red" strokeWidth="2" />
+
+Adjust until PERFECT overlap.
+
+Then remove debug.
+
+--------------------------------------------------
+STEP 7 — Animation
+--------------------------------------------------
+
+const length = path.getTotalLength()
+const point = path.getPointAtLength(progress * length)
+
+Loop:
+progress = (elapsed % duration) / duration
+
+--------------------------------------------------
+🔥 BEST CODEX PROMPTS
+--------------------------------------------------
+
+📦 PROMPT 1 — Add New Circuit Asset
+
+"Create folder src/assets/circuits/ if not exists and prepare it for storing track images."
+
+--------------------------------------------------
+
+🧠 PROMPT 2 — Integrate New Circuit
+
+"Replace current circuit with PNG overlay system using:
+src/assets/circuits/[TRACK_NAME].png
+
+Add SVG overlay for animation with invisible path and moving marker."
+
+--------------------------------------------------
+
+🎯 PROMPT 3 — Fix Alignment
+
+"The moving marker is misaligned.
+
+Fix by:
+- Matching SVG viewBox to image
+- Ensuring SVG overlays exactly
+- Aligning path to image centerline
+- Use debug red path to correct positioning"
+
+--------------------------------------------------
+
+⚡ PROMPT 4 — Convert Image to Path
+
+"Trace this circuit image into a single continuous SVG path optimized for animation (smooth curves, no breaks)"
+
+--------------------------------------------------
+
+🔥 PRO TIP (ELITE MODE)
+--------------------------------------------------
+
+Best system long-term:
+
+👉 Use SVG ONLY (no PNG)
+
+- SVG path = visual track
+- Same path = animation
+
+ZERO alignment issues.
+
+--------------------------------------------------
+⚠️ COMMON MISTAKES
+--------------------------------------------------
+
+❌ Using wrong path  
+❌ Scaling mismatch  
+❌ Guessing shape  
+❌ Using blurry PNG  
+❌ Not using debug mode  
+
+--------------------------------------------------
+🏁 FINAL RESULT
+--------------------------------------------------
+
+You get:
+- Perfect circuit accuracy
+- Smooth animation
+- Reusable system
+- Fast future implementation
+
+--------------------------------------------------
+💡 FUTURE UPGRADE IDEAS
+--------------------------------------------------
+
+- Sector highlights
+- Speed heatmap
+- DRS zones
+- Lap comparison animation
+- AI insights overlay
+
+--------------------------------------------------
+
+END OF SYSTEM

@@ -1,0 +1,11 @@
+Add Canadian GP circuit using same PNG + SVG overlay system as Miami.
+
+PNG:
+src/assets/circuits/canada-track-white.png
+
+Requirements:
+- duplicate Miami structure
+- create canadaPath matching PNG exactly
+- align using debug red path
+- keep animation identical
+- ensure marker follows track perfectly

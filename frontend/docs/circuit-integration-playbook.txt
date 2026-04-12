@@ -1,0 +1,164 @@
+🏁 Circuit Integration Playbook (Chicane.ai)
+
+This guide explains how to add a new F1 circuit with:
+- Accurate visuals (PNG)
+- Smooth animated marker
+- Perfect alignment
+
+--------------------------------------------------
+CORE PRINCIPLE
+--------------------------------------------------
+
+The PNG is the source of truth.
+
+The SVG path must match the PNG EXACTLY.
+
+❌ Never approximate a track  
+❌ Never reuse a generic path  
+✅ Always trace from the actual circuit image  
+
+--------------------------------------------------
+FOLDER STRUCTURE
+--------------------------------------------------
+
+Place all circuit assets here:
+
+src/assets/circuits/
+
+Example:
+
+miami-track-white.png
+monaco-track-white.png
+monza-track-white.png
+
+--------------------------------------------------
+STEP 1 — PREPARE THE IMAGE
+--------------------------------------------------
+
+Requirements:
+- Transparent background
+- White track line (no glow)
+- Clean + centered
+- Consistent aspect ratio
+
+--------------------------------------------------
+STEP 2 — USE PNG IN UI
+--------------------------------------------------
+
+<div className="relative w-full">
+  <img
+    src={trackImage}
+    alt="Circuit"
+    className="w-full h-auto opacity-90"
+  />
+</div>
+
+Optional glow:
+
+className="w-full drop-shadow-[0_0_12px_rgba(255,0,0,0.4)]"
+
+--------------------------------------------------
+STEP 3 — SVG OVERLAY (ANIMATION)
+--------------------------------------------------
+
+<svg
+  viewBox="0 0 800 420"
+  className="absolute inset-0 w-full h-full"
+  preserveAspectRatio="none"
+>
+  <path
+    ref={pathRef}
+    d={trackPath}
+    stroke="transparent"
+    strokeWidth="20"
+    fill="none"
+  />
+
+  <circle cx={marker.x} cy={marker.y} r="4" fill="white" />
+  <circle cx={marker.x} cy={marker.y} r="10" fill="rgba(255,255,255,0.15)" />
+</svg>
+
+--------------------------------------------------
+STEP 4 — PATH ALIGNMENT (CRITICAL)
+--------------------------------------------------
+
+The path must:
+- Sit exactly on top of the PNG
+- Follow the center of the track line
+- Use the SAME coordinate system as the SVG viewBox
+
+Debug mode:
+
+<path d={trackPath} stroke="red" strokeWidth="2" />
+
+If the red line does NOT match the track → FIX THE PATH
+
+--------------------------------------------------
+STEP 5 — ANIMATION LOGIC
+--------------------------------------------------
+
+const length = path.getTotalLength()
+
+const point = path.getPointAtLength(progress * length)
+
+setMarker({
+  x: point.x,
+  y: point.y
+})
+
+Loop:
+
+progress = (elapsed % duration) / duration
+
+--------------------------------------------------
+COMMON MISTAKES
+--------------------------------------------------
+
+❌ Path doesn't match PNG  
+❌ Different aspect ratios  
+❌ SVG not covering image  
+❌ Using guessed coordinates  
+❌ Scaling via CSS instead of viewBox  
+
+--------------------------------------------------
+DEBUG CHECKLIST
+--------------------------------------------------
+
+[ ] Path overlays perfectly in debug mode  
+[ ] Dot stays centered on track  
+[ ] No drifting  
+[ ] Animation loops smoothly  
+[ ] Image and SVG scale together  
+
+--------------------------------------------------
+WORKFLOW (EVERY NEW TRACK)
+--------------------------------------------------
+
+1. Get official circuit image  
+2. Remove background  
+3. Trace or convert to path  
+4. Paste path into code  
+5. Align using debug mode  
+6. Enable animation  
+7. Add glow polish  
+
+--------------------------------------------------
+PRO TIP
+--------------------------------------------------
+
+Best setup:
+
+Use SVG path as BOTH:
+- visible track
+- animation path
+
+This removes alignment issues entirely.
+
+--------------------------------------------------
+RESULT
+--------------------------------------------------
+
+- Pixel-perfect circuit  
+- Smooth animation  
+- Reusable system  
+- Production-quality UI  
