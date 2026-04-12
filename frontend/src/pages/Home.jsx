@@ -165,7 +165,7 @@ export default function Home({ onNavigate }) {
             Predict. Verify. Repeat.
           </h1>
 
-          <p className="leading-relaxed" style={{ fontSize: '1.25rem', color: '#A1A1AA' }}>
+          <p className="leading-relaxed" style={{ fontSize: '16px', color: '#A1A1AA' }}>
             AI-powered F1 predictions updated every race weekend.
           </p>
 
@@ -188,7 +188,7 @@ export default function Home({ onNavigate }) {
           <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 32px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px' }}>
               <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#E8002D' }}></div>
-              <span style={{ fontSize: '13px', fontWeight: '600', color: '#A1A1AA', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Next Race</span>
+              <span style={{ fontSize: '13px', fontWeight: 500, color: '#A1A1AA', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Next Race</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
               {/* Countdown grid */}
@@ -252,7 +252,7 @@ export default function Home({ onNavigate }) {
           {/* Section label */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
             <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#E8002D', flexShrink: 0 }} />
-            <span style={{ fontSize: '13px', fontWeight: 600, color: '#A1A1AA', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Latest Prediction</span>
+            <span style={{ fontSize: '13px', fontWeight: 500, color: '#A1A1AA', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Latest Prediction</span>
           </div>
           <p style={{ fontSize: '14px', color: '#A1A1AA', marginBottom: '24px' }}>Miami Grand Prix · Pre-qualifying</p>
 

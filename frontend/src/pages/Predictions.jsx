@@ -91,7 +91,7 @@ export default function Predictions({ onNavigate }) {
 
         {/* Header */}
         <div className="mb-10">
-          <h1 style={{ fontSize: '2.5rem', fontWeight: 800, letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
+          <h1 style={{ fontSize: '42px', fontWeight: 800, letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
             {race !== 'TBD' ? race : 'Next Race'} Winner Predictions
           </h1>
           {circuit !== 'TBD' && (
@@ -151,10 +151,10 @@ export default function Predictions({ onNavigate }) {
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
                     <div>
-                      <div style={{ fontSize: '18px', fontWeight: 700, color: '#F4F4F5' }}>{p.driver}</div>
+                      <div style={{ fontSize: '17px', fontWeight: 700, color: '#F4F4F5' }}>{p.driver}</div>
                       <div style={{ fontSize: '13px', color: '#A1A1AA', marginTop: '1px' }}>{p.team}</div>
                     </div>
-                    <span style={{ fontSize: '18px', fontWeight: 700, color: '#F4F4F5', fontVariantNumeric: 'tabular-nums', marginLeft: '12px', flexShrink: 0 }}>
+                    <span style={{ fontSize: '17px', fontWeight: 700, color: '#F4F4F5', fontVariantNumeric: 'tabular-nums', marginLeft: '12px', flexShrink: 0 }}>
                       {pct}%
                     </span>
                   </div>

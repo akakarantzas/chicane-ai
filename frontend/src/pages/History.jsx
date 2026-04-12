@@ -38,13 +38,13 @@ export default function History({ onNavigate }) {
 
           {/* Page header */}
           <div className="mb-10">
-            <h1 style={{ fontSize: '2.5rem', fontWeight: 800, letterSpacing: '-0.02em' }}>Prediction History</h1>
-            <p className="text-[#A1A1AA] mt-2" style={{ fontSize: '1.1rem' }}>Track record of AI predictions vs actual race results</p>
+            <h1 style={{ fontSize: '42px', fontWeight: 800, letterSpacing: '-0.02em' }}>Prediction History</h1>
+            <p className="text-[#A1A1AA] mt-2" style={{ fontSize: '15px' }}>Track record of AI predictions vs actual race results</p>
           </div>
 
           {/* Coming soon */}
           <div className="border border-dashed border-white/[0.06] rounded-xl px-6 py-10 text-center">
-            <p className="text-[#A1A1AA]" style={{ fontSize: '1rem' }}>More race predictions coming each weekend</p>
+            <p className="text-[#A1A1AA]" style={{ fontSize: '15px' }}>More race predictions coming each weekend</p>
           </div>
 
         </div>

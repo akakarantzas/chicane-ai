@@ -24,6 +24,7 @@
 - Body: 16px, weight 400
 - Small/muted: 14px, weight 400
 - Label/tag: 13px, weight 500, letter-spacing 0.08em
+- Note: Hero H1 intentionally set to 72px for visual impact. All other H1s use 42px.
 - Logo: DM Sans, SemiBold 600, italic, letter-spacing -0.05em
 - Body/UI: Helvetica, Arial, sans-serif
 
