@@ -1,16 +1,15 @@
 import { useEffect, useState } from 'react'
 
-function capitalize(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1)
+const BAR_COLORS = ['#E8002D', '#FF6B35', '#FFB800']
+const ACCENT_BORDERS = ['#E8002D', '#FF6B35', '#FFB800']
+const POSITION_COLORS = ['#E8002D', '#FF6B35', '#FFB800']
+
+function positionColor(i) {
+  return POSITION_COLORS[i] ?? '#A1A1AA'
 }
 
-// Red (#E8002D) for P1, fading through orange/yellow to a muted gray for last
-function barColor(index, total) {
-  const ratio = index / Math.max(total - 1, 1)
-  const hue = Math.round(ratio * 50)
-  const sat = Math.round(90 - ratio * 55)
-  const light = Math.round(50 - ratio * 20)
-  return `hsl(${hue}, ${sat}%, ${light}%)`
+function barColor(i) {
+  return BAR_COLORS[i] ?? '#3F3F46'
 }
 
 export default function Predictions({ onNavigate }) {
@@ -53,7 +52,7 @@ export default function Predictions({ onNavigate }) {
     )
   }
 
-  const { race, circuit, predictions, status } = data
+  const { race, circuit, predictions } = data
   const maxProb = predictions[0]?.probability ?? 1
 
   return (
@@ -83,56 +82,103 @@ export default function Predictions({ onNavigate }) {
             <button onClick={() => onNavigate?.('predictions')} className="text-[#F4F4F5]">Predictions</button>
             <button onClick={() => onNavigate?.('history')} className="hover:text-[#F4F4F5] transition-colors">History</button>
             <button onClick={() => onNavigate?.('season')} className="hover:text-[#F4F4F5] transition-colors">Calendar</button>
-
           </div>
           <div className="flex-1" />
         </div>
       </nav>
 
       <div className="max-w-2xl mx-auto px-6 pb-12 w-full relative" style={{ zIndex: 1, paddingTop: '64px' }}>
+
         {/* Header */}
         <div className="mb-10">
-          <h1 style={{ fontSize: '2.5rem', fontWeight: 800, letterSpacing: '-0.02em' }}>
+          <h1 style={{ fontSize: '2.5rem', fontWeight: 800, letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
             {race !== 'TBD' ? race : 'Next Race'} Winner Predictions
           </h1>
           {circuit !== 'TBD' && (
-            <p className="text-[#A1A1AA] mt-1" style={{ fontSize: '1.1rem' }}>{circuit}</p>
+            <div className="flex items-center gap-3 mt-2">
+              <p className="text-[#A1A1AA]" style={{ fontSize: '1.1rem' }}>{circuit}</p>
+              <span style={{
+                backgroundColor: 'rgba(232,0,45,0.12)',
+                color: '#E8002D',
+                border: '1px solid rgba(232,0,45,0.25)',
+                borderRadius: '999px',
+                padding: '4px 12px',
+                fontSize: '13px',
+                fontWeight: 600,
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+              }}>
+                Pre-qualifying
+              </span>
+            </div>
           )}
         </div>
 
         {/* Prediction rows */}
-        <ol className="space-y-4">
+        <ol>
           {predictions.map((p, i) => {
             const pct = (p.probability * 100).toFixed(1)
             const barWidth = `${(p.probability / maxProb) * 100}%`
-            const color = barColor(i, predictions.length)
+            const isTop3 = i < 3
 
             return (
-              <li key={p.driver} className="flex items-center gap-4">
-                {/* Position */}
-                <span className="w-6 text-right font-semibold text-[#A1A1AA] shrink-0" style={{ fontSize: '1rem' }}>
+              <li
+                key={p.driver}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '20px',
+                  minHeight: '64px',
+                  padding: '14px 16px',
+                  borderLeft: isTop3 ? `3px solid ${ACCENT_BORDERS[i]}` : '3px solid transparent',
+                  borderBottom: i < predictions.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
+                }}
+              >
+                {/* Position number */}
+                <span style={{
+                  fontSize: '22px',
+                  fontWeight: 800,
+                  color: positionColor(i),
+                  width: '32px',
+                  textAlign: 'right',
+                  flexShrink: 0,
+                  fontVariantNumeric: 'tabular-nums',
+                }}>
                   {i + 1}
                 </span>
 
-                {/* Driver name + bar */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-1">
-                    <span style={{ fontSize: '1rem', fontWeight: 600 }}>{capitalize(p.driver)}</span>
-                    <span className="tabular-nums text-[#A1A1AA]" style={{ fontSize: '1rem' }}>{pct}%</span>
+                {/* Driver info + bar */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                    <div>
+                      <div style={{ fontSize: '18px', fontWeight: 700, color: '#F4F4F5' }}>{p.driver}</div>
+                      <div style={{ fontSize: '13px', color: '#A1A1AA', marginTop: '1px' }}>{p.team}</div>
+                    </div>
+                    <span style={{ fontSize: '18px', fontWeight: 700, color: '#F4F4F5', fontVariantNumeric: 'tabular-nums', marginLeft: '12px', flexShrink: 0 }}>
+                      {pct}%
+                    </span>
                   </div>
-                  <div className="h-2 w-full bg-[#27272A] rounded-full overflow-hidden">
-                    <div
-                      className="h-full rounded-full transition-all duration-500"
-                      style={{ width: barWidth, backgroundColor: color }}
-                    />
+                  <div style={{ height: '10px', width: '100%', backgroundColor: '#27272A', borderRadius: '999px', overflow: 'hidden' }}>
+                    <div style={{
+                      height: '100%',
+                      width: barWidth,
+                      backgroundColor: barColor(i),
+                      borderRadius: '999px',
+                      transition: 'width 0.5s ease',
+                    }} />
                   </div>
                 </div>
               </li>
             )
           })}
         </ol>
+
+        {/* Footer note */}
+        <p style={{ fontSize: '12px', color: '#A1A1AA', textAlign: 'center', fontStyle: 'italic', marginTop: '32px' }}>
+          Predictions generated using Gradient Boosting model trained on 2022–2026 F1 data
+        </p>
+
       </div>
-      </div>
-  
+    </div>
   )
 }

@@ -158,7 +158,7 @@ export default function Home({ onNavigate }) {
         <div className="relative max-w-2xl mx-auto space-y-6" style={{ zIndex: 2 }}>
           {/* Badge */}
           <span className="inline-flex items-center bg-green-900/40 text-green-400 font-medium rounded-full border border-green-800/50" style={{ fontSize: '0.9rem', padding: '6px 14px' }}>
-            Miami GP predictions now live
+            Miami GP predictions now live!
           </span>
 
           <h1 className="tracking-tight" style={{ fontSize: '4.5rem', fontWeight: 800, lineHeight: 1.1 }}>
@@ -247,40 +247,57 @@ export default function Home({ onNavigate }) {
       {/* Latest Prediction */}
       <section style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '80px 32px' }}>
-          <h2 style={{ fontSize: '30px', fontWeight: 700, color: '#F4F4F5', marginBottom: '32px' }}>
-            Latest Prediction
-          </h2>
 
-          <ol className="space-y-5 mb-10">
-            {TOP3.map((p, i) => {
-              const pct = (p.probability * 100).toFixed(0)
-              const barWidth = `${(p.probability / TOP3[0].probability) * 100}%`
-              return (
-                <li key={p.driver} className="flex items-center gap-5">
-                  <span className="w-6 text-right font-semibold text-[#A1A1AA] shrink-0" style={{ fontSize: '1.1rem' }}>
-                    {i + 1}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-2">
-                      <span style={{ fontSize: '1.15rem', fontWeight: 600 }}>{p.driver}</span>
-                      <span className="tabular-nums text-[#A1A1AA]" style={{ fontSize: '1.15rem' }}>{pct}%</span>
-                    </div>
-                    <div className="h-2.5 w-full bg-[#27272A] rounded-full overflow-hidden">
-                      <div
-                        className="h-full rounded-full"
-                        style={{ width: barWidth, backgroundColor: BAR_COLORS[i] }}
-                      />
-                    </div>
-                  </div>
-                </li>
-              )
-            })}
-          </ol>
+          {/* Section label */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+            <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#E8002D', flexShrink: 0 }} />
+            <span style={{ fontSize: '13px', fontWeight: 600, color: '#A1A1AA', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Latest Prediction</span>
+          </div>
+          <p style={{ fontSize: '14px', color: '#A1A1AA', marginBottom: '24px' }}>Miami Grand Prix · Pre-qualifying</p>
+
+          {/* Driver cards */}
+          {TOP3.map((p, i) => {
+            const pct = (p.probability * 100).toFixed(1)
+            const barWidth = `${(p.probability / TOP3[0].probability) * 100}%`
+            const accentColor = BAR_COLORS[i]
+            return (
+              <div key={p.driver} style={{
+                backgroundColor: '#1A1A1F',
+                borderRadius: '12px',
+                padding: '16px 20px',
+                marginBottom: '10px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '16px',
+                borderLeft: `3px solid ${accentColor}`,
+              }}>
+                <span style={{ fontSize: '28px', fontWeight: 800, color: accentColor, flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>{i + 1}</span>
+                <span style={{ fontSize: '17px', fontWeight: 700, color: '#F4F4F5', flex: 1 }}>{p.driver}</span>
+                <div style={{ width: '120px', height: '4px', backgroundColor: '#27272A', borderRadius: '2px', overflow: 'hidden', flexShrink: 0 }}>
+                  <div style={{ height: '100%', width: barWidth, backgroundColor: accentColor, borderRadius: '2px' }} />
+                </div>
+                <span style={{ fontSize: '17px', fontWeight: 700, color: '#F4F4F5', minWidth: '48px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{pct}%</span>
+              </div>
+            )
+          })}
 
           <button
             onClick={() => onNavigate('predictions')}
-            className="w-full border border-white/[0.06] hover:border-white/20 font-medium py-3.5 rounded-lg transition-colors"
-            style={{ fontSize: '1rem' }}
+            style={{
+              width: '100%',
+              backgroundColor: 'transparent',
+              border: '1px solid rgba(255,255,255,0.1)',
+              color: '#A1A1AA',
+              padding: '14px',
+              borderRadius: '10px',
+              fontSize: '14px',
+              fontWeight: 500,
+              cursor: 'pointer',
+              marginTop: '4px',
+              transition: 'background-color 0.2s, color 0.2s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#1A1A1F'; e.currentTarget.style.color = '#F4F4F5' }}
+            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#A1A1AA' }}
           >
             View full predictions →
           </button>

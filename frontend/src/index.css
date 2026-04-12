@@ -37,12 +37,12 @@ body {
 }
 
 .calendar-scroll::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
+  background: #E8002D;
   border-radius: 999px;
 }
 
 .calendar-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: #ff1a3d;
 }
 
 .stat-card:hover {
