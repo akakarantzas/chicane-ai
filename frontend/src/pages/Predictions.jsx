@@ -129,7 +129,7 @@ export default function Predictions({ onNavigate }) {
                   alignItems: 'center',
                   gap: '20px',
                   minHeight: '64px',
-                  padding: '14px 16px',
+                  padding: '24px',
                   borderLeft: isTop3 ? `3px solid ${ACCENT_BORDERS[i]}` : '3px solid transparent',
                   borderBottom: i < predictions.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
                 }}

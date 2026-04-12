@@ -33,7 +33,7 @@ function RaceCard({ round, code, name, country, date, status, cardRef }) {
   return (
     <div
       ref={cardRef}
-      className={`shrink-0 w-48 bg-[#141418] border rounded-xl px-5 py-5 flex flex-col gap-2 ${
+      className={`shrink-0 w-48 bg-[#141418] border rounded-xl px-6 py-6 flex flex-col gap-2 ${
         isCurrent ? 'border-[#E8002D]' : 'border-white/[0.06]'
       } ${isCompleted ? 'opacity-60' : 'opacity-100'}`}
       style={isCurrent ? { boxShadow: '0 0 0 1px #E8002D, 0 4px 24px rgba(232, 0, 45, 0.35)' } : {}}
@@ -83,7 +83,7 @@ function CountdownUnit({ value, label }) {
     <div style={{
       backgroundColor: '#1A1A1F',
       borderRadius: '14px',
-      padding: '24px 20px',
+      padding: '24px',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
@@ -172,8 +172,9 @@ export default function Home({ onNavigate }) {
           <div className="flex items-center justify-center gap-3 pt-2">
             <button
               onClick={() => onNavigate('predictions')}
-              className="bg-[#E8002D] hover:bg-[#E8002D]/90 text-[#F4F4F5] font-semibold rounded-lg transition-colors"
-              style={{ fontSize: '1rem', padding: '14px 28px' }}
+              style={{ height: '44px', padding: '0 20px', borderRadius: '8px', fontSize: '15px', fontWeight: 600, backgroundColor: '#E8002D', color: 'white', cursor: 'pointer', border: 'none', transition: 'background-color 0.2s' }}
+              onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#ff1a3d' }}
+              onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#E8002D' }}
             >
               See predictions
             </button>
@@ -200,8 +201,8 @@ export default function Home({ onNavigate }) {
                 ].map((item) => (
                   <div key={item.label} style={{
                     backgroundColor: '#1A1A1F',
-                    borderRadius: '14px',
-                    padding: '32px 16px',
+                    borderRadius: '12px',
+                    padding: '24px',
                     textAlign: 'center',
                     borderTop: '2px solid #E8002D',
                     minHeight: '120px',
@@ -264,7 +265,7 @@ export default function Home({ onNavigate }) {
               <div key={p.driver} style={{
                 backgroundColor: '#1A1A1F',
                 borderRadius: '12px',
-                padding: '16px 20px',
+                padding: '24px',
                 marginBottom: '10px',
                 display: 'flex',
                 alignItems: 'center',
@@ -285,13 +286,13 @@ export default function Home({ onNavigate }) {
             onClick={() => onNavigate('predictions')}
             style={{
               width: '100%',
+              height: '44px',
               backgroundColor: 'transparent',
               border: '1px solid rgba(255,255,255,0.1)',
               color: '#A1A1AA',
-              padding: '14px',
-              borderRadius: '10px',
-              fontSize: '14px',
-              fontWeight: 500,
+              padding: '0 20px',
+              borderRadius: '8px',
+              fontSize: '15px',
               cursor: 'pointer',
               marginTop: '4px',
               transition: 'background-color 0.2s, color 0.2s',
@@ -318,7 +319,7 @@ export default function Home({ onNavigate }) {
                 <div key={stat.label} style={{
                   backgroundColor: '#1A1A1F',
                   borderRadius: '12px',
-                  padding: '32px 24px',
+                  padding: '24px',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
