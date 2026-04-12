@@ -28,6 +28,214 @@ body {
   font-family: Helvetica, Arial, sans-serif;
 }
 
+button:focus-visible {
+  outline: 2px solid #ff1a3d;
+  outline-offset: 3px;
+}
+
+.app-nav {
+  position: relative;
+  z-index: 10;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding: 0 24px;
+  background-color: transparent;
+}
+
+.app-nav-inner {
+  display: flex;
+  align-items: center;
+  min-height: 64px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.brand-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.brand-button {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  border-radius: 8px;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.brand-button:hover {
+  opacity: 0.82;
+  transform: translateY(-1px);
+}
+
+.brand-logo {
+  height: 60px;
+  width: 60px;
+  object-fit: contain;
+  margin-right: -14px;
+  flex-shrink: 0;
+}
+
+.brand-wordmark {
+  font-family: "DM Sans", sans-serif;
+  font-weight: 600;
+  font-style: italic;
+  letter-spacing: -0.05em;
+  font-size: 1.9rem;
+  color: #F4F4F5;
+  white-space: nowrap;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  color: #A1A1AA;
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.nav-link {
+  border-radius: 8px;
+  padding: 8px 2px;
+  color: inherit;
+  transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+}
+
+.nav-link:hover {
+  color: #F4F4F5;
+  transform: translateY(-1px);
+}
+
+.nav-link-active {
+  color: #F4F4F5;
+}
+
+.nav-link-active:hover {
+  color: #ff1a3d;
+}
+
+.primary-action {
+  height: 44px;
+  padding: 0 20px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  background-color: #E8002D;
+  color: white;
+  border: none;
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.primary-action:hover {
+  background-color: #ff1a3d !important;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(232, 0, 45, 0.25);
+}
+
+.secondary-action {
+  width: 100%;
+  height: 44px;
+  background-color: transparent;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #A1A1AA;
+  padding: 0 20px;
+  border-radius: 8px;
+  font-size: 15px;
+  margin-top: 4px;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.secondary-action:hover {
+  background-color: #1A1A1F !important;
+  color: #F4F4F5 !important;
+  border-color: rgba(232, 0, 45, 0.35) !important;
+  transform: translateY(-1px);
+}
+
+.section-shell {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+.section-band {
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding-top: 80px;
+  padding-bottom: 80px;
+}
+
+.hero-title {
+  font-size: 4.5rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.countdown-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(96px, 120px));
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 32px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.interactive-card {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, background-color 0.2s ease;
+}
+
+.race-card {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+}
+
+.page-bg {
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-color: #0C0C0E;
+}
+
+.page-shell {
+  width: 100%;
+  position: relative;
+  z-index: 1;
+  padding-top: 64px;
+  padding-bottom: 48px;
+}
+
+.page-title {
+  font-size: 42px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.08;
+}
+
+.prediction-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-height: 64px;
+  padding: 24px;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.prediction-row-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.latest-prediction-row {
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
 .calendar-scroll::-webkit-scrollbar {
   height: 4px;
 }
@@ -45,8 +253,184 @@ body {
   background: #ff1a3d;
 }
 
+/* Hover states */
+button { transition: all 0.2s ease; cursor: pointer; }
+button:hover { opacity: 0.88; transform: translateY(-1px); }
+button:active { transform: translateY(0px); opacity: 1; }
+
 .stat-card:hover {
   box-shadow: 0 4px 28px rgba(232, 0, 45, 0.15), 0 2px 16px rgba(0,0,0,0.5);
   border-color: rgba(232, 0, 45, 0.25) !important;
   transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .app-nav {
+    padding: 8px 16px 12px;
+  }
+
+  .app-nav-inner {
+    min-height: auto;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .brand-wrap {
+    justify-content: center;
+  }
+
+  .brand-logo {
+    height: 48px;
+    width: 48px;
+    margin-right: -10px;
+  }
+
+  .brand-wordmark {
+    font-size: 1.45rem;
+  }
+
+  .nav-links {
+    width: 100%;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.95rem;
+  }
+
+  .nav-link {
+    padding: 8px 10px;
+    background-color: rgba(255,255,255,0.035);
+  }
+
+  .nav-spacer {
+    display: none;
+  }
+
+  .section-shell {
+    padding: 0 16px;
+  }
+
+  .section-band {
+    padding-top: 48px;
+    padding-bottom: 48px;
+  }
+
+  .hero-section {
+    min-height: 88vh !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    padding-bottom: 48px !important;
+  }
+
+  .hero-title {
+    font-size: 3rem !important;
+  }
+
+  .hero-actions {
+    width: 100%;
+  }
+
+  .primary-action {
+    width: 100%;
+  }
+
+  .countdown-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+    width: 100%;
+  }
+
+  .countdown-card {
+    min-height: 104px !important;
+    padding: 18px 12px !important;
+  }
+
+  .countdown-value {
+    font-size: 42px !important;
+  }
+
+  .race-meta-pills {
+    flex-wrap: wrap;
+  }
+
+  .home-race-card {
+    width: 168px !important;
+  }
+
+  .season-race-card {
+    width: 224px !important;
+  }
+
+  .latest-prediction-row {
+    align-items: flex-start !important;
+    flex-wrap: wrap;
+    gap: 10px !important;
+  }
+
+  .latest-prediction-row .latest-bar {
+    order: 3;
+    width: 100% !important;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .page-bg {
+    background-attachment: scroll !important;
+  }
+
+  .page-shell {
+    padding-top: 40px !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  .page-title {
+    font-size: 32px !important;
+  }
+
+  .prediction-subhead {
+    align-items: flex-start !important;
+    flex-direction: column;
+    gap: 8px !important;
+  }
+
+  .prediction-row {
+    padding: 18px 12px !important;
+    gap: 12px !important;
+  }
+
+  .prediction-row-main {
+    align-items: flex-start !important;
+    gap: 10px;
+  }
+
+  .season-legend {
+    align-items: flex-start !important;
+    flex-direction: column;
+    gap: 10px !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .nav-links {
+    justify-content: space-between;
+  }
+
+  .nav-link {
+    flex: 1;
+    text-align: center;
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+
+  .hero-title {
+    font-size: 2.5rem !important;
+  }
+
+  .countdown-grid,
+  .stats-grid {
+    grid-template-columns: 1fr !important;
+  }
 }

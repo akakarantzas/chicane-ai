@@ -12,6 +12,63 @@ function barColor(i) {
   return BAR_COLORS[i] ?? '#3F3F46'
 }
 
+function PredictionRow({ prediction, index, maxProb, isLast }) {
+  const [isHovered, setIsHovered] = useState(false)
+  const pct = (prediction.probability * 100).toFixed(1)
+  const barWidth = `${(prediction.probability / maxProb) * 100}%`
+  const isTop3 = index < 3
+
+  return (
+    <li
+      className="prediction-row"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{
+        backgroundColor: isHovered ? '#222228' : '#1A1A1F',
+        transform: isHovered ? 'translateY(-1px)' : 'translateY(0)',
+        borderLeft: isTop3 ? `3px solid ${ACCENT_BORDERS[index]}` : '3px solid transparent',
+        borderBottom: !isLast ? '1px solid rgba(255,255,255,0.05)' : 'none',
+        transition: 'background-color 0.2s ease, transform 0.2s ease',
+      }}
+    >
+      {/* Position number */}
+      <span style={{
+        fontSize: '22px',
+        fontWeight: 800,
+        color: positionColor(index),
+        width: '32px',
+        textAlign: 'right',
+        flexShrink: 0,
+        fontVariantNumeric: 'tabular-nums',
+      }}>
+        {index + 1}
+      </span>
+
+      {/* Driver info + bar */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div className="prediction-row-main">
+          <div>
+            <div style={{ fontSize: '17px', fontWeight: 700, color: '#F4F4F5' }}>{prediction.driver}</div>
+            <div style={{ fontSize: '13px', color: '#A1A1AA', marginTop: '1px' }}>{prediction.team}</div>
+          </div>
+          <span style={{ fontSize: '17px', fontWeight: 700, color: '#F4F4F5', fontVariantNumeric: 'tabular-nums', marginLeft: '12px', flexShrink: 0 }}>
+            {pct}%
+          </span>
+        </div>
+        <div style={{ height: '10px', width: '100%', backgroundColor: '#27272A', borderRadius: '999px', overflow: 'hidden' }}>
+          <div style={{
+            height: '100%',
+            width: barWidth,
+            backgroundColor: barColor(index),
+            borderRadius: '999px',
+            transition: 'width 0.5s ease',
+          }} />
+        </div>
+      </div>
+    </li>
+  )
+}
+
 export default function Predictions({ onNavigate }) {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -57,45 +114,41 @@ export default function Predictions({ onNavigate }) {
 
   return (
     <div
-      className="relative min-h-screen text-[#F4F4F5] flex flex-col"
+      className="page-bg relative min-h-screen text-[#F4F4F5] flex flex-col"
       style={{
         backgroundImage: 'url(/f1pred.jpg)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundAttachment: 'fixed',
-        backgroundColor: '#0C0C0E',
       }}
     >
       {/* Dark overlay */}
       <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to bottom, rgba(12,12,14,0.72) 0%, rgba(12,12,14,0.88) 50%, rgba(12,12,14,0.97) 100%)', zIndex: 0 }} />
 
       {/* Navbar */}
-      <nav className="relative z-10 border-b border-white/[0.06] px-6" style={{ backgroundColor: 'transparent' }}>
-        <div className="flex items-center h-16 max-w-7xl mx-auto">
-          <div className="flex-1 flex items-center">
-            <button onClick={() => onNavigate?.('home')} className="flex items-center hover:opacity-80 transition-opacity">
-              <img src="/logo-mark.png" alt="" style={{ height: '60px', width: '60px', objectFit: 'contain', marginRight: '-14px' }} />
-              <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontStyle: 'italic', letterSpacing: '-0.05em', fontSize: '1.9rem', color: '#F4F4F5' }}>Chicane.ai</span>
+      <nav className="app-nav">
+        <div className="app-nav-inner">
+          <div className="brand-wrap">
+            <button onClick={() => onNavigate?.('home')} className="brand-button">
+              <img src="/logo-mark.png" alt="" className="brand-logo" />
+              <span className="brand-wordmark">Chicane.ai</span>
             </button>
           </div>
-          <div className="flex items-center gap-8 text-[#A1A1AA]" style={{ fontSize: '1.2rem', fontWeight: 500 }}>
-            <button onClick={() => onNavigate?.('predictions')} className="text-[#F4F4F5]">Predictions</button>
-            <button onClick={() => onNavigate?.('history')} className="hover:text-[#F4F4F5] transition-colors">History</button>
-            <button onClick={() => onNavigate?.('season')} className="hover:text-[#F4F4F5] transition-colors">Calendar</button>
+          <div className="nav-links">
+            <button onClick={() => onNavigate?.('predictions')} className="nav-link nav-link-active">Predictions</button>
+            <button onClick={() => onNavigate?.('history')} className="nav-link">History</button>
+            <button onClick={() => onNavigate?.('season')} className="nav-link">Calendar</button>
           </div>
-          <div className="flex-1" />
+          <div className="nav-spacer flex-1" />
         </div>
       </nav>
 
-      <div className="max-w-2xl mx-auto px-6 pb-12 w-full relative" style={{ zIndex: 1, paddingTop: '64px' }}>
+      <div className="page-shell max-w-2xl mx-auto px-6">
 
         {/* Header */}
         <div className="mb-10">
-          <h1 style={{ fontSize: '42px', fontWeight: 800, letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
+          <h1 className="page-title">
             {race !== 'TBD' ? race : 'Next Race'} Winner Predictions
           </h1>
           {circuit !== 'TBD' && (
-            <div className="flex items-center gap-3 mt-2">
+            <div className="prediction-subhead flex items-center gap-3 mt-2">
               <p className="text-[#A1A1AA]" style={{ fontSize: '1.1rem' }}>{circuit}</p>
               <span style={{
                 backgroundColor: 'rgba(232,0,45,0.12)',
@@ -116,61 +169,15 @@ export default function Predictions({ onNavigate }) {
 
         {/* Prediction rows */}
         <ol>
-          {predictions.map((p, i) => {
-            const pct = (p.probability * 100).toFixed(1)
-            const barWidth = `${(p.probability / maxProb) * 100}%`
-            const isTop3 = i < 3
-
-            return (
-              <li
-                key={p.driver}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '20px',
-                  minHeight: '64px',
-                  padding: '24px',
-                  borderLeft: isTop3 ? `3px solid ${ACCENT_BORDERS[i]}` : '3px solid transparent',
-                  borderBottom: i < predictions.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
-                }}
-              >
-                {/* Position number */}
-                <span style={{
-                  fontSize: '22px',
-                  fontWeight: 800,
-                  color: positionColor(i),
-                  width: '32px',
-                  textAlign: 'right',
-                  flexShrink: 0,
-                  fontVariantNumeric: 'tabular-nums',
-                }}>
-                  {i + 1}
-                </span>
-
-                {/* Driver info + bar */}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                    <div>
-                      <div style={{ fontSize: '17px', fontWeight: 700, color: '#F4F4F5' }}>{p.driver}</div>
-                      <div style={{ fontSize: '13px', color: '#A1A1AA', marginTop: '1px' }}>{p.team}</div>
-                    </div>
-                    <span style={{ fontSize: '17px', fontWeight: 700, color: '#F4F4F5', fontVariantNumeric: 'tabular-nums', marginLeft: '12px', flexShrink: 0 }}>
-                      {pct}%
-                    </span>
-                  </div>
-                  <div style={{ height: '10px', width: '100%', backgroundColor: '#27272A', borderRadius: '999px', overflow: 'hidden' }}>
-                    <div style={{
-                      height: '100%',
-                      width: barWidth,
-                      backgroundColor: barColor(i),
-                      borderRadius: '999px',
-                      transition: 'width 0.5s ease',
-                    }} />
-                  </div>
-                </div>
-              </li>
-            )
-          })}
+          {predictions.map((p, i) => (
+            <PredictionRow
+              key={p.driver}
+              prediction={p}
+              index={i}
+              maxProb={maxProb}
+              isLast={i === predictions.length - 1}
+            />
+          ))}
         </ol>
 
         {/* Footer note */}

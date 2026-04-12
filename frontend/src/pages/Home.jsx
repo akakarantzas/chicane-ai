@@ -30,13 +30,22 @@ const RACES = [
 function RaceCard({ round, code, name, country, date, status, cardRef }) {
   const isCurrent   = status === 'current'
   const isCompleted = status === 'completed'
+  const [isHovered, setIsHovered] = useState(false)
+
   return (
     <div
       ref={cardRef}
-      className={`shrink-0 w-48 bg-[#141418] border rounded-xl px-6 py-6 flex flex-col gap-2 ${
+      className={`race-card home-race-card shrink-0 w-48 bg-[#141418] border rounded-xl px-6 py-6 flex flex-col gap-2 ${
         isCurrent ? 'border-[#E8002D]' : 'border-white/[0.06]'
       } ${isCompleted ? 'opacity-60' : 'opacity-100'}`}
-      style={isCurrent ? { boxShadow: '0 0 0 1px #E8002D, 0 4px 24px rgba(232, 0, 45, 0.35)' } : {}}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{
+        backgroundColor: isHovered ? '#1F1F24' : '#141418',
+        cursor: 'pointer',
+        transition: 'background-color 0.2s ease, border-color 0.2s ease',
+        ...(isCurrent ? { boxShadow: '0 0 0 1px #E8002D, 0 4px 24px rgba(232, 0, 45, 0.35)' } : {}),
+      }}
     >
       <div className="flex items-center justify-between">
         <span className="text-[#A1A1AA] font-medium" style={{ fontSize: '0.8rem' }}>R{round}</span>
@@ -45,6 +54,110 @@ function RaceCard({ round, code, name, country, date, status, cardRef }) {
       <p className="font-bold leading-snug text-[#F4F4F5]" style={{ fontSize: '1rem' }}>{name}</p>
       <p className="text-[#A1A1AA]" style={{ fontSize: '0.85rem' }}>{country}</p>
       <p className="text-[#A1A1AA] mt-auto" style={{ fontSize: '0.85rem' }}>{date}</p>
+    </div>
+  )
+}
+
+function CountdownCard({ value, label }) {
+  const [isHovered, setIsHovered] = useState(false)
+
+  return (
+    <div
+      className="interactive-card countdown-card"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{
+        backgroundColor: isHovered ? '#222228' : '#1A1A1F',
+        borderRadius: '12px',
+        padding: '24px',
+        textAlign: 'center',
+        borderTop: '2px solid #E8002D',
+        minHeight: '120px',
+        transition: 'background-color 0.2s ease',
+      }}
+    >
+      <div className="countdown-value" style={{ fontSize: '52px', fontWeight: '700', color: '#F4F4F5', lineHeight: '1' }}>
+        {String(value).padStart(2, '0')}
+      </div>
+      <div style={{ fontSize: '11px', color: '#A1A1AA', marginTop: '8px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+        {label}
+      </div>
+    </div>
+  )
+}
+
+function LatestPredictionCard({ prediction, index }) {
+  const [isHovered, setIsHovered] = useState(false)
+  const pct = (prediction.probability * 100).toFixed(1)
+  const barWidth = `${(prediction.probability / TOP3[0].probability) * 100}%`
+  const accentColor = BAR_COLORS[index]
+
+  return (
+    <div
+      className="latest-prediction-row"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{
+        backgroundColor: isHovered ? '#222228' : '#1A1A1F',
+        borderRadius: '12px',
+        padding: '24px',
+        marginBottom: '10px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '16px',
+        borderLeft: `3px solid ${accentColor}`,
+        transition: 'background-color 0.2s ease',
+      }}
+    >
+      <span style={{ fontSize: '28px', fontWeight: 800, color: accentColor, flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>{index + 1}</span>
+      <span style={{ fontSize: '17px', fontWeight: 700, color: '#F4F4F5', flex: 1 }}>{prediction.driver}</span>
+      <div className="latest-bar" style={{ width: '120px', height: '4px', backgroundColor: '#27272A', borderRadius: '2px', overflow: 'hidden', flexShrink: 0 }}>
+        <div style={{ height: '100%', width: barWidth, backgroundColor: accentColor, borderRadius: '2px' }} />
+      </div>
+      <span style={{ fontSize: '17px', fontWeight: 700, color: '#F4F4F5', minWidth: '48px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{pct}%</span>
+    </div>
+  )
+}
+
+function StatCard({ number, label }) {
+  const [isHovered, setIsHovered] = useState(false)
+
+  return (
+    <div
+      className="interactive-card"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{
+        backgroundColor: isHovered ? '#222228' : '#1A1A1F',
+        borderRadius: '12px',
+        padding: '24px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '140px',
+        position: 'relative',
+        overflow: 'hidden',
+        borderTop: '2px solid #E8002D',
+        transition: 'background-color 0.2s ease',
+      }}
+    >
+      <span style={{
+        fontSize: '48px',
+        fontWeight: '700',
+        color: '#F4F4F5',
+        lineHeight: '1',
+        position: 'relative',
+        zIndex: 1,
+      }}>{number}</span>
+      <span style={{
+        fontSize: '14px',
+        color: '#A1A1AA',
+        marginTop: '10px',
+        position: 'relative',
+        zIndex: 1,
+        letterSpacing: '0.05em',
+      }}>{label}</span>
     </div>
   )
 }
@@ -115,34 +228,33 @@ export default function Home({ onNavigate }) {
     <div className="min-h-screen bg-[#0C0C0E] text-[#F4F4F5] flex flex-col">
 
       {/* Navbar */}
-      <nav
-        className="relative z-10 border-b border-white/[0.06] px-6"
-        style={{ backgroundColor: 'transparent' }}
-      >
-        <div className="flex items-center h-16 max-w-7xl mx-auto">
+      <nav className="app-nav">
+        <div className="app-nav-inner">
 
           {/* Left: logo */}
-          <div className="flex-1 flex items-center">
-            <img src="/logo-mark.png" alt="" style={{ height: '60px', width: '60px', objectFit: 'contain', marginRight: '-14px' }} />
-            <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontStyle: 'italic', letterSpacing: '-0.05em', fontSize: '1.9rem', color: '#F4F4F5' }}>Chicane.ai</span>
+          <div className="brand-wrap">
+            <button onClick={() => onNavigate('home')} className="brand-button" aria-label="Go to home">
+              <img src="/logo-mark.png" alt="" className="brand-logo" />
+              <span className="brand-wordmark">Chicane.ai</span>
+            </button>
           </div>
 
           {/* Center: nav links */}
-          <div className="flex items-center gap-8 text-[#A1A1AA]" style={{ fontSize: '1.2rem', fontWeight: 500 }}>
-            <button onClick={() => onNavigate('predictions')} className="hover:text-[#F4F4F5] transition-colors">Predictions</button>
-            <button onClick={() => onNavigate('history')} className="hover:text-[#F4F4F5] transition-colors">History</button>
-            <button onClick={() => onNavigate('season')} className="hover:text-[#F4F4F5] transition-colors">Calendar</button>
+          <div className="nav-links">
+            <button onClick={() => onNavigate('predictions')} className="nav-link">Predictions</button>
+            <button onClick={() => onNavigate('history')} className="nav-link">History</button>
+            <button onClick={() => onNavigate('season')} className="nav-link">Calendar</button>
 
           </div>
 
           {/* Right: spacer */}
-          <div className="flex-1" />
+          <div className="nav-spacer flex-1" />
 
         </div>
       </nav>
 
       {/* Hero */}
-      <section className="flex-1 flex flex-col items-center justify-center text-center px-6" style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden', backgroundColor: '#0C0C0E', paddingBottom: '80px' }}>
+      <section className="hero-section flex-1 flex flex-col items-center justify-center text-center px-6" style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden', backgroundColor: '#0C0C0E', paddingBottom: '80px' }}>
         {/* Background video */}
         <video
           src="/hero-video.mp4"
@@ -155,13 +267,13 @@ export default function Home({ onNavigate }) {
         {/* Dark overlay */}
         <div style={{ position: 'absolute', inset: 0, zIndex: 1, background: 'linear-gradient(to bottom, rgba(12,12,14,0.4) 0%, rgba(12,12,14,0.8) 100%)' }} />
         {/* Content */}
-        <div className="relative max-w-2xl mx-auto space-y-6" style={{ zIndex: 2 }}>
+        <div className="relative max-w-2xl mx-auto space-y-6" style={{ zIndex: 2, paddingTop: '80px' }}>
           {/* Badge */}
           <span className="inline-flex items-center bg-green-900/40 text-green-400 font-medium rounded-full border border-green-800/50" style={{ fontSize: '0.9rem', padding: '6px 14px' }}>
             Miami GP predictions now live!
           </span>
 
-          <h1 className="tracking-tight" style={{ fontSize: '4.5rem', fontWeight: 800, lineHeight: 1.1 }}>
+          <h1 className="hero-title tracking-tight">
             Predict. Verify. Repeat.
           </h1>
 
@@ -169,12 +281,10 @@ export default function Home({ onNavigate }) {
             AI-powered F1 predictions updated every race weekend.
           </p>
 
-          <div className="flex items-center justify-center gap-3 pt-2">
+          <div className="hero-actions flex items-center justify-center gap-3 pt-2">
             <button
               onClick={() => onNavigate('predictions')}
-              style={{ height: '44px', padding: '0 20px', borderRadius: '8px', fontSize: '15px', fontWeight: 600, backgroundColor: '#E8002D', color: 'white', cursor: 'pointer', border: 'none', transition: 'background-color 0.2s' }}
-              onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#ff1a3d' }}
-              onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#E8002D' }}
+              className="primary-action"
             >
               See predictions
             </button>
@@ -183,55 +293,39 @@ export default function Home({ onNavigate }) {
       </section>
 
       {/* Next Race countdown */}
-      <section>
-        <div style={{ padding: '80px 0', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-          <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 32px' }}>
+      <section className="section-band">
+        <div className="section-shell">
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px' }}>
               <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#E8002D' }}></div>
               <span style={{ fontSize: '13px', fontWeight: 500, color: '#A1A1AA', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Next Race</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
               {/* Countdown grid */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 120px)', gap: '20px', justifyContent: 'center', marginBottom: '32px' }}>
+              <div className="countdown-grid">
                 {[
                   { value: days,    label: 'Days'    },
                   { value: hours,   label: 'Hours'   },
                   { value: minutes, label: 'Minutes' },
                   { value: seconds, label: 'Seconds' },
                 ].map((item) => (
-                  <div key={item.label} style={{
-                    backgroundColor: '#1A1A1F',
-                    borderRadius: '12px',
-                    padding: '24px',
-                    textAlign: 'center',
-                    borderTop: '2px solid #E8002D',
-                    minHeight: '120px',
-                  }}>
-                    <div style={{ fontSize: '52px', fontWeight: '700', color: '#F4F4F5', lineHeight: '1' }}>
-                      {String(item.value).padStart(2, '0')}
-                    </div>
-                    <div style={{ fontSize: '11px', color: '#A1A1AA', marginTop: '8px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-                      {item.label}
-                    </div>
-                  </div>
+                  <CountdownCard key={item.label} {...item} />
                 ))}
               </div>
               {/* Race info */}
               <div style={{ fontSize: '13px', color: '#E8002D', fontWeight: '600', letterSpacing: '0.08em', marginBottom: '12px', textTransform: 'uppercase' }}>Round 6 · 2026</div>
               <h2 style={{ fontSize: '36px', fontWeight: '700', color: '#F4F4F5', lineHeight: '1.1', margin: '0 0 12px 0' }}>Miami Grand Prix</h2>
               <p style={{ fontSize: '16px', color: '#A1A1AA', margin: '0 0 24px 0' }}>Miami International Autodrome · May 3, 2026</p>
-              <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+              <div className="race-meta-pills" style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
                 <span style={{ backgroundColor: 'rgba(232,0,45,0.1)', color: '#E8002D', border: '1px solid rgba(232,0,45,0.2)', borderRadius: '6px', padding: '6px 14px', fontSize: '13px', fontWeight: '600' }}>Pre-Qualifying</span>
                 <span style={{ backgroundColor: 'rgba(255,255,255,0.05)', color: '#A1A1AA', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '6px', padding: '6px 14px', fontSize: '13px' }}>Miami · US</span>
               </div>
             </div>
-          </div>
         </div>
       </section>
 
       {/* 2026 Calendar */}
-      <section style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '80px 32px' }}>
+      <section className="section-band">
+        <div className="section-shell">
           <h2 style={{ fontSize: '30px', fontWeight: 700, color: '#F4F4F5', marginBottom: '32px' }}>
             Race Calendar
           </h2>
@@ -246,8 +340,8 @@ export default function Home({ onNavigate }) {
       </section>
 
       {/* Latest Prediction */}
-      <section style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '80px 32px' }}>
+      <section className="section-band">
+        <div className="section-shell">
 
           {/* Section label */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
@@ -257,48 +351,21 @@ export default function Home({ onNavigate }) {
           <p style={{ fontSize: '14px', color: '#A1A1AA', marginBottom: '24px' }}>Miami Grand Prix · Pre-qualifying</p>
 
           {/* Driver cards */}
-          {TOP3.map((p, i) => {
-            const pct = (p.probability * 100).toFixed(1)
-            const barWidth = `${(p.probability / TOP3[0].probability) * 100}%`
-            const accentColor = BAR_COLORS[i]
-            return (
-              <div key={p.driver} style={{
-                backgroundColor: '#1A1A1F',
-                borderRadius: '12px',
-                padding: '24px',
-                marginBottom: '10px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '16px',
-                borderLeft: `3px solid ${accentColor}`,
-              }}>
-                <span style={{ fontSize: '28px', fontWeight: 800, color: accentColor, flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>{i + 1}</span>
-                <span style={{ fontSize: '17px', fontWeight: 700, color: '#F4F4F5', flex: 1 }}>{p.driver}</span>
-                <div style={{ width: '120px', height: '4px', backgroundColor: '#27272A', borderRadius: '2px', overflow: 'hidden', flexShrink: 0 }}>
-                  <div style={{ height: '100%', width: barWidth, backgroundColor: accentColor, borderRadius: '2px' }} />
-                </div>
-                <span style={{ fontSize: '17px', fontWeight: 700, color: '#F4F4F5', minWidth: '48px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{pct}%</span>
-              </div>
-            )
-          })}
+          {TOP3.map((p, i) => (
+            <LatestPredictionCard key={p.driver} prediction={p} index={i} />
+          ))}
 
           <button
             onClick={() => onNavigate('predictions')}
-            style={{
-              width: '100%',
-              height: '44px',
-              backgroundColor: 'transparent',
-              border: '1px solid rgba(255,255,255,0.1)',
-              color: '#A1A1AA',
-              padding: '0 20px',
-              borderRadius: '8px',
-              fontSize: '15px',
-              cursor: 'pointer',
-              marginTop: '4px',
-              transition: 'background-color 0.2s, color 0.2s',
+            className="secondary-action"
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#1A1A1F'
+              e.currentTarget.style.color = '#F4F4F5'
             }}
-            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#1A1A1F'; e.currentTarget.style.color = '#F4F4F5' }}
-            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#A1A1AA' }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent'
+              e.currentTarget.style.color = '#A1A1AA'
+            }}
           >
             View full predictions →
           </button>
@@ -306,48 +373,17 @@ export default function Home({ onNavigate }) {
       </section>
 
       {/* Season stats */}
-      <section style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 32px' }}>
-          <div style={{ padding: '80px 0' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+      <section className="section-band">
+        <div className="section-shell">
+          <div className="stats-grid">
               {[
                 { number: '24', label: 'Races' },
                 { number: '11', label: 'Teams' },
                 { number: '22', label: 'Drivers' },
                 { number: '6', label: 'Sprints' },
               ].map((stat) => (
-                <div key={stat.label} style={{
-                  backgroundColor: '#1A1A1F',
-                  borderRadius: '12px',
-                  padding: '24px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  minHeight: '140px',
-                  position: 'relative',
-                  overflow: 'hidden',
-                  borderTop: '2px solid #E8002D',
-                }}>
-                  <span style={{
-                    fontSize: '48px',
-                    fontWeight: '700',
-                    color: '#F4F4F5',
-                    lineHeight: '1',
-                    position: 'relative',
-                    zIndex: 1,
-                  }}>{stat.number}</span>
-                  <span style={{
-                    fontSize: '14px',
-                    color: '#A1A1AA',
-                    marginTop: '10px',
-                    position: 'relative',
-                    zIndex: 1,
-                    letterSpacing: '0.05em',
-                  }}>{stat.label}</span>
-                </div>
+                <StatCard key={stat.label} {...stat} />
               ))}
-            </div>
           </div>
         </div>
       </section>
