@@ -44,7 +44,7 @@ button:focus-visible {
 .app-nav-inner {
   display: flex;
   align-items: center;
-  min-height: 64px;
+  min-height: 52px;
   max-width: 1280px;
   margin: 0 auto;
 }
@@ -70,10 +70,10 @@ button:focus-visible {
 }
 
 .brand-logo {
-  height: 60px;
-  width: 60px;
+  height: 44px;
+  width: 44px;
   object-fit: contain;
-  margin-right: -14px;
+  margin-right: -10px;
   flex-shrink: 0;
 }
 
@@ -82,7 +82,7 @@ button:focus-visible {
   font-weight: 600;
   font-style: italic;
   letter-spacing: -0.05em;
-  font-size: 1.9rem;
+  font-size: 1.45rem;
   color: #F4F4F5;
   white-space: nowrap;
 }
@@ -90,9 +90,9 @@ button:focus-visible {
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 32px;
+  gap: 24px;
   color: #A1A1AA;
-  font-size: 1.2rem;
+  font-size: 0.95rem;
   font-weight: 500;
 }
 
@@ -281,13 +281,13 @@ button:active { transform: translateY(0px); opacity: 1; }
   }
 
   .brand-logo {
-    height: 48px;
-    width: 48px;
-    margin-right: -10px;
+    height: 36px;
+    width: 36px;
+    margin-right: -8px;
   }
 
   .brand-wordmark {
-    font-size: 1.45rem;
+    font-size: 1.15rem;
   }
 
   .nav-links {

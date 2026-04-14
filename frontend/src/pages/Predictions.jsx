@@ -175,7 +175,7 @@ export default function Predictions({ onNavigate }) {
 
       {/* Navbar */}
       <nav className="app-nav" style={{ padding: isMobile ? '0 16px' : '0 24px' }}>
-        <div className="app-nav-inner" style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: '64px', gap: '16px' }}>
+        <div className="app-nav-inner" style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: '52px', gap: '16px' }}>
           <div className="brand-wrap" style={{ flex: isMobile ? '0 1 auto' : 1 }}>
             <button onClick={() => onNavigate?.('home')} className="brand-button">
               <img src="/logo-mark.png" alt="" className="brand-logo" />
