@@ -43,6 +43,37 @@ export default function AnimatedCircuit({
       role="img"
       aria-label="Animated Miami GP circuit marker"
     >
+      <path
+        d={path}
+        stroke="rgba(232, 0, 45, 0.22)"
+        strokeWidth="18"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+        style={{ filter: 'blur(7px)' }}
+      />
+      <path
+        d={path}
+        stroke="rgba(255, 245, 245, 0.24)"
+        strokeWidth="10"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+        style={{
+          filter: 'drop-shadow(0 0 4px rgba(255,245,245,0.28)) drop-shadow(0 0 12px rgba(232,0,45,0.42))',
+        }}
+      />
+      <path
+        d={path}
+        stroke="#FFF5F5"
+        strokeWidth="4.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+        style={{
+          filter: 'drop-shadow(0 0 3px rgba(255,245,245,0.42)) drop-shadow(0 0 7px rgba(232,0,45,0.72)) drop-shadow(0 0 15px rgba(232,0,45,0.38))',
+        }}
+      />
       {/* Geometry path used for getTotalLength/getPointAtLength only. */}
       <path
         ref={pathRef}

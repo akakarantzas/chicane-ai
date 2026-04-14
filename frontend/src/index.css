@@ -282,7 +282,7 @@ button:focus-visible {
 }
 
 .circuit-base-image {
-  opacity: 0.88;
+  opacity: 0;
   filter: none;
 }
 
@@ -634,7 +634,11 @@ button:focus-visible {
   position: relative;
   overflow: hidden;
   background:
+    radial-gradient(ellipse 72% 64% at 50% 38%, rgba(12,12,14,0) 0%, rgba(12,12,14,0) 42%, rgba(12,12,14,0.68) 78%, #0C0C0E 100%),
+    linear-gradient(rgba(244,244,245,0.026) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(244,244,245,0.026) 1px, transparent 1px),
     linear-gradient(145deg, #0C0C0E 0%, #0C0C0E 58%, #1A1A1F 100%);
+  background-size: auto, 44px 44px, 44px 44px, auto;
 }
 
 .contact-shell {
@@ -824,20 +828,21 @@ button:focus-visible {
 }
 
 .contact-chip {
-  min-height: 36px;
-  padding: 0 14px;
+  min-height: auto;
+  padding: 6px 14px;
   border-radius: 8px;
-  background: #27272A;
-  border: 1px solid rgba(244,244,245,0.12);
-  color: #F4F4F5;
-  font-size: 14px;
-  font-weight: 700;
+  background: rgba(232,0,45,0.1);
+  border: 1px solid rgba(232,0,45,0.34);
+  color: #E8002D;
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .contact-chip:hover {
-  border-color: rgba(232,0,45,0.5);
-  background: #27272A;
-  color: #F4F4F5;
+  border-color: #E8002D;
+  background: rgba(232,0,45,0.16);
+  color: #E8002D;
+  box-shadow: 0 0 14px rgba(232,0,45,0.18);
 }
 
 .calendar-scroll::-webkit-scrollbar {
