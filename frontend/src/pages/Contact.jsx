@@ -1,5 +1,12 @@
-
 import { useEffect, useState } from 'react'
+
+const EMAIL = 'a.kakarantzas@acg.edu'
+const FEATURE_CHIPS = [
+  'Lap time comparison',
+  'Fantasy optimizer',
+  'Live race updates',
+  'Driver career stats',
+]
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768)
@@ -44,46 +51,30 @@ function MobileNavDropdown({ onNavigate }) {
   return (
     <div style={{ width: '100%', borderTop: '1px solid rgba(255,255,255,0.06)', padding: '8px 0 12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
       <button onClick={() => onNavigate('predictions')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>Predictions</button>
-      <button onClick={() => onNavigate('history')} className="nav-link nav-link-active" style={{ width: '100%', textAlign: 'left', padding: '12px 4px' }}>History</button>
+      <button onClick={() => onNavigate('history')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>History</button>
       <button onClick={() => onNavigate('season')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>Calendar</button>
-      <button onClick={() => onNavigate('contact')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>Contact</button>
+      <button onClick={() => onNavigate('contact')} className="nav-link nav-link-active" style={{ width: '100%', textAlign: 'left', padding: '12px 4px' }}>Contact</button>
     </div>
   )
 }
 
-function HistoryCard({ children }) {
-  const [isHovered, setIsHovered] = useState(false)
-
-  return (
-    <div
-      className="interactive-card border border-dashed border-white/[0.06] rounded-xl px-6 py-10 text-center"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      style={{
-        backgroundColor: isHovered ? '#27272A' : '#1A1A1F',
-        transition: 'background-color 0.2s ease',
-      }}
-    >
-      {children}
-    </div>
-  )
-}
-
-export default function History({ onNavigate }) {
+export default function Contact({ onNavigate }) {
   const isMobile = useIsMobile()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [copied, setCopied] = useState(false)
+
+  const copyEmail = async () => {
+    try {
+      await navigator.clipboard.writeText(EMAIL)
+      setCopied(true)
+      window.setTimeout(() => setCopied(false), 1800)
+    } catch {
+      window.location.href = `mailto:${EMAIL}`
+    }
+  }
 
   return (
-    <div
-      className="page-bg relative min-h-screen text-[#F4F4F5] flex flex-col"
-      style={{
-        backgroundImage: 'url(/f1red.jpg)',
-      }}
-    >
-      {/* Dark overlay */}
-      <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: 'rgba(12,12,14,0.88)', zIndex: 0 }} />
-
-      {/* Navbar */}
+    <div className="contact-page min-h-screen text-[#F4F4F5] flex flex-col">
       <nav className="app-nav" style={{ padding: isMobile ? '0 16px' : '0 24px' }}>
         <div className="app-nav-inner" style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: '52px', gap: '16px' }}>
           <div className="brand-wrap" style={{ flex: isMobile ? '0 1 auto' : 1 }}>
@@ -94,10 +85,9 @@ export default function History({ onNavigate }) {
           </div>
           <div className="nav-links" style={{ display: isMobile ? 'none' : 'flex' }}>
             <button onClick={() => onNavigate('predictions')} className="nav-link">Predictions</button>
-            <button onClick={() => onNavigate('history')} className="nav-link nav-link-active">History</button>
+            <button onClick={() => onNavigate('history')} className="nav-link">History</button>
             <button onClick={() => onNavigate('season')} className="nav-link">Calendar</button>
-            <button onClick={() => onNavigate('contact')} className="nav-link">Contact</button>
-
+            <button onClick={() => onNavigate('contact')} className="nav-link nav-link-active">Contact</button>
           </div>
           {isMobile && (
             <HamburgerButton
@@ -110,28 +100,51 @@ export default function History({ onNavigate }) {
         {isMobile && isMenuOpen && <MobileNavDropdown onNavigate={onNavigate} />}
       </nav>
 
-      <main className="page-shell flex-1 px-6 relative" style={{ paddingLeft: isMobile ? '16px' : '32px', paddingRight: isMobile ? '16px' : '32px', paddingTop: isMobile ? '40px' : '64px' }}>
-        <div className="max-w-3xl mx-auto">
-
-          {/* Page header */}
-          <div className="mb-10">
-            <h1 className="page-title">Prediction History</h1>
-            <p className="text-[#A1A1AA] mt-2" style={{ fontSize: '15px' }}>Track record of AI predictions vs actual race results</p>
+      <main className="contact-shell">
+        <header className="contact-header">
+          <div className="contact-header-brand" aria-label="Chicane.ai">
+            <img src="/logo-mark.png" alt="" className="brand-logo" />
+            <span className="brand-wordmark">Chicane.ai</span>
           </div>
+          <h1>Get in touch</h1>
+          <p>Questions, feedback, or ideas for Chicane.ai.</p>
+        </header>
 
-          {/* Coming soon */}
-          <HistoryCard>
-            <p className="text-[#A1A1AA]" style={{ fontSize: '15px' }}>More race predictions coming each weekend</p>
-          </HistoryCard>
+        <section className="contact-stack" aria-label="Contact options">
+          <article className="contact-card contact-card-row">
+            <div className="contact-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M4.75 6.75h14.5v10.5H4.75V6.75Z" stroke="currentColor" strokeWidth="1.8" />
+                <path d="m5.5 7.5 6.5 5 6.5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+            <div className="contact-card-copy">
+              <span>Email</span>
+              <p>{EMAIL}</p>
+            </div>
+            <button className="contact-action" onClick={copyEmail}>
+              {copied ? 'Copied' : 'Copy email'}
+            </button>
+          </article>
 
-        </div>
+          <article className="contact-card contact-feature-card">
+            <div className="contact-feature-heading">
+              <span className="contact-status-dot" aria-hidden="true" />
+              <div>
+                <h2>Feature requests</h2>
+                <p>Suggest improvements, new F1 tools, or prediction views that would make the product more useful.</p>
+              </div>
+            </div>
+            <div className="contact-chip-grid">
+              {FEATURE_CHIPS.map((chip) => (
+                <button key={chip} className="contact-chip" type="button">
+                  {chip}
+                </button>
+              ))}
+            </div>
+          </article>
+        </section>
       </main>
-
-      {/* Footer */}
-      <footer className="border-t border-white/[0.06] relative" style={{ zIndex: 1, padding: '28px 32px' }}>
-        <p style={{ fontSize: '14px', color: '#A1A1AA', textAlign: 'center', margin: 0 }}>© 2026 Chicane.ai, All rights reserved.</p>
-      </footer>
-
     </div>
   )
 }

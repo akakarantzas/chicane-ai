@@ -72,6 +72,7 @@ function MobileNavDropdown({ onNavigate }) {
       <button onClick={() => onNavigate('predictions')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>Predictions</button>
       <button onClick={() => onNavigate('history')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>History</button>
       <button onClick={() => onNavigate('season')} className="nav-link nav-link-active" style={{ width: '100%', textAlign: 'left', padding: '12px 4px' }}>Calendar</button>
+      <button onClick={() => onNavigate('contact')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>Contact</button>
     </div>
   )
 }
@@ -84,18 +85,18 @@ function RaceCard({ round, code, name, country, date, status, cardRef, isMobile 
   return (
     <div
       ref={cardRef}
-      className={`race-card season-race-card shrink-0 w-64 bg-[#141418] border rounded-xl px-6 py-6 flex flex-col gap-3 ${
+      className={`race-card season-race-card shrink-0 w-64 bg-[#1A1A1F] border rounded-xl px-6 py-6 flex flex-col gap-3 ${
         isCurrent ? 'border-[#E8002D]' : 'border-white/[0.06]'
       } ${isCompleted ? 'opacity-60' : 'opacity-100'}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{
-        backgroundColor: isHovered ? '#1F1F24' : '#141418',
+        backgroundColor: isHovered ? '#27272A' : '#1A1A1F',
         borderColor: isHovered ? 'rgba(232, 0, 45, 0.35)' : undefined,
         width: isMobile ? '224px' : '256px',
         cursor: 'pointer',
         transition: 'background-color 0.2s ease, border-color 0.2s ease',
-        ...(isCurrent ? { boxShadow: '0 0 0 1px #E8002D, 0 4px 24px rgba(232, 0, 45, 0.35)' } : {}),
+        ...(isCurrent ? { boxShadow: '0 12px 28px rgba(0,0,0,0.34)' } : {}),
       }}
     >
       <div className="flex items-center justify-between">
@@ -126,7 +127,7 @@ export default function Season({ onNavigate }) {
       }}
     >
       {/* Dark overlay */}
-      <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to bottom, rgba(12,12,14,0.72) 0%, rgba(12,12,14,0.88) 50%, rgba(12,12,14,0.97) 100%)', zIndex: 0 }} />
+      <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: 'rgba(12,12,14,0.88)', zIndex: 0 }} />
 
       {/* Navbar */}
       <nav className="app-nav" style={{ padding: isMobile ? '0 16px' : '0 24px' }}>
@@ -141,6 +142,7 @@ export default function Season({ onNavigate }) {
             <button onClick={() => onNavigate('predictions')} className="nav-link">Predictions</button>
             <button onClick={() => onNavigate('history')} className="nav-link">History</button>
             <button onClick={() => onNavigate('season')} className="nav-link nav-link-active">Calendar</button>
+            <button onClick={() => onNavigate('contact')} className="nav-link">Contact</button>
 
           </div>
           {isMobile && (
@@ -166,15 +168,15 @@ export default function Season({ onNavigate }) {
           {/* Legend */}
           <div className="season-legend flex items-center gap-6 mb-6 text-[#A1A1AA]" style={{ fontSize: '0.9rem' }}>
             <span className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-sm bg-[#141418] border border-[#E8002D] shrink-0" />
+              <span className="w-3 h-3 rounded-sm bg-[#1A1A1F] border border-[#E8002D] shrink-0" />
               Current race
             </span>
             <span className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-sm bg-[#141418] border border-white/[0.06] opacity-60 shrink-0" />
+              <span className="w-3 h-3 rounded-sm bg-[#1A1A1F] border border-white/[0.06] opacity-60 shrink-0" />
               Completed
             </span>
             <span className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-sm bg-[#141418] border border-white/[0.06] shrink-0" />
+              <span className="w-3 h-3 rounded-sm bg-[#1A1A1F] border border-white/[0.06] shrink-0" />
               Upcoming
             </span>
           </div>

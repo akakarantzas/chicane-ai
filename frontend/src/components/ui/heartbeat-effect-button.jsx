@@ -32,13 +32,13 @@ export default function ButtonHeartbeatEffectDemo({ onClick, children = 'See pre
           position: 'relative', zIndex: 1,
           height: '44px', padding: '0 20px', borderRadius: '8px',
           fontSize: '15px', fontWeight: 600,
-          backgroundColor: '#E8002D', color: 'white', border: 'none',
+          backgroundColor: '#E8002D', color: '#F4F4F5', border: 'none',
           cursor: 'pointer',
           transition: 'background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease',
           whiteSpace: 'nowrap',
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = '#ff1a3d'
+          e.currentTarget.style.backgroundColor = '#E8002D'
           e.currentTarget.style.transform = 'translateY(-1px)'
           e.currentTarget.style.boxShadow = '0 10px 24px rgba(232,0,45,0.25)'
         }}

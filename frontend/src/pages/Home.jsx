@@ -94,6 +94,7 @@ function MobileNavDropdown({ onNavigate }) {
       <button onClick={() => navigate('predictions')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>Predictions</button>
       <button onClick={() => navigate('history')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>History</button>
       <button onClick={() => navigate('season')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>Calendar</button>
+      <button onClick={() => navigate('contact')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>Contact</button>
     </div>
   )
 }
@@ -106,17 +107,13 @@ function RaceCard({ round, code, name, country, date, status, cardRef, isMobile 
   return (
     <div
       ref={cardRef}
-      className={`race-card home-race-card shrink-0 w-48 bg-[#141418] border rounded-xl px-6 py-6 flex flex-col gap-2 ${
-        isCurrent ? 'border-[#E8002D]' : 'border-white/[0.06]'
-      } ${isCompleted ? 'opacity-60' : 'opacity-100'}`}
+      className={`race-card premium-race-card home-race-card shrink-0 w-48 border px-6 py-6 flex flex-col gap-2 ${isCurrent ? 'premium-race-card-active' : ''} ${isCompleted ? 'opacity-60' : 'opacity-100'}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{
-        backgroundColor: isHovered ? '#1F1F24' : '#141418',
         width: isMobile ? '168px' : '192px',
         cursor: 'pointer',
-        transition: 'background-color 0.2s ease, border-color 0.2s ease',
-        ...(isCurrent ? { boxShadow: '0 0 0 1px #E8002D, 0 4px 24px rgba(232, 0, 45, 0.35)' } : {}),
+        transform: isHovered ? 'translateY(-4px)' : 'translateY(0)',
       }}
     >
       <div className="flex items-center justify-between">
@@ -135,20 +132,17 @@ function CountdownCard({ value, label, isMobile }) {
 
   return (
     <div
-      className="interactive-card countdown-card"
+      className="interactive-card countdown-card premium-stat-card"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{
-        backgroundColor: isHovered ? '#222228' : '#1A1A1F',
-        borderRadius: '12px',
         padding: isMobile ? '12px' : '24px',
         textAlign: 'center',
-        borderTop: '2px solid #E8002D',
         minHeight: '120px',
-        transition: 'background-color 0.2s ease',
+        transform: isHovered ? 'translateY(-3px)' : 'translateY(0)',
       }}
     >
-      <div className="countdown-value" style={{ fontSize: '52px', fontWeight: '700', color: '#F4F4F5', lineHeight: '1' }}>
+      <div className="countdown-value premium-number" style={{ fontSize: '52px', fontWeight: '700', lineHeight: '1' }}>
         {String(value).padStart(2, '0')}
       </div>
       <div style={{ fontSize: '11px', color: '#A1A1AA', marginTop: '8px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
@@ -162,29 +156,28 @@ function LatestPredictionCard({ prediction, index, isMobile }) {
   const [isHovered, setIsHovered] = useState(false)
   const pct = (prediction.probability * 100).toFixed(1)
   const barWidth = `${(prediction.probability / TOP3[0].probability) * 100}%`
-  const accentColor = BAR_COLORS[index]
+  const barColor = BAR_COLORS[index]
+  const positionColor = BAR_COLORS[index]
 
   return (
     <div
-      className="latest-prediction-row"
+      className="latest-prediction-row premium-prediction-row"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{
-        backgroundColor: isHovered ? '#222228' : '#1A1A1F',
-        borderRadius: '12px',
         padding: isMobile ? '16px' : '24px',
         marginBottom: '10px',
         display: 'flex',
         alignItems: 'center',
         gap: '16px',
-        borderLeft: `3px solid ${accentColor}`,
-        transition: 'background-color 0.2s ease',
+        borderLeft: '3px solid #E8002D',
+        transform: isHovered ? 'translateX(4px)' : 'translateX(0)',
       }}
     >
-      <span style={{ fontSize: '28px', fontWeight: 800, color: accentColor, flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>{index + 1}</span>
+      <span style={{ fontSize: '28px', fontWeight: 800, color: positionColor, flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>{index + 1}</span>
       <span style={{ fontSize: '17px', fontWeight: 700, color: '#F4F4F5', flex: 1 }}>{prediction.driver}</span>
-      <div className="latest-bar" style={{ width: '120px', height: '4px', backgroundColor: '#27272A', borderRadius: '2px', overflow: 'hidden', flexShrink: 0 }}>
-        <div style={{ height: '100%', width: barWidth, backgroundColor: accentColor, borderRadius: '2px' }} />
+      <div className="latest-bar premium-bar-track" style={{ width: '120px', height: '5px', flexShrink: 0 }}>
+        <div className="premium-bar-fill" style={{ width: barWidth, '--bar-start': barColor }} />
       </div>
       <span style={{ fontSize: '17px', fontWeight: 700, color: '#F4F4F5', minWidth: '48px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{pct}%</span>
     </div>
@@ -196,12 +189,10 @@ function StatCard({ number, label }) {
 
   return (
     <div
-      className="interactive-card"
+      className="interactive-card stat-card premium-stat-card"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{
-        backgroundColor: isHovered ? '#222228' : '#1A1A1F',
-        borderRadius: '12px',
         padding: '24px',
         display: 'flex',
         flexDirection: 'column',
@@ -210,14 +201,12 @@ function StatCard({ number, label }) {
         minHeight: '140px',
         position: 'relative',
         overflow: 'hidden',
-        borderTop: '2px solid #E8002D',
-        transition: 'background-color 0.2s ease',
+        transform: isHovered ? 'translateY(-3px)' : 'translateY(0)',
       }}
     >
-      <span style={{
+      <span className="premium-number" style={{
         fontSize: '48px',
         fontWeight: '700',
-        color: '#F4F4F5',
         lineHeight: '1',
         position: 'relative',
         zIndex: 1,
@@ -280,7 +269,7 @@ export default function Home({ onNavigate }) {
   }, [])
 
   return (
-    <div className="min-h-screen bg-[#0C0C0E] text-[#F4F4F5] flex flex-col">
+    <div className="home-page min-h-screen bg-[#0C0C0E] text-[#F4F4F5] flex flex-col">
 
       {/* Navbar */}
       <nav className="app-nav hero-nav" style={{ padding: isMobile ? '0 16px' : '0 24px' }}>
@@ -299,6 +288,7 @@ export default function Home({ onNavigate }) {
             <button onClick={() => onNavigate('predictions')} className="nav-link">Predictions</button>
             <button onClick={() => onNavigate('history')} className="nav-link">History</button>
             <button onClick={() => onNavigate('season')} className="nav-link">Calendar</button>
+            <button onClick={() => onNavigate('contact')} className="nav-link">Contact</button>
 
           </div>
 
@@ -317,7 +307,7 @@ export default function Home({ onNavigate }) {
       </nav>
 
       {/* Hero */}
-      <section className="hero-section flex-1 flex flex-col items-center justify-center text-center px-6" style={{ position: 'relative', minHeight: '100vh', height: '100vh', overflow: 'hidden', backgroundColor: '#0C0C0E', paddingTop: isMobile ? '84px' : '96px', paddingBottom: isMobile ? '72px' : '96px', paddingLeft: isMobile ? '20px' : '80px', paddingRight: isMobile ? '20px' : '80px', textAlign: 'center' }}>
+      <section className="hero-section home-hero flex-1 flex flex-col items-center justify-center text-center px-6" style={{ position: 'relative', minHeight: '100vh', height: '100vh', overflow: 'hidden', backgroundColor: '#0C0C0E', paddingTop: isMobile ? '84px' : '96px', paddingBottom: isMobile ? '72px' : '96px', paddingLeft: isMobile ? '20px' : '80px', paddingRight: isMobile ? '20px' : '80px', textAlign: 'center' }}>
         {/* Background video */}
         <video
           src="/hero-video.mp4"
@@ -325,14 +315,14 @@ export default function Home({ onNavigate }) {
           muted={true}
           loop={true}
           playsInline={true}
-          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '50% 42%', zIndex: 0, opacity: 0.32 }}
+          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '50% 42%', zIndex: 0, opacity: 0.36 }}
         />
         {/* Dark overlay */}
-        <div style={{ position: 'absolute', inset: 0, zIndex: 1, background: 'linear-gradient(to bottom, rgba(12,12,14,0.22) 0%, rgba(12,12,14,0.5) 48%, rgba(12,12,14,0.88) 100%)' }} />
+        <div className="hero-lighting" style={{ position: 'absolute', inset: 0, zIndex: 1 }} />
         {/* Content */}
         <div className="hero-content relative max-w-2xl mx-auto space-y-6" style={{ zIndex: 2, textAlign: 'center' }}>
           {/* Badge */}
-          <span className="inline-flex items-center bg-green-900/40 text-green-400 font-medium rounded-full border border-green-800/50" style={{ fontSize: '0.9rem', padding: '6px 14px' }}>
+          <span className="hero-badge inline-flex items-center font-medium rounded-full" style={{ fontSize: '0.9rem', padding: '6px 14px' }}>
             Miami GP predictions now live!
           </span>
 
@@ -340,7 +330,7 @@ export default function Home({ onNavigate }) {
             Predict. Verify. Repeat.
           </h1>
 
-          <p className="leading-relaxed" style={{ fontSize: '16px', color: '#A1A1AA' }}>
+          <p className="hero-subcopy leading-relaxed" style={{ fontSize: '16px', color: '#A1A1AA' }}>
             AI-powered F1 predictions updated every race weekend.
           </p>
 
@@ -389,7 +379,7 @@ export default function Home({ onNavigate }) {
       {/* 2026 Calendar */}
       <section className="section-band" style={{ paddingTop: isMobile ? '40px' : '80px', paddingBottom: isMobile ? '40px' : '80px' }}>
         <div className="section-shell" style={{ padding: isMobile ? '0 16px' : '0 32px' }}>
-          <h2 style={{ fontSize: '30px', fontWeight: 700, color: '#F4F4F5', marginBottom: '32px' }}>
+          <h2 className="section-heading" style={{ fontSize: '30px', fontWeight: 700, color: '#F4F4F5', marginBottom: '32px' }}>
             Race Calendar
           </h2>
           <div className="calendar-scroll overflow-x-auto pb-2" ref={calendarScrollRef}>
@@ -409,7 +399,7 @@ export default function Home({ onNavigate }) {
           {/* Section label */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
             <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#E8002D', flexShrink: 0 }} />
-            <span style={{ fontSize: '13px', fontWeight: 500, color: '#A1A1AA', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Latest Prediction</span>
+            <span className="section-kicker" style={{ fontSize: '13px', fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Latest Prediction</span>
           </div>
           <p style={{ fontSize: '14px', color: '#A1A1AA', marginBottom: '24px' }}>Miami Grand Prix · Pre-qualifying</p>
 

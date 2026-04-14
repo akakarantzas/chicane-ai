@@ -59,12 +59,12 @@ export default function AnimatedCircuit({
         <circle
           r="5.8"
           fill="#E8002D"
-          stroke="rgba(255, 107, 53, 0.78)"
+          stroke="#E8002D"
           strokeWidth="1.3"
         />
         <circle
           r="2.8"
-          fill="#FF6B35"
+          fill="#E8002D"
           style={{
             filter: 'drop-shadow(0 0 6px rgba(232,0,45,0.55))',
           }}
