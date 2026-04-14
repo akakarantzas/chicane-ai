@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm create:*)"
+      "Bash(npm create:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)",
+      "Bash(npx shadcn@latest add https://21st.dev/r/shadcnspace/heartbeat-effect-button)",
+      "Bash(git checkout:*)"
     ]
   }
 }

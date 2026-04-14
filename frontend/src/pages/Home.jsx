@@ -283,7 +283,7 @@ export default function Home({ onNavigate }) {
     <div className="min-h-screen bg-[#0C0C0E] text-[#F4F4F5] flex flex-col">
 
       {/* Navbar */}
-      <nav className="app-nav" style={{ padding: isMobile ? '0 16px' : '0 24px' }}>
+      <nav className="app-nav hero-nav" style={{ padding: isMobile ? '0 16px' : '0 24px' }}>
         <div className="app-nav-inner" style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: '52px', gap: '16px' }}>
 
           {/* Left: logo */}
@@ -317,7 +317,7 @@ export default function Home({ onNavigate }) {
       </nav>
 
       {/* Hero */}
-      <section className="hero-section flex-1 flex flex-col items-center justify-center text-center px-6" style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden', backgroundColor: '#0C0C0E', paddingBottom: isMobile ? '40px' : '80px', paddingLeft: isMobile ? '20px' : '80px', paddingRight: isMobile ? '20px' : '80px', textAlign: 'center' }}>
+      <section className="hero-section flex-1 flex flex-col items-center justify-center text-center px-6" style={{ position: 'relative', minHeight: '100vh', height: '100vh', overflow: 'hidden', backgroundColor: '#0C0C0E', paddingTop: isMobile ? '84px' : '96px', paddingBottom: isMobile ? '72px' : '96px', paddingLeft: isMobile ? '20px' : '80px', paddingRight: isMobile ? '20px' : '80px', textAlign: 'center' }}>
         {/* Background video */}
         <video
           src="/hero-video.mp4"
@@ -325,12 +325,12 @@ export default function Home({ onNavigate }) {
           muted={true}
           loop={true}
           playsInline={true}
-          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 0, opacity: 0.35 }}
+          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '50% 42%', zIndex: 0, opacity: 0.32 }}
         />
         {/* Dark overlay */}
-        <div style={{ position: 'absolute', inset: 0, zIndex: 1, background: 'linear-gradient(to bottom, rgba(12,12,14,0.4) 0%, rgba(12,12,14,0.8) 100%)' }} />
+        <div style={{ position: 'absolute', inset: 0, zIndex: 1, background: 'linear-gradient(to bottom, rgba(12,12,14,0.22) 0%, rgba(12,12,14,0.5) 48%, rgba(12,12,14,0.88) 100%)' }} />
         {/* Content */}
-        <div className="relative max-w-2xl mx-auto space-y-6" style={{ zIndex: 2, paddingTop: '80px', textAlign: 'center' }}>
+        <div className="hero-content relative max-w-2xl mx-auto space-y-6" style={{ zIndex: 2, textAlign: 'center' }}>
           {/* Badge */}
           <span className="inline-flex items-center bg-green-900/40 text-green-400 font-medium rounded-full border border-green-800/50" style={{ fontSize: '0.9rem', padding: '6px 14px' }}>
             Miami GP predictions now live!
@@ -344,7 +344,7 @@ export default function Home({ onNavigate }) {
             AI-powered F1 predictions updated every race weekend.
           </p>
 
-          <div className="hero-actions flex items-center justify-center gap-3 pt-2">
+          <div className="hero-actions flex items-center justify-center gap-3">
             <button
               onClick={() => onNavigate('predictions')}
               className="primary-action"
@@ -353,6 +353,7 @@ export default function Home({ onNavigate }) {
             </button>
           </div>
         </div>
+
       </section>
 
       {/* Next Race countdown */}
