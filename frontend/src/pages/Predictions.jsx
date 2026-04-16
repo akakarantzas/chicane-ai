@@ -53,6 +53,7 @@ function MobileNavDropdown({ onNavigate }) {
   return (
     <div style={{ width: '100%', borderTop: '1px solid rgba(255,255,255,0.06)', padding: '8px 0 12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
       <button onClick={() => onNavigate?.('predictions')} className="nav-link nav-link-active" style={{ width: '100%', textAlign: 'left', padding: '12px 4px' }}>Predictions</button>
+      <button onClick={() => onNavigate?.('h2h')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>H2H</button>
       <button onClick={() => onNavigate?.('history')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>History</button>
       <button onClick={() => onNavigate?.('season')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>Calendar</button>
       <button onClick={() => onNavigate?.('contact')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>Contact</button>
@@ -65,6 +66,8 @@ function PredictionRow({ prediction, index, maxProb, isLast }) {
   const pct = (prediction.probability * 100).toFixed(1)
   const barWidth = `${(prediction.probability / maxProb) * 100}%`
   const isTop3 = index < 3
+  const rowDelay = `${index * 80}ms`
+  const barDelay = `${index * 80 + 220}ms`
 
   return (
     <li
@@ -72,22 +75,27 @@ function PredictionRow({ prediction, index, maxProb, isLast }) {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{
-        backgroundColor: isHovered ? '#27272A' : '#1A1A1F',
-        transform: isHovered ? 'translateY(-1px)' : 'translateY(0)',
+        backgroundColor: isHovered ? 'rgba(18,18,22,0.96)' : 'rgba(18,18,22,0.9)',
+        transform: isHovered ? 'translateY(-1px)' : undefined,
         borderLeft: isTop3 ? '3px solid #E8002D' : '3px solid transparent',
         borderBottom: !isLast ? '1px solid rgba(255,255,255,0.05)' : 'none',
-        transition: 'background-color 0.2s ease, transform 0.2s ease',
+        animationDelay: rowDelay,
       }}
     >
       {/* Position number */}
-      <span className="predictions-rank" style={{
+      <span className={`predictions-rank ${index < 3 ? 'predictions-rank-podium' : ''}`} style={{
         fontSize: '22px',
         fontWeight: 800,
         color: positionColor(index),
-        width: '32px',
-        textAlign: 'right',
+        width: '42px',
+        height: '42px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        textAlign: 'center',
         flexShrink: 0,
         fontVariantNumeric: 'tabular-nums',
+        '--rank-fill': positionColor(index),
       }}>
         {index + 1}
       </span>
@@ -104,10 +112,11 @@ function PredictionRow({ prediction, index, maxProb, isLast }) {
               className="predictions-bar-fill"
               style={{
                 height: '100%',
-                width: barWidth,
+                width: '0%',
+                '--bar-width': barWidth,
                 '--bar-start': barColor(index),
                 borderRadius: '999px',
-                transition: 'width 0.5s ease',
+                animationDelay: barDelay,
               }}
             />
           </div>
@@ -120,12 +129,13 @@ function PredictionRow({ prediction, index, maxProb, isLast }) {
   )
 }
 
-export default function Predictions({ onNavigate }) {
+export default function Predictions({ onNavigate, animationKey = 0 }) {
   const isMobile = useIsMobile()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [playAnimations, setPlayAnimations] = useState(false)
 
   useEffect(() => {
     fetch('http://localhost:8000/api/predictions/next-race')
@@ -142,6 +152,23 @@ export default function Predictions({ onNavigate }) {
         setLoading(false)
       })
   }, [])
+
+  useEffect(() => {
+    if (!data) return undefined
+
+    setPlayAnimations(false)
+    let secondFrame
+    const firstFrame = requestAnimationFrame(() => {
+      secondFrame = requestAnimationFrame(() => {
+        setPlayAnimations(true)
+      })
+    })
+
+    return () => {
+      cancelAnimationFrame(firstFrame)
+      if (secondFrame) cancelAnimationFrame(secondFrame)
+    }
+  }, [animationKey, data])
 
   if (loading) {
     return (
@@ -187,6 +214,7 @@ export default function Predictions({ onNavigate }) {
           </div>
           <div className="nav-links" style={{ display: isMobile ? 'none' : 'flex' }}>
             <button onClick={() => onNavigate?.('predictions')} className="nav-link nav-link-active">Predictions</button>
+            <button onClick={() => onNavigate?.('h2h')} className="nav-link">H2H</button>
             <button onClick={() => onNavigate?.('history')} className="nav-link">History</button>
             <button onClick={() => onNavigate?.('season')} className="nav-link">Calendar</button>
             <button onClick={() => onNavigate?.('contact')} className="nav-link">Contact</button>
@@ -245,10 +273,13 @@ export default function Predictions({ onNavigate }) {
             <span>Prediction</span>
           </div>
 
-          <ol className="predictions-page-list">
+          <ol
+            className={`predictions-page-list ${playAnimations ? 'predictions-animate-in' : 'predictions-animation-reset'}`}
+            key={`predictions-list-${animationKey}`}
+          >
             {predictions.map((p, i) => (
               <PredictionRow
-                key={p.driver}
+                key={`${animationKey}-${p.driver}`}
                 prediction={p}
                 index={i}
                 maxProb={maxProb}

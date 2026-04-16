@@ -23,7 +23,7 @@ export default function ButtonHeartbeatEffectDemo({ onClick, children = 'See pre
     <div style={{ position: 'relative', display: 'inline-flex' }}>
       <span aria-hidden="true" style={{
         position: 'absolute', inset: 0, borderRadius: '8px',
-        border: '1px solid rgba(232,0,45,0.6)', backgroundColor: 'transparent',
+        border: '1px solid rgba(232,0,45,0.82)', backgroundColor: 'rgba(232,0,45,0.05)',
         animation: 'heartbeat-ping 2s ease-out infinite',
       }} />
       <button

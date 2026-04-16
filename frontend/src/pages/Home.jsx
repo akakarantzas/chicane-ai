@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import NextRaceCircuitCard from '../components/NextRaceCircuitCard'
+import ButtonHeartbeatEffectDemo from '../components/ui/heartbeat-effect-button'
 import { nextRaceCircuit } from '../data/circuits'
-
 const RACES = [
   { round: 1,  code: 'AU', name: 'Australian GP',    country: 'Australia',     date: 'Mar 8',  status: 'completed' },
   { round: 2,  code: 'CN', name: 'Chinese GP',        country: 'China',         date: 'Mar 15', status: 'completed' },
@@ -92,6 +92,7 @@ function MobileNavDropdown({ onNavigate }) {
       gap: '4px',
     }}>
       <button onClick={() => navigate('predictions')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>Predictions</button>
+      <button onClick={() => navigate('h2h')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>H2H</button>
       <button onClick={() => navigate('history')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>History</button>
       <button onClick={() => navigate('season')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>Calendar</button>
       <button onClick={() => navigate('contact')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>Contact</button>
@@ -99,7 +100,7 @@ function MobileNavDropdown({ onNavigate }) {
   )
 }
 
-function RaceCard({ round, code, name, country, date, status, cardRef, isMobile }) {
+function RaceCard({ name, country, date, status, cardRef }) {
   const isCurrent   = status === 'current'
   const isCompleted = status === 'completed'
   const [isHovered, setIsHovered] = useState(false)
@@ -107,22 +108,16 @@ function RaceCard({ round, code, name, country, date, status, cardRef, isMobile 
   return (
     <div
       ref={cardRef}
-      className={`race-card premium-race-card home-race-card shrink-0 w-48 border px-6 py-6 flex flex-col gap-2 ${isCurrent ? 'premium-race-card-active' : ''} ${isCompleted ? 'opacity-60' : 'opacity-100'}`}
+      className={`home-calendar-card ${isCurrent ? 'home-calendar-card-active' : ''} ${isCompleted ? 'home-calendar-card-completed' : ''}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{
-        width: isMobile ? '168px' : '192px',
-        cursor: 'pointer',
-        transform: isHovered ? 'translateY(-4px)' : 'translateY(0)',
+        transform: isHovered ? 'translateY(-5px)' : 'translateY(0)',
       }}
     >
-      <div className="flex items-center justify-between">
-        <span className="text-[#A1A1AA] font-medium" style={{ fontSize: '0.8rem' }}>R{round}</span>
-        <span className="text-[#A1A1AA] font-medium" style={{ fontSize: '0.8rem' }}>{code}</span>
-      </div>
-      <p className="font-bold leading-snug text-[#F4F4F5]" style={{ fontSize: '1rem' }}>{name}</p>
-      <p className="text-[#A1A1AA]" style={{ fontSize: '0.85rem' }}>{country}</p>
-      <p className="text-[#A1A1AA] mt-auto" style={{ fontSize: '0.85rem' }}>{date}</p>
+      <p className="home-calendar-race">{name}</p>
+      <p className="home-calendar-location">{country}</p>
+      <p className="home-calendar-date">{date}</p>
     </div>
   )
 }
@@ -157,7 +152,6 @@ function LatestPredictionCard({ prediction, index, isMobile }) {
   const pct = (prediction.probability * 100).toFixed(1)
   const barWidth = `${(prediction.probability / TOP3[0].probability) * 100}%`
   const barColor = BAR_COLORS[index]
-  const positionColor = BAR_COLORS[index]
 
   return (
     <div
@@ -174,7 +168,12 @@ function LatestPredictionCard({ prediction, index, isMobile }) {
         transform: isHovered ? 'translateX(4px)' : 'translateX(0)',
       }}
     >
-      <span style={{ fontSize: '28px', fontWeight: 800, color: positionColor, flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>{index + 1}</span>
+      <span
+        className="home-prediction-rank predictions-rank-podium"
+        style={{ '--rank-fill': barColor }}
+      >
+        {index + 1}
+      </span>
       <span style={{ fontSize: '17px', fontWeight: 700, color: '#F4F4F5', flex: 1 }}>{prediction.driver}</span>
       <div className="latest-bar premium-bar-track" style={{ width: '120px', height: '5px', flexShrink: 0 }}>
         <div className="premium-bar-fill" style={{ width: barWidth, '--bar-start': barColor }} />
@@ -233,6 +232,26 @@ const BAR_COLORS = ['#E8002D', '#f97316', '#eab308']
 
 const RACE_DATE = new Date('2026-05-03T19:30:00Z')
 
+function useCountUp(target, duration = 1500, isVisible) {
+  const [count, setCount] = useState(0)
+  useEffect(() => {
+    if (!isVisible) return
+    let start = 0
+    const increment = target / (duration / 16)
+    const timer = setInterval(() => {
+      start += increment
+      if (start >= target) {
+        setCount(target)
+        clearInterval(timer)
+      } else {
+        setCount(Math.floor(start))
+      }
+    }, 16)
+    return () => clearInterval(timer)
+  }, [isVisible, target, duration])
+  return count
+}
+
 function useCountdown(target) {
   const [timeLeft, setTimeLeft] = useState(() => Math.max(0, target - Date.now()))
 
@@ -258,6 +277,17 @@ export default function Home({ onNavigate }) {
   const { days, hours, minutes, seconds } = useCountdown(RACE_DATE.getTime())
   const currentRaceRef = useRef(null)
   const calendarScrollRef = useRef(null)
+  const statsRef = useRef(null)
+  const [statsVisible, setStatsVisible] = useState(false)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setStatsVisible(true) },
+      { threshold: 0.3 }
+    )
+    if (statsRef.current) observer.observe(statsRef.current)
+    return () => observer.disconnect()
+  }, [])
 
   useEffect(() => {
     const card = currentRaceRef.current
@@ -267,6 +297,16 @@ export default function Home({ onNavigate }) {
     const containerRect = container.getBoundingClientRect()
     container.scrollLeft += cardRect.left - containerRect.left - containerRect.width / 2 + cardRect.width / 2
   }, [])
+
+  const scrollCalendar = (direction) => {
+    const container = calendarScrollRef.current
+    if (!container) return
+    const scrollAmount = Math.min(container.clientWidth * 0.72, 640)
+    container.scrollBy({
+      left: direction * scrollAmount,
+      behavior: 'smooth',
+    })
+  }
 
   return (
     <div className="home-page min-h-screen bg-[#0C0C0E] text-[#F4F4F5] flex flex-col">
@@ -286,6 +326,7 @@ export default function Home({ onNavigate }) {
           {/* Center: nav links */}
           <div className="nav-links" style={{ display: isMobile ? 'none' : 'flex' }}>
             <button onClick={() => onNavigate('predictions')} className="nav-link">Predictions</button>
+            <button onClick={() => onNavigate('h2h')} className="nav-link">H2H</button>
             <button onClick={() => onNavigate('history')} className="nav-link">History</button>
             <button onClick={() => onNavigate('season')} className="nav-link">Calendar</button>
             <button onClick={() => onNavigate('contact')} className="nav-link">Contact</button>
@@ -335,12 +376,9 @@ export default function Home({ onNavigate }) {
           </p>
 
           <div className="hero-actions flex items-center justify-center gap-3">
-            <button
-              onClick={() => onNavigate('predictions')}
-              className="primary-action"
-            >
+            <ButtonHeartbeatEffectDemo onClick={() => onNavigate('predictions')}>
               See predictions
-            </button>
+            </ButtonHeartbeatEffectDemo>
           </div>
         </div>
 
@@ -349,6 +387,7 @@ export default function Home({ onNavigate }) {
       {/* Next Race countdown */}
       <section className="section-band" style={{ paddingTop: isMobile ? '40px' : '80px', paddingBottom: isMobile ? '40px' : '80px' }}>
         <div className="section-shell" style={{ padding: isMobile ? '0 16px' : '0 32px' }}>
+          <div>
             <NextRaceCircuitCard
               raceName="Miami Grand Prix"
               round="Round 6 · 2026"
@@ -360,6 +399,7 @@ export default function Home({ onNavigate }) {
               viewBox={nextRaceCircuit.viewBox}
               start={nextRaceCircuit.start}
             />
+          </div>
             <div style={{ marginTop: isMobile ? '24px' : '32px' }}>
               {/* Countdown grid */}
               <div className="countdown-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', gap: isMobile ? '8px' : '20px', marginBottom: 0, order: 2 }}>
@@ -377,17 +417,35 @@ export default function Home({ onNavigate }) {
       </section>
 
       {/* 2026 Calendar */}
-      <section className="section-band" style={{ paddingTop: isMobile ? '40px' : '80px', paddingBottom: isMobile ? '40px' : '80px' }}>
+      <section className="section-band home-calendar-section" style={{ paddingTop: isMobile ? '40px' : '80px', paddingBottom: isMobile ? '40px' : '80px' }}>
         <div className="section-shell" style={{ padding: isMobile ? '0 16px' : '0 32px' }}>
-          <h2 className="section-heading" style={{ fontSize: '30px', fontWeight: 700, color: '#F4F4F5', marginBottom: '32px' }}>
-            Race Calendar
-          </h2>
-          <div className="calendar-scroll overflow-x-auto pb-2" ref={calendarScrollRef}>
-            <div className="flex gap-3" style={{ width: 'max-content' }}>
-              {RACES.map((race) => (
-                <RaceCard key={race.round} {...race} cardRef={race.status === 'current' ? currentRaceRef : null} isMobile={isMobile} />
-              ))}
+          <div className="home-calendar-header">
+            <h2 className="section-heading home-calendar-title">
+              Race Calendar
+            </h2>
+            <div className="home-calendar-controls" aria-label="Race calendar controls">
+              <button className="home-calendar-control" type="button" aria-label="Scroll calendar left" onClick={() => scrollCalendar(-1)}>
+                ‹
+              </button>
+              <button className="home-calendar-control" type="button" aria-label="Scroll calendar right" onClick={() => scrollCalendar(1)}>
+                ›
+              </button>
             </div>
+          </div>
+          <div className="home-calendar-frame">
+            <button className="home-calendar-side-control home-calendar-side-control-left" type="button" aria-label="Scroll calendar left" onClick={() => scrollCalendar(-1)}>
+              ‹
+            </button>
+            <div className="calendar-scroll home-calendar-scroll overflow-x-auto" ref={calendarScrollRef}>
+              <div className="home-calendar-track">
+              {RACES.map((race) => (
+                <RaceCard key={race.round} {...race} cardRef={race.status === 'current' ? currentRaceRef : null} />
+              ))}
+              </div>
+            </div>
+            <button className="home-calendar-side-control home-calendar-side-control-right" type="button" aria-label="Scroll calendar right" onClick={() => scrollCalendar(1)}>
+              ›
+            </button>
           </div>
         </div>
       </section>
@@ -428,12 +486,12 @@ export default function Home({ onNavigate }) {
       {/* Season stats */}
       <section className="section-band" style={{ paddingTop: isMobile ? '40px' : '80px', paddingBottom: isMobile ? '40px' : '80px' }}>
         <div className="section-shell" style={{ padding: isMobile ? '0 16px' : '0 32px' }}>
-          <div className="stats-grid" style={{ gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)' }}>
+          <div ref={statsRef} className="stats-grid" style={{ gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)' }}>
               {[
-                { number: '24', label: 'Races' },
-                { number: '11', label: 'Teams' },
-                { number: '22', label: 'Drivers' },
-                { number: '6', label: 'Sprints' },
+                { number: useCountUp(24, 1500, statsVisible), label: 'Races' },
+                { number: useCountUp(11, 1500, statsVisible), label: 'Teams' },
+                { number: useCountUp(22, 1500, statsVisible), label: 'Drivers' },
+                { number: useCountUp(6,  1500, statsVisible), label: 'Sprints' },
               ].map((stat) => (
                 <StatCard key={stat.label} {...stat} />
               ))}

@@ -2,6 +2,36 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: "Formula1";
+  src: url("/fonts/Formula1-Regular.woff2") format("woff2"),
+       url("/fonts/Formula1-Regular.woff") format("woff"),
+       url("/fonts/Formula1-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Formula1";
+  src: url("/fonts/Formula1-Bold.woff2") format("woff2"),
+       url("/fonts/Formula1-Bold.woff") format("woff"),
+       url("/fonts/Formula1-Bold.ttf") format("truetype");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Formula1Wide";
+  src: url("/fonts/Formula1-Wide.woff2") format("woff2"),
+       url("/fonts/Formula1-Wide.woff") format("woff"),
+       url("/fonts/Formula1-Wide.ttf") format("truetype");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
@@ -366,10 +396,97 @@ button:focus-visible {
   margin-bottom: 32px;
 }
 
+.countdown-card {
+  background:
+    linear-gradient(145deg, rgba(244,244,245,0.075), rgba(244,244,245,0.024) 42%, rgba(12,12,14,0.38)),
+    rgba(24,24,29,0.76) !important;
+  border: 1px solid rgba(244,244,245,0.105) !important;
+  box-shadow: 0 16px 30px rgba(0,0,0,0.32), inset 0 1px 0 rgba(244,244,245,0.055), inset 0 -22px 38px rgba(244,244,245,0.02) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
+}
+
+.stat-card {
+  background:
+    linear-gradient(145deg, rgba(244,244,245,0.075), rgba(244,244,245,0.024) 42%, rgba(12,12,14,0.38)),
+    rgba(24,24,29,0.76) !important;
+  border: 1px solid rgba(244,244,245,0.105) !important;
+  box-shadow: 0 16px 30px rgba(0,0,0,0.32), inset 0 1px 0 rgba(244,244,245,0.055), inset 0 -22px 38px rgba(244,244,245,0.02) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.h2h-matchup-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(10px, 2vw, 16px);
+  align-items: stretch;
+  margin-bottom: 16px;
+}
+
+.h2h-selector-grid {
+  align-items: end;
+}
+
+.h2h-selector-cell {
+  min-width: 0;
+}
+
+.h2h-selector-cell select {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.h2h-driver-card {
+  min-width: 0;
+  min-height: 200px;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  text-align: center;
+  background-color: #1A1A1F;
+  border-radius: 8px;
+}
+
+.h2h-card-grid {
+  align-items: stretch;
+}
+
+.h2h-card-grid .h2h-driver-card:first-child {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.h2h-card-grid .h2h-driver-card:last-child {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.h2h-vs-circle {
+  width: clamp(48px, 6vw, 64px);
+  aspect-ratio: 1;
+  grid-column: 1 / -1;
+  grid-row: 1;
+  align-self: center;
+  justify-self: center;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background-color: #E8002D;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 900;
+  animation: pulse 2s infinite;
 }
 
 .interactive-card {
@@ -378,6 +495,229 @@ button:focus-visible {
 
 .race-card {
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+}
+
+.home-calendar-section {
+  overflow: hidden;
+}
+
+.home-calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.home-calendar-title {
+  margin: 0;
+  color: #F4F4F5;
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.home-calendar-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.home-calendar-control,
+.home-calendar-side-control {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: rgba(39,39,42,0.72);
+  border: 1px solid rgba(244,244,245,0.08);
+  color: #F4F4F5;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: inset 0 1px 0 rgba(244,244,245,0.08), 0 10px 22px rgba(0,0,0,0.26);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.home-calendar-frame {
+  position: relative;
+}
+
+.home-calendar-scroll {
+  margin: 0 -10px;
+  padding: 8px 10px 18px;
+  scroll-behavior: smooth;
+  scroll-snap-type: x proximity;
+}
+
+.home-calendar-track {
+  display: flex;
+  width: max-content;
+  gap: 12px;
+}
+
+.home-calendar-card {
+  position: relative;
+  width: 164px;
+  min-height: 176px;
+  padding: 28px 18px 34px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  flex-shrink: 0;
+  overflow: hidden;
+  scroll-snap-align: center;
+  border-radius: 8px;
+  background:
+    linear-gradient(145deg, rgba(244,244,245,0.075), rgba(244,244,245,0.024) 42%, rgba(12,12,14,0.38)),
+    rgba(24,24,29,0.76);
+  border: 1px solid rgba(244,244,245,0.105);
+  box-shadow: 0 16px 30px rgba(0,0,0,0.32), inset 0 1px 0 rgba(244,244,245,0.055), inset 0 -22px 38px rgba(244,244,245,0.02);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  cursor: pointer;
+  transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease, background-color 0.22s ease, opacity 0.22s ease;
+}
+
+.home-calendar-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(180deg, rgba(244,244,245,0.08), transparent 36%),
+    linear-gradient(90deg, transparent, rgba(244,244,245,0.045) 78%, rgba(244,244,245,0.06));
+  -webkit-mask-image: radial-gradient(circle at 0 0, transparent 0 34px, rgba(0,0,0,0.28) 54px, #000 88px);
+  mask-image: radial-gradient(circle at 0 0, transparent 0 34px, rgba(0,0,0,0.28) 54px, #000 88px);
+  pointer-events: none;
+}
+
+.home-calendar-card:hover {
+  border-color: rgba(244,244,245,0.18);
+  box-shadow:
+    0 20px 38px rgba(0,0,0,0.4),
+    0 0 0 1px rgba(232,0,45,0.42),
+    0 0 5px rgba(232,0,45,0.18),
+    0 0 10px rgba(232,0,45,0.1),
+    inset 0 1px 0 rgba(244,244,245,0.06),
+    inset 0 -22px 38px rgba(244,244,245,0.02);
+}
+
+.home-calendar-card-active {
+  border-color: rgba(232,0,45,0.64);
+  background:
+    linear-gradient(145deg, rgba(232,0,45,0.13), rgba(244,244,245,0.035) 44%, rgba(12,12,14,0.38)),
+    rgba(26,26,31,0.84);
+  box-shadow: 0 16px 30px rgba(0,0,0,0.34), inset 0 1px 0 rgba(244,244,245,0.055), inset 0 -22px 38px rgba(232,0,45,0.03);
+}
+
+.home-calendar-card-active:hover {
+  box-shadow:
+    0 21px 40px rgba(0,0,0,0.44),
+    0 0 0 1px rgba(232,0,45,0.58),
+    0 0 6px rgba(232,0,45,0.26),
+    0 0 12px rgba(232,0,45,0.12),
+    inset 0 1px 0 rgba(244,244,245,0.06),
+    inset 0 -22px 38px rgba(232,0,45,0.06);
+}
+
+.home-calendar-card-active::before {
+  background:
+    linear-gradient(180deg, rgba(244,244,245,0.08), transparent 34%),
+    linear-gradient(90deg, transparent, rgba(232,0,45,0.035) 78%, rgba(232,0,45,0.05));
+}
+
+.home-calendar-card-active:hover::before {
+  background:
+    linear-gradient(180deg, rgba(244,244,245,0.08), transparent 34%),
+    linear-gradient(90deg, transparent, rgba(232,0,45,0.08) 76%, rgba(232,0,45,0.1));
+}
+
+.home-calendar-card-completed:not(.home-calendar-card-active) {
+  opacity: 0.66;
+}
+
+.home-calendar-race,
+.home-calendar-location,
+.home-calendar-date {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+}
+
+.home-calendar-race {
+  color: #F4F4F5;
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  text-align: center;
+  min-height: 38px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.home-calendar-location {
+  color: #A1A1AA;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.home-calendar-date {
+  margin-top: 8px;
+  color: #E5E7EB;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.home-calendar-side-control {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  transform: translateY(-50%);
+}
+
+.home-calendar-control,
+.home-calendar-control:hover,
+.home-calendar-control:active,
+.home-calendar-control:focus,
+.home-calendar-control:focus-visible {
+  transform: none;
+  transition: none;
+  background: rgba(39,39,42,0.72);
+  border: 1px solid rgba(244,244,245,0.08);
+  color: #F4F4F5;
+  box-shadow: inset 0 1px 0 rgba(244,244,245,0.08), 0 10px 22px rgba(0,0,0,0.26);
+}
+
+.home-calendar-side-control,
+.home-calendar-side-control:hover,
+.home-calendar-side-control:active,
+.home-calendar-side-control:focus,
+.home-calendar-side-control:focus-visible {
+  transform: translateY(-50%);
+  transition: none;
+  background: rgba(39,39,42,0.72);
+  border: 1px solid rgba(244,244,245,0.08);
+  color: #F4F4F5;
+  box-shadow: inset 0 1px 0 rgba(244,244,245,0.08), 0 10px 22px rgba(0,0,0,0.26);
+}
+
+.home-calendar-side-control-left {
+  left: -18px;
+}
+
+.home-calendar-side-control-right {
+  right: -18px;
 }
 
 .page-bg {
@@ -419,7 +759,23 @@ button:focus-visible {
 }
 
 .latest-prediction-row {
+  background:
+    linear-gradient(145deg, rgba(244,244,245,0.05), rgba(244,244,245,0.018) 42%, rgba(12,12,14,0.5)),
+    rgba(18,18,22,0.9);
+  border: 1px solid rgba(244,244,245,0.105);
+  box-shadow: 0 16px 30px rgba(0,0,0,0.32), inset 0 1px 0 rgba(244,244,245,0.055), inset 0 -22px 38px rgba(244,244,245,0.02);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.home-prediction-rank {
+  width: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
 }
 
 .predictions-page-shell {
@@ -458,8 +814,9 @@ button:focus-visible {
   padding: 22px;
   border-radius: 8px;
   background:
-    linear-gradient(118deg, rgba(232,0,45,0.08), rgba(26,26,31,0) 34%),
-    linear-gradient(145deg, #1A1A1F 0%, #1A1A1F 64%, #0C0C0E 100%);
+    radial-gradient(circle at top left, rgba(232,0,45,0.18) 0%, rgba(232,0,45,0.08) 20%, rgba(232,0,45,0) 46%),
+    linear-gradient(145deg, rgba(244,244,245,0.05), rgba(244,244,245,0.018) 42%, rgba(12,12,14,0.5)),
+    rgba(18,18,22,0.9);
   border: 1px solid rgba(244,244,245,0.09);
   box-shadow: 0 22px 48px rgba(0,0,0,0.38), inset 0 1px 0 rgba(244,244,245,0.08);
 }
@@ -524,6 +881,12 @@ button:focus-visible {
   text-transform: uppercase;
 }
 
+.predictions-column-head span:first-child {
+  justify-self: center;
+  text-align: center;
+  transform: translateX(-6px);
+}
+
 .predictions-column-head span:last-child {
   text-align: right;
 }
@@ -541,9 +904,13 @@ button:focus-visible {
   padding: 14px 18px;
   gap: 18px;
   border-radius: 8px;
-  background: #1A1A1F;
+  background:
+    linear-gradient(145deg, rgba(244,244,245,0.05), rgba(244,244,245,0.018) 42%, rgba(12,12,14,0.5)),
+    rgba(18,18,22,0.9);
   border: 1px solid rgba(244,244,245,0.075);
   box-shadow: inset 0 1px 0 rgba(244,244,245,0.065);
+  opacity: 0;
+  transform: translateY(12px);
 }
 
 .predictions-page-row:hover {
@@ -553,9 +920,27 @@ button:focus-visible {
 
 .predictions-rank {
   align-self: center;
-  justify-self: start;
-  text-align: left !important;
+  justify-self: center;
+  color: #E5E7EB !important;
+  font-family: "Formula1", Helvetica, Arial, sans-serif;
+  text-align: center !important;
   text-shadow: none;
+  transform: translateX(-6px);
+}
+
+.predictions-rank-podium {
+  color: var(--rank-fill) !important;
+  font-family: "Formula1", "Montserrat", Helvetica, Arial, sans-serif;
+  font-size: 24px !important;
+  font-weight: 800 !important;
+  font-style: italic;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  -webkit-text-stroke: 0.45px rgba(255,244,238,0.72);
+  text-shadow:
+    0 0 1px rgba(255,244,238,0.42),
+    0 0 5px color-mix(in srgb, var(--rank-fill) 34%, transparent),
+    0 0 9px color-mix(in srgb, var(--rank-fill) 18%, transparent);
 }
 
 .predictions-row-content {
@@ -619,6 +1004,25 @@ button:focus-visible {
   box-shadow: 0 0 10px rgba(232, 0, 45, 0.6), 0 0 20px rgba(255, 122, 0, 0.35);
 }
 
+.predictions-animation-reset .predictions-page-row {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: none;
+}
+
+.predictions-animation-reset .predictions-bar-fill {
+  width: 0% !important;
+  animation: none;
+}
+
+.predictions-animate-in .predictions-page-row {
+  animation: prediction-row-enter 0.42s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.predictions-animate-in .predictions-bar-fill {
+  animation: prediction-bar-grow 0.72s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
 .predictions-bar-fill::after {
   content: "";
   position: absolute;
@@ -628,6 +1032,26 @@ button:focus-visible {
   background: linear-gradient(90deg, #E8002D, #FF7A00, #FFD000);
   filter: blur(6px);
   opacity: 0.6;
+}
+
+@keyframes prediction-row-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes prediction-bar-grow {
+  from {
+    width: 0%;
+  }
+  to {
+    width: var(--bar-width);
+  }
 }
 
 .contact-page {
@@ -699,10 +1123,13 @@ button:focus-visible {
   overflow: hidden;
   border-radius: 8px;
   background:
-    linear-gradient(120deg, rgba(232,0,45,0.07), rgba(26,26,31,0) 38%),
-    #1A1A1F;
-  border: 1px solid rgba(244,244,245,0.1);
-  box-shadow: 0 18px 42px rgba(0,0,0,0.34), inset 0 1px 0 rgba(244,244,245,0.08);
+    radial-gradient(circle at top left, rgba(232,0,45,0.16) 0%, rgba(232,0,45,0.07) 18%, rgba(232,0,45,0) 42%),
+    linear-gradient(145deg, rgba(244,244,245,0.075), rgba(244,244,245,0.024) 42%, rgba(12,12,14,0.38)),
+    rgba(24,24,29,0.76);
+  border: 1px solid rgba(244,244,245,0.105);
+  box-shadow: 0 16px 30px rgba(0,0,0,0.32), inset 0 1px 0 rgba(244,244,245,0.055), inset 0 -22px 38px rgba(244,244,245,0.02);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .contact-card::before {
@@ -991,6 +1418,50 @@ button:active { transform: translateY(0px); opacity: 1; }
     width: 168px !important;
   }
 
+  .home-calendar-header {
+    align-items: flex-start;
+    margin-bottom: 18px;
+  }
+
+  .home-calendar-title {
+    font-size: 26px;
+  }
+
+  .home-calendar-controls {
+    display: flex;
+  }
+
+  .home-calendar-side-control {
+    display: none;
+  }
+
+  .home-calendar-scroll {
+    margin: 0 -16px;
+    padding: 8px 16px 16px;
+    scroll-snap-type: x mandatory;
+  }
+
+  .home-calendar-track {
+    gap: 10px;
+  }
+
+  .home-calendar-card {
+    width: 152px;
+    min-height: 158px;
+    padding: 26px 16px 30px;
+  }
+
+  .home-calendar-race {
+    font-size: 16px;
+    overflow-wrap: anywhere;
+    min-height: 36px;
+  }
+
+  .home-calendar-location,
+  .home-calendar-date {
+    font-size: 11px;
+  }
+
   .season-race-card {
     width: 224px !important;
   }
@@ -1008,6 +1479,40 @@ button:active { transform: translateY(0px); opacity: 1; }
 
   .stats-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .h2h-matchup-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .h2h-driver-card {
+    min-height: 174px;
+    padding: 16px 10px;
+  }
+
+  .h2h-driver-card > div:first-child {
+    width: 56px !important;
+    height: 56px !important;
+  }
+
+  .h2h-driver-card > div:first-child span {
+    font-size: 18px !important;
+  }
+
+  .h2h-driver-card > div:nth-child(2) {
+    font-size: 15px !important;
+    overflow-wrap: anywhere;
+  }
+
+  .h2h-driver-card > div:nth-child(3) {
+    font-size: 12px !important;
+    overflow-wrap: anywhere;
+  }
+
+  .h2h-vs-circle {
+    width: 44px;
+    font-size: 13px;
   }
 
   .page-bg {
@@ -1059,7 +1564,7 @@ button:active { transform: translateY(0px); opacity: 1; }
   }
 
   .predictions-page-row {
-    grid-template-columns: 34px minmax(0, 1fr);
+    grid-template-columns: 42px minmax(0, 1fr);
     padding: 14px 12px !important;
     gap: 12px !important;
   }
@@ -1074,8 +1579,13 @@ button:active { transform: translateY(0px); opacity: 1; }
   }
 
   .predictions-rank {
-    width: 28px !important;
+    width: 42px !important;
+    height: 42px !important;
     font-size: 20px !important;
+  }
+
+  .predictions-rank-podium {
+    font-size: 22px !important;
   }
 
   .predictions-driver-name {

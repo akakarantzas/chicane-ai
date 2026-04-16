@@ -3,3 +3,4 @@ uvicorn[standard]
 python-dotenv
 joblib
 pandas
+fastf1
