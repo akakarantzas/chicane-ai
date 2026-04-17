@@ -67,7 +67,7 @@ button:focus-visible {
 .app-nav {
   position: relative;
   z-index: 10;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 0;
   padding: 0 24px;
   background-color: transparent;
 }
@@ -78,7 +78,7 @@ button:focus-visible {
   left: 0;
   right: 0;
   z-index: 20;
-  border-bottom-color: rgba(255,255,255,0.04);
+  border-bottom-color: transparent;
   background: rgba(12,12,14,0.18);
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
@@ -217,7 +217,7 @@ button:focus-visible {
 }
 
 .section-band {
-  border-top: 1px solid rgba(255,255,255,0.055);
+  border-top: 0;
   padding-top: 80px;
   padding-bottom: 80px;
   position: relative;
@@ -296,10 +296,13 @@ button:focus-visible {
 .next-race-card {
   border-radius: 8px;
   background:
-    linear-gradient(105deg, rgba(232,0,45,0.1) 0%, rgba(232,0,45,0.045) 24%, rgba(26,26,31,0) 58%),
-    linear-gradient(135deg, #1A1A1F 0%, #1A1A1F 62%, #0C0C0E 100%);
-  border: 1px solid rgba(244,244,245,0.08);
-  box-shadow: 0 18px 42px rgba(0,0,0,0.36), inset 0 1px 0 rgba(244,244,245,0.08);
+    radial-gradient(circle at top left, rgba(232,0,45,0.16) 0%, rgba(232,0,45,0.07) 18%, rgba(232,0,45,0) 42%),
+    linear-gradient(145deg, rgba(244,244,245,0.05), rgba(244,244,245,0.018) 42%, rgba(12,12,14,0.5)),
+    rgba(18,18,22,0.9);
+  border: 1px solid rgba(244,244,245,0.105);
+  box-shadow: 0 16px 30px rgba(0,0,0,0.32), inset 0 1px 0 rgba(244,244,245,0.055), inset 0 -22px 38px rgba(244,244,245,0.02);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .circuit-panel {
@@ -374,7 +377,7 @@ button:focus-visible {
 
 .premium-stat-card {
   position: relative;
-  border-top: 1px solid #E8002D !important;
+  border-top: 0 !important;
   transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
 }
 
@@ -391,19 +394,104 @@ button:focus-visible {
 .countdown-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(96px, 120px));
-  gap: 20px;
+  gap: 16px;
   justify-content: center;
   margin-bottom: 32px;
 }
 
 .countdown-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-radius: 12px !important;
   background:
-    linear-gradient(145deg, rgba(244,244,245,0.075), rgba(244,244,245,0.024) 42%, rgba(12,12,14,0.38)),
-    rgba(24,24,29,0.76) !important;
-  border: 1px solid rgba(244,244,245,0.105) !important;
-  box-shadow: 0 16px 30px rgba(0,0,0,0.32), inset 0 1px 0 rgba(244,244,245,0.055), inset 0 -22px 38px rgba(244,244,245,0.02) !important;
+    linear-gradient(145deg, rgba(244,244,245,0.05), rgba(244,244,245,0.018) 42%, rgba(12,12,14,0.5)),
+    rgba(18,18,22,0.9) !important;
+  border: 1px solid rgba(244,244,245,0.11) !important;
+  box-shadow:
+    0 18px 34px rgba(0,0,0,0.34),
+    0 0 0 1px rgba(232,0,45,0.08),
+    0 0 18px rgba(232,0,45,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    inset 0 -22px 38px rgba(255,255,255,0.02) !important;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+  transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease, background-color 0.22s ease;
+}
+
+.countdown-card::before {
+  content: none;
+}
+
+.countdown-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0));
+  pointer-events: none;
+}
+
+.countdown-card > * {
+  position: relative;
+  z-index: 1;
+  align-self: stretch;
+}
+
+.countdown-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.countdown-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(232,0,45,0.24) !important;
+  box-shadow:
+    0 22px 40px rgba(0,0,0,0.4),
+    0 0 0 1px rgba(232,0,45,0.14),
+    0 0 20px rgba(232,0,45,0.12),
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    inset 0 -22px 38px rgba(255,255,255,0.025) !important;
+}
+
+.countdown-number {
+  width: 3ch;
+  display: block;
+  margin: 0 auto;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+  font-kerning: none;
+  text-align: center;
+  line-height: 1;
+}
+
+.countdown-value {
+  color: #F4F4F5;
+  font-size: clamp(2.9rem, 4vw, 3.9rem);
+  font-family: "Formula1", "Arial", Helvetica, sans-serif;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-shadow: 0 10px 26px rgba(0,0,0,0.35);
+}
+
+.countdown-label {
+  width: 100%;
+  margin-top: 8px;
+  color: #A1A1AA;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  line-height: 1;
+  text-align: center;
+  text-transform: uppercase;
 }
 
 .stats-grid {
@@ -414,8 +502,8 @@ button:focus-visible {
 
 .stat-card {
   background:
-    linear-gradient(145deg, rgba(244,244,245,0.075), rgba(244,244,245,0.024) 42%, rgba(12,12,14,0.38)),
-    rgba(24,24,29,0.76) !important;
+    linear-gradient(145deg, rgba(244,244,245,0.05), rgba(244,244,245,0.018) 42%, rgba(12,12,14,0.5)),
+    rgba(18,18,22,0.9) !important;
   border: 1px solid rgba(244,244,245,0.105) !important;
   box-shadow: 0 16px 30px rgba(0,0,0,0.32), inset 0 1px 0 rgba(244,244,245,0.055), inset 0 -22px 38px rgba(244,244,245,0.02) !important;
   backdrop-filter: blur(16px);
@@ -441,6 +529,9 @@ button:focus-visible {
 .h2h-selector-cell select {
   min-width: 0;
   max-width: 100%;
+  background:
+    linear-gradient(145deg, rgba(244,244,245,0.05), rgba(244,244,245,0.018) 42%, rgba(12,12,14,0.5)),
+    rgba(18,18,22,0.9) !important;
 }
 
 .h2h-driver-card {
@@ -453,8 +544,16 @@ button:focus-visible {
   justify-content: center;
   gap: 0;
   text-align: center;
-  background-color: #1A1A1F;
+  background:
+    linear-gradient(145deg, rgba(244,244,245,0.05), rgba(244,244,245,0.018) 42%, rgba(12,12,14,0.5)),
+    rgba(18,18,22,0.9) !important;
   border-radius: 8px;
+}
+
+.h2h-surface-card {
+  background:
+    linear-gradient(145deg, rgba(244,244,245,0.05), rgba(244,244,245,0.018) 42%, rgba(12,12,14,0.5)),
+    rgba(18,18,22,0.9) !important;
 }
 
 .h2h-card-grid {
@@ -560,7 +659,7 @@ button:focus-visible {
 
 .home-calendar-card {
   position: relative;
-  width: 164px;
+  width: 196px;
   min-height: 176px;
   padding: 28px 18px 34px;
   display: flex;
@@ -573,8 +672,8 @@ button:focus-visible {
   scroll-snap-align: center;
   border-radius: 8px;
   background:
-    linear-gradient(145deg, rgba(244,244,245,0.075), rgba(244,244,245,0.024) 42%, rgba(12,12,14,0.38)),
-    rgba(24,24,29,0.76);
+    linear-gradient(145deg, rgba(244,244,245,0.05), rgba(244,244,245,0.018) 42%, rgba(12,12,14,0.5)),
+    rgba(18,18,22,0.9);
   border: 1px solid rgba(244,244,245,0.105);
   box-shadow: 0 16px 30px rgba(0,0,0,0.32), inset 0 1px 0 rgba(244,244,245,0.055), inset 0 -22px 38px rgba(244,244,245,0.02);
   backdrop-filter: blur(16px);
@@ -610,8 +709,9 @@ button:focus-visible {
 .home-calendar-card-active {
   border-color: rgba(232,0,45,0.64);
   background:
-    linear-gradient(145deg, rgba(232,0,45,0.13), rgba(244,244,245,0.035) 44%, rgba(12,12,14,0.38)),
-    rgba(26,26,31,0.84);
+    linear-gradient(145deg, rgba(232,0,45,0.13), rgba(244,244,245,0.035) 44%, rgba(12,12,14,0)),
+    linear-gradient(145deg, rgba(244,244,245,0.05), rgba(244,244,245,0.018) 42%, rgba(12,12,14,0.5)),
+    rgba(18,18,22,0.9);
   box-shadow: 0 16px 30px rgba(0,0,0,0.34), inset 0 1px 0 rgba(244,244,245,0.055), inset 0 -22px 38px rgba(232,0,45,0.03);
 }
 
@@ -822,14 +922,7 @@ button:focus-visible {
 }
 
 .predictions-page-card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  right: 0;
-  left: 0;
-  height: 1px;
-  background: #E8002D;
-  opacity: 0.9;
+  content: none;
 }
 
 .predictions-card-header {
@@ -936,11 +1029,10 @@ button:focus-visible {
   font-style: italic;
   line-height: 1;
   letter-spacing: 0.02em;
-  -webkit-text-stroke: 0.45px rgba(255,244,238,0.72);
+  -webkit-text-stroke: 0;
   text-shadow:
-    0 0 1px rgba(255,244,238,0.42),
-    0 0 5px color-mix(in srgb, var(--rank-fill) 34%, transparent),
-    0 0 9px color-mix(in srgb, var(--rank-fill) 18%, transparent);
+    0 0 5px color-mix(in srgb, var(--rank-fill) 28%, transparent),
+    0 0 10px color-mix(in srgb, var(--rank-fill) 14%, transparent);
 }
 
 .predictions-row-content {
@@ -1016,11 +1108,39 @@ button:focus-visible {
 }
 
 .predictions-animate-in .predictions-page-row {
-  animation: prediction-row-enter 0.42s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation: prediction-row-enter 1.68s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.predictions-animate-in .predictions-extra-row {
+  animation: prediction-extra-row-enter 1.36s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
 .predictions-animate-in .predictions-bar-fill {
-  animation: prediction-bar-grow 0.72s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation: prediction-bar-grow 2.88s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.predictions-show-more-button {
+  width: 100%;
+  height: 42px;
+  margin-top: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(244,244,245,0.105);
+  background:
+    linear-gradient(145deg, rgba(244,244,245,0.05), rgba(244,244,245,0.018) 42%, rgba(12,12,14,0.5)),
+    rgba(18,18,22,0.9);
+  color: #E5E7EB;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  box-shadow: inset 0 1px 0 rgba(244,244,245,0.055);
+  transition: border-color 0.18s ease, background-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+}
+
+.predictions-show-more-button:hover {
+  border-color: rgba(232,0,45,0.36);
+  color: #F4F4F5;
+  transform: translateY(-1px);
 }
 
 .predictions-bar-fill::after {
@@ -1038,6 +1158,17 @@ button:focus-visible {
   from {
     opacity: 0;
     transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes prediction-extra-row-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -1124,8 +1255,8 @@ button:focus-visible {
   border-radius: 8px;
   background:
     radial-gradient(circle at top left, rgba(232,0,45,0.16) 0%, rgba(232,0,45,0.07) 18%, rgba(232,0,45,0) 42%),
-    linear-gradient(145deg, rgba(244,244,245,0.075), rgba(244,244,245,0.024) 42%, rgba(12,12,14,0.38)),
-    rgba(24,24,29,0.76);
+    linear-gradient(145deg, rgba(244,244,245,0.05), rgba(244,244,245,0.018) 42%, rgba(12,12,14,0.5)),
+    rgba(18,18,22,0.9);
   border: 1px solid rgba(244,244,245,0.105);
   box-shadow: 0 16px 30px rgba(0,0,0,0.32), inset 0 1px 0 rgba(244,244,245,0.055), inset 0 -22px 38px rgba(244,244,245,0.02);
   backdrop-filter: blur(16px);
@@ -1133,14 +1264,28 @@ button:focus-visible {
 }
 
 .contact-card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  right: 0;
-  left: 0;
-  height: 1px;
-  background: #E8002D;
-  opacity: 0.75;
+  content: none;
+}
+
+footer.border-t {
+  border-top: 0 !important;
+}
+
+.history-coming-card {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: history-card-fade-in 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 0.12s forwards;
+}
+
+@keyframes history-card-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .contact-card-row {
@@ -1402,12 +1547,18 @@ button:active { transform: translateY(0px); opacity: 1; }
   }
 
   .countdown-card {
-    min-height: 104px !important;
-    padding: 12px !important;
+    min-height: 108px !important;
+    padding: 14px 12px !important;
   }
 
   .countdown-value {
-    font-size: 42px !important;
+    font-size: 2.45rem !important;
+  }
+
+  .countdown-label {
+    margin-top: 6px;
+    font-size: 10px;
+    letter-spacing: 0.14em;
   }
 
   .race-meta-pills {
@@ -1446,7 +1597,7 @@ button:active { transform: translateY(0px); opacity: 1; }
   }
 
   .home-calendar-card {
-    width: 152px;
+    width: 178px;
     min-height: 158px;
     padding: 26px 16px 30px;
   }

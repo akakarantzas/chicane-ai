@@ -61,17 +61,50 @@ function MobileNavDropdown({ onNavigate }) {
   )
 }
 
-function PredictionRow({ prediction, index, maxProb, isLast }) {
+function PredictionRow({ prediction, index, maxProb, isLast, isExtra = false, extraIndex = 0 }) {
   const [isHovered, setIsHovered] = useState(false)
-  const pct = (prediction.probability * 100).toFixed(1)
+  const pctValue = prediction.probability * 100
+  const [displayPct, setDisplayPct] = useState(0)
   const barWidth = `${(prediction.probability / maxProb) * 100}%`
   const isTop3 = index < 3
-  const rowDelay = `${index * 80}ms`
-  const barDelay = `${index * 80 + 220}ms`
+  const rowDelay = isExtra ? `${extraIndex * 55}ms` : `${index * 55}ms`
+  const barDelayMs = index * 55 + 180
+  const barDelay = `${barDelayMs}ms`
+
+  useEffect(() => {
+    setDisplayPct(0)
+
+    const duration = 2880
+    let frameId
+    let timeoutId
+
+    const startAnimation = () => {
+      const start = performance.now()
+
+      const tick = (now) => {
+        const progress = Math.min((now - start) / duration, 1)
+        const eased = 1 - Math.pow(1 - progress, 3)
+        setDisplayPct(pctValue * eased)
+
+        if (progress < 1) {
+          frameId = requestAnimationFrame(tick)
+        }
+      }
+
+      frameId = requestAnimationFrame(tick)
+    }
+
+    timeoutId = window.setTimeout(startAnimation, barDelayMs)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+      if (frameId) cancelAnimationFrame(frameId)
+    }
+  }, [barDelayMs, pctValue])
 
   return (
     <li
-      className="prediction-row predictions-page-row"
+      className={`prediction-row predictions-page-row ${isExtra ? 'predictions-extra-row' : ''}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{
@@ -121,7 +154,7 @@ function PredictionRow({ prediction, index, maxProb, isLast }) {
             />
           </div>
           <span className="predictions-percent">
-            {pct}%
+            {displayPct.toFixed(1)}%
           </span>
         </div>
       </div>
@@ -136,6 +169,7 @@ export default function Predictions({ onNavigate, animationKey = 0 }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [playAnimations, setPlayAnimations] = useState(false)
+  const [showAllPredictions, setShowAllPredictions] = useState(false)
 
   useEffect(() => {
     fetch('http://localhost:8000/api/predictions/next-race')
@@ -192,6 +226,8 @@ export default function Predictions({ onNavigate, animationKey = 0 }) {
   const { race, circuit, predictions } = data
   const raceTitle = race !== 'TBD' ? race.replace(/\bGP\b/g, 'Grand Prix') : 'Next Race'
   const maxProb = predictions[0]?.probability ?? 1
+  const visiblePredictions = showAllPredictions ? predictions : predictions.slice(0, 5)
+  const hiddenCount = Math.max(predictions.length - 5, 0)
 
   return (
     <div
@@ -240,18 +276,15 @@ export default function Predictions({ onNavigate, animationKey = 0 }) {
           {circuit !== 'TBD' && (
             <div className="prediction-subhead flex items-center gap-3 mt-2">
               <p className="text-[#A1A1AA]" style={{ fontSize: '1.1rem' }}>{circuit}</p>
-              <span style={{
-                backgroundColor: 'rgba(232,0,45,0.12)',
-                color: '#E8002D',
-                border: '1px solid rgba(232,0,45,0.25)',
-                borderRadius: '999px',
+              <span className="next-race-pill-primary" style={{
+                borderRadius: '8px',
                 padding: '4px 12px',
                 fontSize: '13px',
                 fontWeight: 600,
                 whiteSpace: 'nowrap',
                 flexShrink: 0,
               }}>
-                Pre-qualifying
+                Pre-Qualifying
               </span>
             </div>
           )}
@@ -277,16 +310,29 @@ export default function Predictions({ onNavigate, animationKey = 0 }) {
             className={`predictions-page-list ${playAnimations ? 'predictions-animate-in' : 'predictions-animation-reset'}`}
             key={`predictions-list-${animationKey}`}
           >
-            {predictions.map((p, i) => (
+            {visiblePredictions.map((p, i) => (
               <PredictionRow
                 key={`${animationKey}-${p.driver}`}
                 prediction={p}
                 index={i}
                 maxProb={maxProb}
-                isLast={i === predictions.length - 1}
+                isLast={i === visiblePredictions.length - 1}
+                isExtra={i >= 5}
+                extraIndex={Math.max(i - 5, 0)}
               />
             ))}
           </ol>
+
+          {hiddenCount > 0 && (
+            <button
+              type="button"
+              className="predictions-show-more-button"
+              onClick={() => setShowAllPredictions((show) => !show)}
+              aria-expanded={showAllPredictions}
+            >
+              {showAllPredictions ? 'Show Less' : `Show More (${hiddenCount})`}
+            </button>
+          )}
         </section>
 
         {/* Footer note */}

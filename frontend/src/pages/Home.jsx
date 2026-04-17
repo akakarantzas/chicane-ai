@@ -123,25 +123,22 @@ function RaceCard({ name, country, date, status, cardRef }) {
 }
 
 function CountdownCard({ value, label, isMobile }) {
-  const [isHovered, setIsHovered] = useState(false)
-
   return (
     <div
       className="interactive-card countdown-card premium-stat-card"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
       style={{
         padding: isMobile ? '12px' : '24px',
         textAlign: 'center',
         minHeight: '120px',
-        transform: isHovered ? 'translateY(-3px)' : 'translateY(0)',
       }}
     >
-      <div className="countdown-value premium-number" style={{ fontSize: '52px', fontWeight: '700', lineHeight: '1' }}>
-        {String(value).padStart(2, '0')}
-      </div>
-      <div style={{ fontSize: '11px', color: '#A1A1AA', marginTop: '8px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-        {label}
+      <div className="countdown-content">
+        <div className="countdown-number countdown-value premium-number">
+          {String(value).padStart(2, '0')}
+        </div>
+        <div className="countdown-label">
+          {label}
+        </div>
       </div>
     </div>
   )
@@ -149,12 +146,66 @@ function CountdownCard({ value, label, isMobile }) {
 
 function LatestPredictionCard({ prediction, index, isMobile }) {
   const [isHovered, setIsHovered] = useState(false)
-  const pct = (prediction.probability * 100).toFixed(1)
+  const rowRef = useRef(null)
+  const [isVisible, setIsVisible] = useState(false)
+  const [displayPct, setDisplayPct] = useState(0)
+  const pctValue = prediction.probability * 100
   const barWidth = `${(prediction.probability / TOP3[0].probability) * 100}%`
   const barColor = BAR_COLORS[index]
 
+  useEffect(() => {
+    const node = rowRef.current
+    if (!node) return undefined
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true)
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.35 },
+    )
+
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (!isVisible) return undefined
+
+    const duration = 2880
+    const delay = index * 55 + 180
+    let frameId
+    let timeoutId
+
+    const startAnimation = () => {
+      const start = performance.now()
+
+      const tick = (now) => {
+        const progress = Math.min((now - start) / duration, 1)
+        const eased = 1 - Math.pow(1 - progress, 3)
+        setDisplayPct(pctValue * eased)
+
+        if (progress < 1) {
+          frameId = requestAnimationFrame(tick)
+        }
+      }
+
+      frameId = requestAnimationFrame(tick)
+    }
+
+    timeoutId = window.setTimeout(startAnimation, delay)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+      if (frameId) cancelAnimationFrame(frameId)
+    }
+  }, [index, isVisible, pctValue])
+
   return (
     <div
+      ref={rowRef}
       className="latest-prediction-row premium-prediction-row"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -176,9 +227,17 @@ function LatestPredictionCard({ prediction, index, isMobile }) {
       </span>
       <span style={{ fontSize: '17px', fontWeight: 700, color: '#F4F4F5', flex: 1 }}>{prediction.driver}</span>
       <div className="latest-bar premium-bar-track" style={{ width: '120px', height: '5px', flexShrink: 0 }}>
-        <div className="premium-bar-fill" style={{ width: barWidth, '--bar-start': barColor }} />
+        <div
+          className="premium-bar-fill"
+          style={{
+            width: isVisible ? barWidth : '0%',
+            '--bar-start': barColor,
+            transition: 'width 2.88s cubic-bezier(0.2, 0.8, 0.2, 1)',
+            transitionDelay: `${index * 55 + 180}ms`,
+          }}
+        />
       </div>
-      <span style={{ fontSize: '17px', fontWeight: 700, color: '#F4F4F5', minWidth: '48px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{pct}%</span>
+      <span style={{ fontSize: '17px', fontWeight: 700, color: '#F4F4F5', minWidth: '48px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{displayPct.toFixed(1)}%</span>
     </div>
   )
 }
@@ -372,7 +431,7 @@ export default function Home({ onNavigate }) {
           </h1>
 
           <p className="hero-subcopy leading-relaxed" style={{ fontSize: '16px', color: '#A1A1AA' }}>
-            AI-powered F1 predictions updated every race weekend.
+            AI-powered F1 analytics updated every race weekend.
           </p>
 
           <div className="hero-actions flex items-center justify-center gap-3">
@@ -459,7 +518,13 @@ export default function Home({ onNavigate }) {
             <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#E8002D', flexShrink: 0 }} />
             <span className="section-kicker" style={{ fontSize: '13px', fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Latest Prediction</span>
           </div>
-          <p style={{ fontSize: '14px', color: '#A1A1AA', marginBottom: '24px' }}>Miami Grand Prix · Pre-qualifying</p>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '24px', flexWrap: 'wrap', lineHeight: 1.2 }}>
+            <span style={{ fontSize: '14px', color: '#A1A1AA', lineHeight: 1.2 }}>Miami Grand Prix</span>
+            <span style={{ fontSize: '14px', color: '#A1A1AA', lineHeight: 1.2 }}>·</span>
+            <span style={{ color: '#E8002D', fontSize: '14px', fontWeight: 600, lineHeight: 1.2 }}>
+              Pre-Qualifying
+            </span>
+          </div>
 
           {/* Driver cards */}
           {TOP3.map((p, i) => (

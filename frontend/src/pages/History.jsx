@@ -57,7 +57,7 @@ function HistoryCard({ children }) {
 
   return (
     <div
-      className="interactive-card border border-dashed border-white/[0.06] rounded-xl px-6 py-10 text-center"
+      className="interactive-card history-coming-card border border-dashed border-white/[0.06] rounded-xl px-6 py-10 text-center"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{

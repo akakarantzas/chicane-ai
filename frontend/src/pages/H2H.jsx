@@ -1,17 +1,29 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 
 // ─── Static driver roster ───────────────────────────────────────────────────
 const DRIVERS = [
-  { abbrev: 'ANT', fullName: 'Kimi Antonelli',   team: 'Mercedes',          number: '12' },
+  { abbrev: 'NOR', fullName: 'Lando Norris',      team: 'McLaren',           number: '1'  },
+  { abbrev: 'PIA', fullName: 'Oscar Piastri',     team: 'McLaren',           number: '81' },
   { abbrev: 'RUS', fullName: 'George Russell',    team: 'Mercedes',          number: '63' },
+  { abbrev: 'ANT', fullName: 'Kimi Antonelli',    team: 'Mercedes',          number: '12' },
+  { abbrev: 'VER', fullName: 'Max Verstappen',    team: 'Red Bull Racing',   number: '3'  },
+  { abbrev: 'HAD', fullName: 'Isack Hadjar',      team: 'Red Bull Racing',   number: '6'  },
   { abbrev: 'LEC', fullName: 'Charles Leclerc',   team: 'Ferrari',           number: '16' },
   { abbrev: 'HAM', fullName: 'Lewis Hamilton',    team: 'Ferrari',           number: '44' },
-  { abbrev: 'NOR', fullName: 'Lando Norris',      team: 'McLaren',           number: '4'  },
-  { abbrev: 'PIA', fullName: 'Oscar Piastri',     team: 'McLaren',           number: '81' },
-  { abbrev: 'VER', fullName: 'Max Verstappen',    team: 'Red Bull Racing',   number: '1'  },
-  { abbrev: 'HAD', fullName: 'Isack Hadjar',      team: 'Racing Bulls',      number: '6'  },
-  { abbrev: 'GAS', fullName: 'Pierre Gasly',      team: 'Alpine',            number: '10' },
+  { abbrev: 'ALB', fullName: 'Alex Albon',        team: 'Williams',          number: '23' },
+  { abbrev: 'SAI', fullName: 'Carlos Sainz',      team: 'Williams',          number: '55' },
+  { abbrev: 'LIN', fullName: 'Arvid Lindblad',    team: 'Racing Bulls',      number: '41' },
+  { abbrev: 'LAW', fullName: 'Liam Lawson',       team: 'Racing Bulls',      number: '30' },
+  { abbrev: 'STR', fullName: 'Lance Stroll',      team: 'Aston Martin',      number: '18' },
+  { abbrev: 'ALO', fullName: 'Fernando Alonso',   team: 'Aston Martin',      number: '14' },
+  { abbrev: 'OCO', fullName: 'Esteban Ocon',      team: 'Haas',              number: '31' },
   { abbrev: 'BEA', fullName: 'Oliver Bearman',    team: 'Haas',              number: '87' },
+  { abbrev: 'HUL', fullName: 'Nico Hulkenberg',   team: 'Audi',              number: '27' },
+  { abbrev: 'BOR', fullName: 'Gabriel Bortoleto', team: 'Audi',              number: '5'  },
+  { abbrev: 'GAS', fullName: 'Pierre Gasly',      team: 'Alpine',            number: '10' },
+  { abbrev: 'COL', fullName: 'Franco Colapinto',  team: 'Alpine',            number: '43' },
+  { abbrev: 'PER', fullName: 'Sergio Perez',      team: 'Cadillac',          number: '11' },
+  { abbrev: 'BOT', fullName: 'Valtteri Bottas',   team: 'Cadillac',          number: '77' },
 ]
 
 const DRIVER_MAP = Object.fromEntries(DRIVERS.map((d) => [d.abbrev, d]))
@@ -476,9 +488,6 @@ export default function H2H({ onNavigate }) {
 
             {/* Driver 1 column */}
             <div className="h2h-selector-cell">
-              <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#A1A1AA', marginBottom: '8px' }}>
-                Driver 1
-              </div>
               <select
                 value={d1}
                 onChange={(e) => { setD1(e.target.value); setResult(null); setPrediction(null) }}
@@ -494,9 +503,6 @@ export default function H2H({ onNavigate }) {
 
             {/* Driver 2 column */}
             <div className="h2h-selector-cell">
-              <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#A1A1AA', marginBottom: '8px' }}>
-                Driver 2
-              </div>
               <select
                 value={d2}
                 onChange={(e) => { setD2(e.target.value); setResult(null); setPrediction(null) }}
