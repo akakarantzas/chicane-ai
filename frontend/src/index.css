@@ -298,7 +298,7 @@ button:focus-visible {
 .next-race-card {
   border-radius: 8px;
   background:
-    radial-gradient(circle at top left, rgba(232,0,45,0.16) 0%, rgba(232,0,45,0.07) 18%, rgba(232,0,45,0) 42%),
+    radial-gradient(circle at top right, rgba(232,0,45,0.16) 0%, rgba(232,0,45,0.07) 18%, rgba(232,0,45,0) 42%),
     linear-gradient(145deg, rgba(244,244,245,0.05), rgba(244,244,245,0.018) 42%, rgba(12,12,14,0.5)),
     rgba(18,18,22,0.9);
   border: 1px solid rgba(244,244,245,0.105);
@@ -917,7 +917,7 @@ button:focus-visible {
   padding: 22px;
   border-radius: 8px;
   background:
-    radial-gradient(circle at top left, rgba(232,0,45,0.18) 0%, rgba(232,0,45,0.08) 20%, rgba(232,0,45,0) 46%),
+    radial-gradient(circle at top right, rgba(232,0,45,0.18) 0%, rgba(232,0,45,0.08) 20%, rgba(232,0,45,0) 46%),
     linear-gradient(145deg, rgba(244,244,245,0.05), rgba(244,244,245,0.018) 42%, rgba(12,12,14,0.5)),
     rgba(18,18,22,0.9);
   border: 1px solid rgba(244,244,245,0.09);
