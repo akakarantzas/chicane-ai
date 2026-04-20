@@ -44,14 +44,11 @@ const D2_COLOR = '#CBD5E1'
 const HEADING_TEXT_COLOR = '#E5E7EB'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-function getBarWidths(v1, v2, lowerIsBetter) {
+function getBarWidths(v1, v2) {
   if (v1 == null || v2 == null) return { w1: 50, w2: 50 }
   if (v1 === v2) return { w1: 50, w2: 50 }
   const sum = v1 + v2
   if (sum === 0) return { w1: 50, w2: 50 }
-  if (lowerIsBetter) {
-    return { w1: (v2 / sum) * 100, w2: (v1 / sum) * 100 }
-  }
   return { w1: (v1 / sum) * 100, w2: (v2 / sum) * 100 }
 }
 
@@ -134,13 +131,13 @@ function DriverInfoCard({ abbrev, accentColor }) {
       </div>
       <div style={{ fontSize: '20px', fontWeight: 700, color: HEADING_TEXT_COLOR, marginTop: '12px' }}>{driver.fullName}</div>
       <div style={{ fontSize: '14px', color: '#A1A1AA', marginTop: '4px' }}>{driver.team}</div>
-      <div style={{ fontSize: '18px', color: accentColor, fontWeight: 700, marginTop: '6px' }}>#{driver.number}</div>
+      <div className="num" style={{ fontSize: '18px', color: accentColor, fontWeight: 700, marginTop: '6px' }}>#{driver.number}</div>
     </div>
   )
 }
 
 function StatBar({ def, d1Val, d2Val }) {
-  const { w1, w2 } = getBarWidths(d1Val, d2Val, def.lowerIsBetter)
+  const { w1, w2 } = getBarWidths(d1Val, d2Val)
   const win = winner(d1Val, d2Val, def.lowerIsBetter)
   const d1Wins = win === 'd1'
   const d2Wins = win === 'd2'
@@ -179,14 +176,12 @@ function StatBar({ def, d1Val, d2Val }) {
       {/* Values + bar row */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '4px' }}>
         {/* D1 value */}
-        <div style={{
+        <div className="num" style={{
           minWidth: '56px',
           textAlign: 'right',
           fontSize: d1Wins ? '28px' : '22px',
-          fontWeight: (d1Wins || isTie) ? 800 : 400,
+          fontWeight: 800,
           color: D1_COLOR,
-          opacity: d2Wins ? 0.4 : 1,
-          fontVariantNumeric: 'tabular-nums',
           flexShrink: 0,
           transition: 'font-size 0.3s ease',
         }}>
@@ -210,14 +205,12 @@ function StatBar({ def, d1Val, d2Val }) {
         </div>
 
         {/* D2 value */}
-        <div style={{
+        <div className="num" style={{
           minWidth: '56px',
           textAlign: 'left',
           fontSize: d2Wins ? '28px' : '22px',
-          fontWeight: (d2Wins || isTie) ? 800 : 400,
+          fontWeight: 800,
           color: D2_COLOR,
-          opacity: d1Wins ? 0.4 : 1,
-          fontVariantNumeric: 'tabular-nums',
           flexShrink: 0,
           transition: 'font-size 0.3s ease',
         }}>
@@ -298,18 +291,16 @@ function PredictionCard({ prediction, d1Abbrev, d2Abbrev, loading }) {
         gap: '12px',
         marginBottom: '20px',
       }}>
-        <span style={{
+        <span className="num" style={{
           fontSize: '36px',
           fontWeight: 800,
           color: d1IsWinner ? D1_COLOR : '#52525B',
-          fontVariantNumeric: 'tabular-nums',
         }}>{d1Wins}</span>
         <span style={{ fontSize: '24px', color: '#A1A1AA', fontWeight: 400 }}>—</span>
-        <span style={{
+        <span className="num" style={{
           fontSize: '36px',
           fontWeight: 800,
           color: !d1IsWinner ? D2_COLOR : '#52525B',
-          fontVariantNumeric: 'tabular-nums',
         }}>{d2Wins}</span>
       </div>
 
@@ -328,18 +319,11 @@ function PredictionCard({ prediction, d1Abbrev, d2Abbrev, loading }) {
           height: '6px',
           borderRadius: '99px',
           backgroundColor: '#27272A',
-          overflow: 'hidden',
+          overflow: 'visible',
         }}>
-          <div style={{
-            height: '100%',
-            width: `${confidencePct}%`,
-            background: 'linear-gradient(to right, #E8002D, #FF6B35, #FFB800)',
-            borderRadius: '99px',
-            boxShadow: '0 0 10px rgba(232,0,45,0.6), 0 0 20px rgba(255,107,53,0.3)',
-            transition: 'width 0.5s ease',
-          }} />
+          <div className="h2h-confidence-bar-fill" style={{ '--bar-width': `${confidencePct}%` }} />
         </div>
-        <div style={{
+        <div className="num" style={{
           fontSize: '14px',
           fontWeight: 600,
           color: HEADING_TEXT_COLOR,
@@ -555,8 +539,62 @@ export default function H2H({ onNavigate }) {
 
           {/* ── States ── */}
           {loading && (
-            <div style={{ textAlign: 'center', color: '#A1A1AA', fontSize: '15px', marginTop: '40px' }}>
-              Fetching real F1 data...
+            <div
+              role="status"
+              aria-label="Fetching real F1 data"
+              style={{
+                marginTop: '40px', display: 'flex', flexDirection: 'column',
+                alignItems: 'center', gap: '18px',
+              }}
+            >
+              <div style={{
+                display: 'flex', gap: '6px', padding: '10px', borderRadius: '10px',
+                background: '#0C0C0E', border: '1px solid rgba(255,255,255,0.06)',
+              }}>
+                {[0, 1, 2, 3, 4].map((i) => (
+                  <div key={i} style={{
+                    display: 'flex', flexDirection: 'column', gap: '4px',
+                    padding: '8px 6px', borderRadius: '4px',
+                    background: '#05050A', border: '1px solid rgba(255,255,255,0.04)',
+                  }}>
+                    {[0, 1].map((j) => (
+                      <span key={j} className="f1-light" style={{
+                        width: '14px', height: '14px', borderRadius: '999px',
+                        background: '#2A0A10', display: 'block',
+                        animation: `f1-light-seq 2.6s ease-in-out ${i * 0.28}s infinite`,
+                      }} />
+                    ))}
+                  </div>
+                ))}
+              </div>
+
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: '10px',
+                fontSize: '11px', fontWeight: 800, letterSpacing: '0.16em',
+                textTransform: 'uppercase', color: '#A1A1AA',
+              }}>
+                <span style={{
+                  width: '6px', height: '6px', borderRadius: '99px',
+                  background: '#E8002D',
+                  animation: 'f1-pulse 1s ease-in-out infinite',
+                }} />
+                Fetching real F1 data...
+              </div>
+
+              <style>{`
+                @keyframes f1-light-seq {
+                  0%, 8%    { background: #2A0A10; box-shadow: none; }
+                  12%, 72%  { background: #E8002D; box-shadow: 0 0 12px rgba(232,0,45,0.7); }
+                  76%, 100% { background: #2A0A10; box-shadow: none; }
+                }
+                @keyframes f1-pulse {
+                  0%, 100% { opacity: 0.35; }
+                  50%      { opacity: 1; }
+                }
+                @media (prefers-reduced-motion: reduce) {
+                  .f1-light { animation: none !important; background: #E8002D !important; }
+                }
+              `}</style>
             </div>
           )}
 

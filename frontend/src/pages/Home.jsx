@@ -117,12 +117,12 @@ function RaceCard({ name, country, date, status, cardRef }) {
     >
       <p className="home-calendar-race">{name}</p>
       <p className="home-calendar-location">{country}</p>
-      <p className="home-calendar-date">{date}</p>
+      <p className="home-calendar-date" style={isCurrent ? { color: '#E8002D' } : undefined}>{date}</p>
     </div>
   )
 }
 
-function CountdownCard({ value, label, isMobile }) {
+function CountdownCard({ value, label, isMobile, accent }) {
   return (
     <div
       className="interactive-card countdown-card premium-stat-card"
@@ -133,7 +133,10 @@ function CountdownCard({ value, label, isMobile }) {
       }}
     >
       <div className="countdown-content">
-        <div className="countdown-number countdown-value premium-number">
+        <div
+          className="countdown-number countdown-value premium-number num"
+          style={accent ? { color: '#E8002D' } : undefined}
+        >
           {String(value).padStart(2, '0')}
         </div>
         <div className="countdown-label">
@@ -150,7 +153,7 @@ function LatestPredictionCard({ prediction, index, isMobile }) {
   const [isVisible, setIsVisible] = useState(false)
   const [displayPct, setDisplayPct] = useState(0)
   const pctValue = prediction.probability * 100
-  const barWidth = `${(prediction.probability / TOP3[0].probability) * 100}%`
+  const barWidth = `${pctValue}%`
   const barColor = BAR_COLORS[index]
 
   useEffect(() => {
@@ -237,7 +240,7 @@ function LatestPredictionCard({ prediction, index, isMobile }) {
           }}
         />
       </div>
-      <span style={{ fontSize: '17px', fontWeight: 700, color: '#F4F4F5', minWidth: '48px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{displayPct.toFixed(1)}%</span>
+      <span className="num" style={{ fontSize: '17px', fontWeight: 700, color: '#F4F4F5', width: '60px', flexShrink: 0, textAlign: 'right' }}>{displayPct.toFixed(1)}%</span>
     </div>
   )
 }
@@ -262,7 +265,7 @@ function StatCard({ number, label }) {
         transform: isHovered ? 'translateY(-3px)' : 'translateY(0)',
       }}
     >
-      <span className="premium-number" style={{
+      <span className="premium-number num" style={{
         fontSize: '48px',
         fontWeight: '700',
         lineHeight: '1',
@@ -449,7 +452,7 @@ export default function Home({ onNavigate }) {
           <div>
             <NextRaceCircuitCard
               raceName="Miami Grand Prix"
-              round="Round 6 · 2026"
+              round="Round 6 · 2026 Season"
               venue="Miami International Autodrome"
               date="May 3, 2026"
               status="Pre-Qualifying"
@@ -466,7 +469,7 @@ export default function Home({ onNavigate }) {
                   { value: days,    label: 'Days'    },
                   { value: hours,   label: 'Hours'   },
                   { value: minutes, label: 'Minutes' },
-                  { value: seconds, label: 'Seconds' },
+                  { value: seconds, label: 'Seconds', accent: true },
                 ].map((item) => (
                   <CountdownCard key={item.label} {...item} isMobile={isMobile} />
                 ))}

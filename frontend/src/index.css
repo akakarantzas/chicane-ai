@@ -4,9 +4,7 @@
 
 @font-face {
   font-family: "Formula1";
-  src: url("/fonts/Formula1-Regular.woff2") format("woff2"),
-       url("/fonts/Formula1-Regular.woff") format("woff"),
-       url("/fonts/Formula1-Regular.ttf") format("truetype");
+  src: url("/fonts/Formula1-Regular_web_0.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -14,9 +12,7 @@
 
 @font-face {
   font-family: "Formula1";
-  src: url("/fonts/Formula1-Bold.woff2") format("woff2"),
-       url("/fonts/Formula1-Bold.woff") format("woff"),
-       url("/fonts/Formula1-Bold.ttf") format("truetype");
+  src: url("/fonts/Formula1-Bold_web_0.ttf") format("truetype");
   font-weight: 800;
   font-style: normal;
   font-display: swap;
@@ -24,12 +20,18 @@
 
 @font-face {
   font-family: "Formula1Wide";
-  src: url("/fonts/Formula1-Wide.woff2") format("woff2"),
-       url("/fonts/Formula1-Wide.woff") format("woff"),
-       url("/fonts/Formula1-Wide.ttf") format("truetype");
+  src: url("/fonts/Formula1-Wide_web_0.ttf") format("truetype");
   font-weight: 800;
   font-style: normal;
   font-display: swap;
+}
+
+.num {
+  font-family: "Formula1", Helvetica, Arial, sans-serif;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+  letter-spacing: 0;
 }
 
 /* Custom scrollbar */
@@ -751,7 +753,7 @@ button:focus-visible {
 
 .home-calendar-race {
   color: #F4F4F5;
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 800;
   line-height: 1.1;
   letter-spacing: -0.01em;
@@ -773,10 +775,11 @@ button:focus-visible {
 .home-calendar-date {
   margin-top: 8px;
   color: #E5E7EB;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
   line-height: 1.2;
   text-align: center;
+  text-transform: uppercase;
 }
 
 .home-calendar-side-control {
@@ -1031,8 +1034,8 @@ button:focus-visible {
   letter-spacing: 0.02em;
   -webkit-text-stroke: 0;
   text-shadow:
-    0 0 5px color-mix(in srgb, var(--rank-fill) 28%, transparent),
-    0 0 10px color-mix(in srgb, var(--rank-fill) 14%, transparent);
+    0 0 5px color-mix(in srgb, var(--rank-fill) 14%, transparent),
+    0 0 10px color-mix(in srgb, var(--rank-fill) 7%, transparent);
 }
 
 .predictions-row-content {
@@ -1141,6 +1144,32 @@ button:focus-visible {
   border-color: rgba(232,0,45,0.36);
   color: #F4F4F5;
   transform: translateY(-1px);
+}
+
+.h2h-confidence-bar-fill {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(to right, #E8002D, #FF6B35, #FFB800);
+  animation: h2h-bar-grow 1.4s cubic-bezier(0.2, 0.8, 0.2, 1) 0.3s forwards;
+  width: 0%;
+}
+
+@keyframes h2h-bar-grow {
+  from { width: 0%; }
+  to   { width: var(--bar-width); }
+}
+
+.h2h-confidence-bar-fill::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(to right, #E8002D, #FF6B35, #FFB800);
+  filter: blur(6px);
+  opacity: 0.6;
 }
 
 .predictions-bar-fill::after {
@@ -1603,7 +1632,7 @@ button:active { transform: translateY(0px); opacity: 1; }
   }
 
   .home-calendar-race {
-    font-size: 16px;
+    font-size: 14px;
     overflow-wrap: anywhere;
     min-height: 36px;
   }

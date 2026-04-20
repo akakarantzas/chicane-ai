@@ -65,7 +65,7 @@ function PredictionRow({ prediction, index, maxProb, isLast, isExtra = false, ex
   const [isHovered, setIsHovered] = useState(false)
   const pctValue = prediction.probability * 100
   const [displayPct, setDisplayPct] = useState(0)
-  const barWidth = `${(prediction.probability / maxProb) * 100}%`
+  const barWidth = `${pctValue}%`
   const isTop3 = index < 3
   const rowDelay = isExtra ? `${extraIndex * 55}ms` : `${index * 55}ms`
   const barDelayMs = index * 55 + 180
@@ -116,7 +116,7 @@ function PredictionRow({ prediction, index, maxProb, isLast, isExtra = false, ex
       }}
     >
       {/* Position number */}
-      <span className={`predictions-rank ${index < 3 ? 'predictions-rank-podium' : ''}`} style={{
+      <span className={`predictions-rank num ${index < 3 ? 'predictions-rank-podium' : ''}`} style={{
         fontSize: '22px',
         fontWeight: 800,
         color: positionColor(index),
@@ -127,7 +127,6 @@ function PredictionRow({ prediction, index, maxProb, isLast, isExtra = false, ex
         justifyContent: 'center',
         textAlign: 'center',
         flexShrink: 0,
-        fontVariantNumeric: 'tabular-nums',
         '--rank-fill': positionColor(index),
       }}>
         {index + 1}
@@ -153,7 +152,7 @@ function PredictionRow({ prediction, index, maxProb, isLast, isExtra = false, ex
               }}
             />
           </div>
-          <span className="predictions-percent">
+          <span className="predictions-percent num">
             {displayPct.toFixed(1)}%
           </span>
         </div>

@@ -8,6 +8,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Helvetica', 'Arial', 'sans-serif'],
+        display: ['"Formula1"', 'Helvetica', 'Arial', 'sans-serif'],
       },
     },
   },

@@ -95,7 +95,7 @@ function RaceCard({ name, country, date, status, cardRef }) {
     >
       <p className="home-calendar-race">{name}</p>
       <p className="home-calendar-location">{country}</p>
-      <p className="home-calendar-date">{date}</p>
+      <p className="home-calendar-date" style={isCurrent ? { color: '#E8002D' } : undefined}>{date}</p>
     </div>
   )
 }
