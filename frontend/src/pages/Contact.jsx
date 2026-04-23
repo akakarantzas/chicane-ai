@@ -81,7 +81,7 @@ export default function Contact({ onNavigate }) {
           <div className="brand-wrap" style={{ flex: isMobile ? '0 1 auto' : 1 }}>
             <button onClick={() => onNavigate('home')} className="brand-button">
               <img src="/logo-mark.png" alt="" className="brand-logo" />
-              <span className="brand-wordmark">Chicane.ai</span>
+              <span className="brand-wordmark">ChicaneAI</span>
             </button>
           </div>
           <div className="nav-links" style={{ display: isMobile ? 'none' : 'flex' }}>
@@ -104,12 +104,12 @@ export default function Contact({ onNavigate }) {
 
       <main className="contact-shell">
         <header className="contact-header">
-          <div className="contact-header-brand" aria-label="Chicane.ai">
+          <div className="contact-header-brand" aria-label="ChicaneAI">
             <img src="/logo-mark.png" alt="" className="brand-logo" />
-            <span className="brand-wordmark">Chicane.ai</span>
+            <span className="brand-wordmark">ChicaneAI</span>
           </div>
           <h1>Get in touch</h1>
-          <p>Questions, feedback, or ideas for Chicane.ai.</p>
+          <p>Questions, feedback, or ideas for ChicaneAI.</p>
         </header>
 
         <section className="contact-stack" aria-label="Contact options">

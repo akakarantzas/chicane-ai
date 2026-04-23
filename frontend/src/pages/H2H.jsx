@@ -431,7 +431,7 @@ export default function H2H({ onNavigate }) {
           <div className="brand-wrap" style={{ flex: isMobile ? '0 1 auto' : 1 }}>
             <button onClick={() => onNavigate?.('home')} className="brand-button" aria-label="Go to home">
               <img src="/logo-mark.png" alt="" className="brand-logo" />
-              <span className="brand-wordmark">Chicane.ai</span>
+              <span className="brand-wordmark">ChicaneAI</span>
             </button>
           </div>
 
@@ -667,7 +667,7 @@ export default function H2H({ onNavigate }) {
       {/* ── Footer ── */}
       <footer className="border-t border-white/[0.06]" style={{ padding: '28px 32px' }}>
         <p style={{ fontSize: '14px', color: '#A1A1AA', textAlign: 'center', margin: 0 }}>
-          © 2026 Chicane.ai, All rights reserved.
+          © 2026 ChicaneAI, All rights reserved.
         </p>
       </footer>
 

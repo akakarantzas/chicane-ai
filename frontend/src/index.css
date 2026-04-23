@@ -646,11 +646,32 @@ button:focus-visible {
   position: relative;
 }
 
+/* Container query root — cqi resolves to this element's inline size */
+#home-race-calendar {
+  container-type: inline-size;
+}
+
 .home-calendar-scroll {
   margin: 0 -10px;
   padding: 8px 10px 18px;
+}
+
+/* ── Home-page calendar overrides (desktop: 3 cards) ─────────────────────── */
+#home-race-calendar .home-calendar-scroll {
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
-  scroll-snap-type: x proximity;
+  margin-inline: 0;
+  /* padding = (N-1)(100cqi + gap) / (2N) for N=3, gap=12px → 100cqi/3 + 4px
+     allows every card, including first and last, to snap to centre */
+  padding-inline: calc(40cqi + 4.8px);
+}
+
+#home-race-calendar .home-calendar-card {
+  /* exactly 3 cards + 2 gaps fill the container */
+  width: calc((100cqi - 4 * 12px) / 5);
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
 }
 
 .home-calendar-track {
@@ -671,7 +692,6 @@ button:focus-visible {
   gap: 7px;
   flex-shrink: 0;
   overflow: hidden;
-  scroll-snap-align: center;
   border-radius: 8px;
   background:
     linear-gradient(145deg, rgba(244,244,245,0.05), rgba(244,244,245,0.018) 42%, rgba(12,12,14,0.5)),
@@ -1618,7 +1638,16 @@ button:active { transform: translateY(0px); opacity: 1; }
   .home-calendar-scroll {
     margin: 0 -16px;
     padding: 8px 16px 16px;
-    scroll-snap-type: x mandatory;
+  }
+
+  /* Mobile: 2 cards, padding = (N-1)(100cqi + gap) / (2N) for N=2 → 25cqi + 3px */
+  #home-race-calendar .home-calendar-scroll {
+    margin-inline: 0;
+    padding-inline: calc(25cqi + 3px);
+  }
+
+  #home-race-calendar .home-calendar-card {
+    width: calc((100cqi - 12px) / 2);
   }
 
   .home-calendar-track {
@@ -1834,3 +1863,4 @@ button:active { transform: translateY(0px); opacity: 1; }
     padding-right: 4px;
   }
 }
+

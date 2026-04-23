@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import NextRaceCircuitCard from '../components/NextRaceCircuitCard'
 import ButtonHeartbeatEffectDemo from '../components/ui/heartbeat-effect-button'
 import { nextRaceCircuit } from '../data/circuits'
+
 const RACES = [
   { round: 1,  code: 'AU', name: 'Australian GP',    country: 'Australia',     date: 'Mar 8',  status: 'completed' },
   { round: 2,  code: 'CN', name: 'Chinese GP',        country: 'China',         date: 'Mar 15', status: 'completed' },
@@ -99,7 +100,6 @@ function MobileNavDropdown({ onNavigate }) {
     </div>
   )
 }
-
 function RaceCard({ name, country, date, status, cardRef }) {
   const isCurrent   = status === 'current'
   const isCompleted = status === 'completed'
@@ -357,7 +357,26 @@ export default function Home({ onNavigate }) {
     if (!card || !container) return
     const cardRect = card.getBoundingClientRect()
     const containerRect = container.getBoundingClientRect()
+    // Disable smooth so the page loads already centred — no slide-in animation
+    container.style.scrollBehavior = 'auto'
     container.scrollLeft += cardRect.left - containerRect.left - containerRect.width / 2 + cardRect.width / 2
+    container.style.scrollBehavior = ''
+  }, [])
+
+  useEffect(() => {
+    const container = calendarScrollRef.current
+    if (!container) return
+    const onWheel = (e) => {
+      const delta = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX
+      if (delta === 0) return
+      e.preventDefault()
+      container.style.scrollSnapType = 'none'
+      container.style.scrollBehavior = 'auto'
+      container.scrollLeft += delta
+      // After the wheel goes idle restore CSS — browser will smooth-snap to nearest card
+    }
+    container.addEventListener('wheel', onWheel, { passive: false })
+    return () => container.removeEventListener('wheel', onWheel)
   }, [])
 
   const scrollCalendar = (direction) => {
@@ -381,7 +400,7 @@ export default function Home({ onNavigate }) {
           <div className="brand-wrap" style={{ flex: isMobile ? '0 1 auto' : 1 }}>
             <button onClick={() => onNavigate('home')} className="brand-button" aria-label="Go to home">
               <img src="/logo-mark.png" alt="" className="brand-logo" />
-              <span className="brand-wordmark">Chicane.ai</span>
+              <span className="brand-wordmark">ChicaneAI</span>
             </button>
           </div>
 
@@ -494,10 +513,7 @@ export default function Home({ onNavigate }) {
               </button>
             </div>
           </div>
-          <div className="home-calendar-frame">
-            <button className="home-calendar-side-control home-calendar-side-control-left" type="button" aria-label="Scroll calendar left" onClick={() => scrollCalendar(-1)}>
-              ‹
-            </button>
+          <div id="home-race-calendar" className="home-calendar-frame">
             <div className="calendar-scroll home-calendar-scroll overflow-x-auto" ref={calendarScrollRef}>
               <div className="home-calendar-track">
               {RACES.map((race) => (
@@ -505,9 +521,6 @@ export default function Home({ onNavigate }) {
               ))}
               </div>
             </div>
-            <button className="home-calendar-side-control home-calendar-side-control-right" type="button" aria-label="Scroll calendar right" onClick={() => scrollCalendar(1)}>
-              ›
-            </button>
           </div>
         </div>
       </section>
@@ -546,7 +559,7 @@ export default function Home({ onNavigate }) {
               e.currentTarget.style.color = '#A1A1AA'
             }}
           >
-            View full predictions →
+            View full predictions
           </button>
         </div>
       </section>
@@ -569,9 +582,10 @@ export default function Home({ onNavigate }) {
 
       {/* Footer */}
       <footer className="border-t border-white/[0.06]" style={{ padding: '28px 32px' }}>
-        <p style={{ fontSize: '14px', color: '#A1A1AA', textAlign: 'center', margin: 0 }}>© 2026 Chicane.ai, All rights reserved.</p>
+        <p style={{ fontSize: '14px', color: '#A1A1AA', textAlign: 'center', margin: 0 }}>© 2026 ChicaneAI, All rights reserved.</p>
       </footer>
 
     </div>
   )
 }
+

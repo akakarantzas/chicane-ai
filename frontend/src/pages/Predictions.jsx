@@ -244,7 +244,7 @@ export default function Predictions({ onNavigate, animationKey = 0 }) {
           <div className="brand-wrap" style={{ flex: isMobile ? '0 1 auto' : 1 }}>
             <button onClick={() => onNavigate?.('home')} className="brand-button">
               <img src="/logo-mark.png" alt="" className="brand-logo" />
-              <span className="brand-wordmark">Chicane.ai</span>
+              <span className="brand-wordmark">ChicaneAI</span>
             </button>
           </div>
           <div className="nav-links" style={{ display: isMobile ? 'none' : 'flex' }}>

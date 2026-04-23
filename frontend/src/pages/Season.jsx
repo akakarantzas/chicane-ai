@@ -115,6 +115,18 @@ export default function Season({ onNavigate }) {
     container.scrollLeft += cardRect.left - containerRect.left - containerRect.width / 2 + cardRect.width / 2
   }, [])
 
+  useEffect(() => {
+    const container = calendarScrollRef.current
+    if (!container) return
+    const onWheel = (e) => {
+      if (e.deltaY === 0) return
+      e.preventDefault()
+      container.scrollLeft += e.deltaY
+    }
+    container.addEventListener('wheel', onWheel, { passive: false })
+    return () => container.removeEventListener('wheel', onWheel)
+  }, [])
+
   const scrollCalendar = (direction) => {
     const container = calendarScrollRef.current
     if (!container) return
@@ -141,7 +153,7 @@ export default function Season({ onNavigate }) {
           <div className="brand-wrap" style={{ flex: isMobile ? '0 1 auto' : 1 }}>
             <button onClick={() => onNavigate('home')} className="brand-button">
               <img src="/logo-mark.png" alt="" className="brand-logo" />
-              <span className="brand-wordmark">Chicane.ai</span>
+              <span className="brand-wordmark">ChicaneAI</span>
             </button>
           </div>
           <div className="nav-links" style={{ display: isMobile ? 'none' : 'flex' }}>
@@ -183,9 +195,6 @@ export default function Season({ onNavigate }) {
 
           {/* Scrollable race cards */}
           <div className="home-calendar-frame">
-            <button className="home-calendar-side-control home-calendar-side-control-left" type="button" aria-label="Scroll calendar left" onClick={() => scrollCalendar(-1)}>
-              ‹
-            </button>
             <div className="calendar-scroll home-calendar-scroll overflow-x-auto" ref={calendarScrollRef}>
               <div className="home-calendar-track">
               {RACES.map((race) => (
@@ -193,16 +202,13 @@ export default function Season({ onNavigate }) {
               ))}
               </div>
             </div>
-            <button className="home-calendar-side-control home-calendar-side-control-right" type="button" aria-label="Scroll calendar right" onClick={() => scrollCalendar(1)}>
-              ›
-            </button>
           </div>
 
         </div>
       </main>
 
       <footer className="border-t border-white/[0.06] relative" style={{ zIndex: 1, padding: '28px 32px' }}>
-        <p style={{ fontSize: '14px', color: '#A1A1AA', textAlign: 'center', margin: 0 }}>© 2026 Chicane.ai, All rights reserved.</p>
+        <p style={{ fontSize: '14px', color: '#A1A1AA', textAlign: 'center', margin: 0 }}>© 2026 ChicaneAI, All rights reserved.</p>
       </footer>
 
     </div>
