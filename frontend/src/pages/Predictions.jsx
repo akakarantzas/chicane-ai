@@ -1,13 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
-const BAR_COLORS = ['#E8002D', '#f97316', '#eab308']
+const POSITION_COLORS = ['#E8002D', '#f97316', '#eab308']
 
 function positionColor(i) {
-  return BAR_COLORS[i] ?? '#A1A1AA'
-}
-
-function barColor(i) {
-  return BAR_COLORS[i] ?? '#E8002D'
+  return POSITION_COLORS[i] ?? '#A1A1AA'
 }
 
 function useIsMobile() {
@@ -146,7 +142,6 @@ function PredictionRow({ prediction, index, maxProb, isLast, isExtra = false, ex
                 height: '100%',
                 width: '0%',
                 '--bar-width': barWidth,
-                '--bar-start': barColor(index),
                 borderRadius: '999px',
                 animationDelay: barDelay,
               }}
@@ -158,6 +153,126 @@ function PredictionRow({ prediction, index, maxProb, isLast, isExtra = false, ex
         </div>
       </div>
     </li>
+  )
+}
+
+function GhostPredictionRow({ prediction, onExpand }) {
+  const rowRef = useRef(null)
+  const [isVisible, setIsVisible] = useState(false)
+  const [displayPct, setDisplayPct] = useState(0)
+  const pctValue = prediction.probability * 100
+
+  useEffect(() => {
+    const node = rowRef.current
+    if (!node) return undefined
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setIsVisible(true); observer.disconnect() } },
+      { threshold: 0.35 },
+    )
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (!isVisible) return undefined
+    const duration = 2880
+    const delay = 5 * 55 + 180
+    let frameId
+    let timeoutId
+    const startAnimation = () => {
+      const start = performance.now()
+      const tick = (now) => {
+        const progress = Math.min((now - start) / duration, 1)
+        setDisplayPct(pctValue * (1 - Math.pow(1 - progress, 3)))
+        if (progress < 1) frameId = requestAnimationFrame(tick)
+      }
+      frameId = requestAnimationFrame(tick)
+    }
+    timeoutId = window.setTimeout(startAnimation, delay)
+    return () => { window.clearTimeout(timeoutId); if (frameId) cancelAnimationFrame(frameId) }
+  }, [isVisible, pctValue])
+
+  return (
+    <div style={{ position: 'relative', marginTop: '8px' }} ref={rowRef}>
+      <div
+        aria-hidden="true"
+        className="prediction-row predictions-page-row"
+        style={{
+          backgroundColor: 'rgba(18,18,22,0.9)',
+          borderLeft: '3px solid transparent',
+          borderBottom: 'none',
+          pointerEvents: 'none',
+          userSelect: 'none',
+        }}
+      >
+        <span
+          className="predictions-rank num"
+          style={{
+            fontSize: '22px',
+            fontWeight: 800,
+            color: '#A1A1AA',
+            width: '42px',
+            height: '42px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            textAlign: 'center',
+            flexShrink: 0,
+          }}
+        >
+          6
+        </span>
+        <div className="predictions-row-content" style={{ flex: 1, minWidth: 0 }}>
+          <div className="prediction-row-main">
+            <div className="predictions-driver">
+              <div className="predictions-driver-name">{prediction.driver}</div>
+              <div className="predictions-team-name">{prediction.team}</div>
+            </div>
+            <div className="predictions-bar-track" style={{ height: '10px', width: '100%' }}>
+              <div
+                className="predictions-bar-fill"
+                style={{
+                  height: '100%',
+                  width: `${pctValue.toFixed(1)}%`,
+                  borderRadius: '999px',
+                  animation: 'none',
+                }}
+              />
+            </div>
+            <span className="predictions-percent num">
+              {displayPct.toFixed(1)}%
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'linear-gradient(to bottom, rgba(12,12,14,0.05) 0%, rgba(12,12,14,0.97) 72%)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <button
+          type="button"
+          onClick={onExpand}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: '#71717A',
+            fontSize: '14px',
+            cursor: 'pointer',
+            padding: '4px 12px',
+            letterSpacing: '0.02em',
+          }}
+        >
+          show more
+        </button>
+      </div>
+    </div>
   )
 }
 
@@ -322,14 +437,32 @@ export default function Predictions({ onNavigate, animationKey = 0 }) {
             ))}
           </ol>
 
-          {hiddenCount > 0 && (
+          {hiddenCount > 0 && !showAllPredictions && (
+            <GhostPredictionRow
+              prediction={predictions[5]}
+              onExpand={() => setShowAllPredictions(true)}
+            />
+          )}
+
+          {showAllPredictions && (
             <button
               type="button"
-              className="predictions-show-more-button"
-              onClick={() => setShowAllPredictions((show) => !show)}
-              aria-expanded={showAllPredictions}
+              onClick={() => setShowAllPredictions(false)}
+              style={{
+                display: 'block',
+                width: '100%',
+                background: 'none',
+                border: 'none',
+                color: '#71717A',
+                fontSize: '14px',
+                cursor: 'pointer',
+                padding: '4px 12px',
+                letterSpacing: '0.02em',
+                marginTop: '8px',
+                textAlign: 'center',
+              }}
             >
-              {showAllPredictions ? 'Show Less' : `Show More (${hiddenCount})`}
+              show less
             </button>
           )}
         </section>

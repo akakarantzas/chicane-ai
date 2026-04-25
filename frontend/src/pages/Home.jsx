@@ -234,7 +234,6 @@ function LatestPredictionCard({ prediction, index, isMobile }) {
           className="premium-bar-fill"
           style={{
             width: isVisible ? barWidth : '0%',
-            '--bar-start': barColor,
             transition: 'width 2.88s cubic-bezier(0.2, 0.8, 0.2, 1)',
             transitionDelay: `${index * 55 + 180}ms`,
           }}
@@ -280,6 +279,100 @@ function StatCard({ number, label }) {
         zIndex: 1,
         letterSpacing: '0.05em',
       }}>{label}</span>
+    </div>
+  )
+}
+
+function GhostPredictionRow({ isMobile, onNavigate }) {
+  const rowRef = useRef(null)
+  const [isVisible, setIsVisible] = useState(false)
+  const [displayPct, setDisplayPct] = useState(0)
+  const pctValue = 1.3
+
+  useEffect(() => {
+    const node = rowRef.current
+    if (!node) return undefined
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setIsVisible(true); observer.disconnect() } },
+      { threshold: 0.35 },
+    )
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (!isVisible) return undefined
+    const duration = 2880
+    const delay = 3 * 55 + 180
+    let frameId
+    let timeoutId
+    const startAnimation = () => {
+      const start = performance.now()
+      const tick = (now) => {
+        const progress = Math.min((now - start) / duration, 1)
+        setDisplayPct(pctValue * (1 - Math.pow(1 - progress, 3)))
+        if (progress < 1) frameId = requestAnimationFrame(tick)
+      }
+      frameId = requestAnimationFrame(tick)
+    }
+    timeoutId = window.setTimeout(startAnimation, delay)
+    return () => { window.clearTimeout(timeoutId); if (frameId) cancelAnimationFrame(frameId) }
+  }, [isVisible])
+
+  return (
+    <div style={{ position: 'relative' }} ref={rowRef}>
+      <div
+        aria-hidden="true"
+        className="latest-prediction-row premium-prediction-row"
+        style={{
+          padding: isMobile ? '16px' : '24px',
+          marginBottom: 0,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '16px',
+          borderLeft: '3px solid #E8002D',
+          pointerEvents: 'none',
+          userSelect: 'none',
+        }}
+      >
+        <span
+          className="home-prediction-rank num"
+          style={{ fontSize: '22px', fontWeight: 800, color: '#A1A1AA', width: '42px', height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+        >
+          4
+        </span>
+        <span style={{ fontSize: '17px', fontWeight: 700, color: '#F4F4F5', flex: 1 }}>Hamilton</span>
+        <div className="latest-bar premium-bar-track" style={{ width: '120px', height: '5px', flexShrink: 0 }}>
+          <div className="premium-bar-fill" style={{ width: '1.3%' }} />
+        </div>
+        <span className="num" style={{ fontSize: '17px', fontWeight: 700, color: '#F4F4F5', width: '60px', flexShrink: 0, textAlign: 'right' }}>{displayPct.toFixed(1)}%</span>
+      </div>
+
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'linear-gradient(to bottom, rgba(12,12,14,0.05) 0%, rgba(12,12,14,0.97) 72%)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <button
+          onClick={() => onNavigate('predictions')}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: '#71717A',
+            fontSize: '14px',
+            cursor: 'pointer',
+            padding: '4px 12px',
+            letterSpacing: '0.02em',
+          }}
+        >
+          view all predictions
+        </button>
+      </div>
     </div>
   )
 }
@@ -547,20 +640,8 @@ export default function Home({ onNavigate }) {
             <LatestPredictionCard key={p.driver} prediction={p} index={i} isMobile={isMobile} />
           ))}
 
-          <button
-            onClick={() => onNavigate('predictions')}
-            className="secondary-action"
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#1A1A1F'
-              e.currentTarget.style.color = '#F4F4F5'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent'
-              e.currentTarget.style.color = '#A1A1AA'
-            }}
-          >
-            View full predictions
-          </button>
+          {/* Ghost 4th row + depth fade + "view all predictions" */}
+          <GhostPredictionRow isMobile={isMobile} onNavigate={onNavigate} />
         </div>
       </section>
 

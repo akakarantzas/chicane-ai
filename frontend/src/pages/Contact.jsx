@@ -8,6 +8,31 @@ const FEATURE_CHIPS = [
   'Driver career stats',
 ]
 
+function FeatureChip({ label }) {
+  const [hovered, setHovered] = useState(false)
+  return (
+    <span
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        display: 'inline-block',
+        color: '#E8002D',
+        backgroundColor: hovered ? 'rgba(232,0,45,0.16)' : 'rgba(232,0,45,0.1)',
+        border: `1px solid ${hovered ? '#E8002D' : 'rgba(232,0,45,0.34)'}`,
+        borderRadius: '8px',
+        padding: '4px 12px',
+        fontSize: '13px',
+        fontWeight: 600,
+        whiteSpace: 'nowrap',
+        boxShadow: hovered ? '0 0 14px rgba(232,0,45,0.18)' : 'none',
+        transition: 'background-color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease',
+      }}
+    >
+      {label}
+    </span>
+  )
+}
+
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768)
 
@@ -134,14 +159,12 @@ export default function Contact({ onNavigate }) {
               <span className="contact-status-dot" aria-hidden="true" />
               <div>
                 <h2>Feature requests</h2>
-                <p>Suggest improvements, new F1 tools, or prediction views that would make the product more useful.</p>
+                <p>Suggest improvements, new F1 tools, or prediction views that would make ChicaneAI more useful.</p>
               </div>
             </div>
             <div className="contact-chip-grid">
               {FEATURE_CHIPS.map((chip) => (
-                <button key={chip} className="contact-chip" type="button">
-                  {chip}
-                </button>
+                <FeatureChip key={chip} label={chip} />
               ))}
             </div>
           </article>

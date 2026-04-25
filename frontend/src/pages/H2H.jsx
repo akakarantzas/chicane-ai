@@ -520,21 +520,21 @@ export default function H2H({ onNavigate }) {
             style={{
               width: '100%',
               height: '44px',
-              backgroundColor: '#E8002D',
+              backgroundColor: btnHovered && !loading ? '#c8002a' : '#E8002D',
               color: '#fff',
-              border: 'none',
+              border: '1px solid rgba(232,0,45,0.5)',
               borderRadius: '8px',
               fontSize: '15px',
               fontWeight: 600,
               cursor: loading ? 'not-allowed' : 'pointer',
               opacity: loading ? 0.6 : 1,
               boxShadow: btnHovered && !loading
-                ? '0 4px 30px rgba(232,0,45,0.5)'
-                : '0 4px 20px rgba(232,0,45,0.3)',
-              transition: 'opacity 0.2s, box-shadow 0.2s',
+                ? '0 3px 8px rgba(232,0,45,0.12)'
+                : 'none',
+              transition: 'background-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease',
             }}
           >
-            {loading ? 'Loading...' : 'Compare'}
+            {loading ? <span className="loading-dots">Loading</span> : 'Compare'}
           </button>
 
           {/* ── States ── */}

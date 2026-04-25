@@ -325,6 +325,13 @@ button:focus-visible {
   color: #E8002D;
   background: rgba(232,0,45,0.1);
   border: 1px solid rgba(232,0,45,0.34);
+  transition: box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.next-race-pill-primary:hover {
+  background: rgba(232,0,45,0.16);
+  border-color: #E8002D;
+  box-shadow: 0 0 14px rgba(232,0,45,0.18);
 }
 
 .next-race-pill-secondary {
@@ -373,7 +380,7 @@ button:focus-visible {
 .premium-bar-fill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--bar-start), #f97316 48%, #eab308);
+  background: linear-gradient(90deg, #E8002D, #f97316 48%, #eab308);
   box-shadow: none;
 }
 
@@ -573,7 +580,7 @@ button:focus-visible {
 }
 
 .h2h-vs-circle {
-  width: clamp(48px, 6vw, 64px);
+  width: clamp(40px, 5vw, 54px);
   aspect-ratio: 1;
   grid-column: 1 / -1;
   grid-row: 1;
@@ -583,7 +590,7 @@ button:focus-visible {
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background-color: #E8002D;
+  background-color: #450a0a;
   color: #fff;
   font-size: 16px;
   font-weight: 900;
@@ -1234,6 +1241,21 @@ button:focus-visible {
   }
 }
 
+@keyframes loading-dots {
+  0%  { content: '.';   }
+  25% { content: '..';  }
+  50% { content: '...'; }
+  75% { content: '';    }
+}
+
+.loading-dots::after {
+  content: '';
+  display: inline-block;
+  width: 1.4em;
+  text-align: left;
+  animation: loading-dots 1.2s steps(4, end) infinite;
+}
+
 .contact-page {
   position: relative;
   overflow: hidden;
@@ -1449,14 +1471,7 @@ footer.border-t {
 }
 
 .contact-chip {
-  min-height: auto;
-  padding: 6px 14px;
-  border-radius: 8px;
-  background: rgba(232,0,45,0.1);
-  border: 1px solid rgba(232,0,45,0.34);
-  color: #E8002D;
-  font-size: 13px;
-  font-weight: 600;
+  display: inline-block;
 }
 
 .contact-chip:hover {
@@ -1720,7 +1735,7 @@ button:active { transform: translateY(0px); opacity: 1; }
   }
 
   .h2h-vs-circle {
-    width: 44px;
+    width: 37px;
     font-size: 13px;
   }
 
