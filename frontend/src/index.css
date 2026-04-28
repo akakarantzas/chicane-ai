@@ -1272,7 +1272,7 @@ button:focus-visible {
   z-index: 1;
   width: min(100%, 680px);
   margin: 0 auto;
-  padding: 118px 24px 72px;
+  padding: 64px 24px 72px;
 }
 
 .contact-header {
@@ -1317,7 +1317,7 @@ button:focus-visible {
 .contact-stack {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
 }
 
 .contact-card {
@@ -1479,6 +1479,151 @@ footer.border-t {
   background: rgba(232,0,45,0.16);
   color: #E8002D;
   box-shadow: 0 0 14px rgba(232,0,45,0.18);
+}
+
+/* ── Contact form ─────────────────────────────────────────────────────────── */
+
+.cf-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.cf-field-last {
+  margin-bottom: 0;
+}
+
+.cf-label {
+  color: #A1A1AA;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.cf-label-optional {
+  color: #52525B;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.cf-input,
+.cf-textarea {
+  width: 100%;
+  background: rgba(12,12,14,0.6);
+  border: 1px solid rgba(244,244,245,0.1);
+  border-radius: 6px;
+  color: #F4F4F5;
+  font-size: 15px;
+  font-family: inherit;
+  padding: 10px 12px;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.cf-input::placeholder,
+.cf-textarea::placeholder {
+  color: #52525B;
+}
+
+.cf-input:focus,
+.cf-textarea:focus {
+  border-color: rgba(232,0,45,0.5);
+  box-shadow: 0 0 0 3px rgba(232,0,45,0.1);
+}
+
+.cf-input.cf-input-error,
+.cf-textarea.cf-input-error {
+  border-color: rgba(232,0,45,0.55);
+}
+
+.cf-textarea {
+  resize: vertical;
+  min-height: 116px;
+}
+
+.cf-error-text {
+  color: #F87171;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.cf-server-error {
+  margin-top: 14px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: rgba(232,0,45,0.08);
+  border: 1px solid rgba(232,0,45,0.28);
+  color: #F87171;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.cf-submit {
+  width: 100%;
+  height: 44px;
+  margin-top: 16px;
+  border-radius: 8px;
+  background: rgba(232,0,45,0.1);
+  border: 1px solid rgba(232,0,45,0.34);
+  color: #E8002D;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.cf-submit:hover:not(:disabled) {
+  background: rgba(232,0,45,0.16);
+  border-color: #E8002D;
+  box-shadow: 0 0 14px rgba(232,0,45,0.18);
+}
+
+.cf-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.cf-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 16px 0 8px;
+  gap: 12px;
+}
+
+.cf-success-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(34,197,94,0.12);
+  border: 1px solid rgba(34,197,94,0.3);
+  display: grid;
+  place-items: center;
+  color: #22C55E;
+}
+
+.cf-success h3 {
+  color: #F4F4F5;
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.cf-success p {
+  color: #A1A1AA;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
 }
 
 .calendar-scroll::-webkit-scrollbar {
@@ -1821,7 +1966,7 @@ button:active { transform: translateY(0px); opacity: 1; }
   }
 
   .contact-shell {
-    padding: 96px 16px 52px;
+    padding: 48px 16px 52px;
   }
 
   .contact-header {

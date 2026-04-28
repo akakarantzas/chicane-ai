@@ -1,7 +1,10 @@
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import predictions, races, h2h
+load_dotenv()
+
+from app.routers import predictions, races, h2h, contact
 
 app = FastAPI(title="Chicane.ai API")
 
@@ -17,6 +20,7 @@ app.add_middleware(
 app.include_router(predictions.router)
 app.include_router(races.router)
 app.include_router(h2h.router)
+app.include_router(contact.router)
 
 
 @app.get("/api/health")

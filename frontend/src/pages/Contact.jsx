@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 
-const EMAIL = 'a.kakarantzas@acg.edu'
 const FEATURE_CHIPS = [
   'Lap time comparison',
   'Fantasy optimizer',
@@ -84,20 +83,124 @@ function MobileNavDropdown({ onNavigate }) {
   )
 }
 
+function ContactForm() {
+  const [fields, setFields] = useState({ name: '', email: '', message: '' })
+  const [errors, setErrors] = useState({})
+  const [status, setStatus] = useState('idle')
+  const [serverError, setServerError] = useState('')
+
+  const validate = () => {
+    const e = {}
+    if (!fields.email.trim()) {
+      e.email = 'Email is required.'
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email.trim())) {
+      e.email = 'Please enter a valid email.'
+    }
+    if (!fields.message.trim()) {
+      e.message = 'Message is required.'
+    } else if (fields.message.length > 2000) {
+      e.message = 'Message must be under 2000 characters.'
+    }
+    return e
+  }
+
+  const handleChange = (key) => (e) => {
+    setFields((f) => ({ ...f, [key]: e.target.value }))
+    if (errors[key]) setErrors((prev) => { const n = { ...prev }; delete n[key]; return n })
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    const errs = validate()
+    if (Object.keys(errs).length) { setErrors(errs); return }
+    setErrors({})
+    setStatus('submitting')
+    try {
+      const res = await fetch('http://localhost:8000/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(fields),
+      })
+      const data = await res.json()
+      if (res.ok && data.success) {
+        setStatus('success')
+      } else {
+        setServerError(data.detail || data.error || 'Something went wrong. Please try again.')
+        setStatus('error')
+      }
+    } catch {
+      setServerError('Could not reach the server. Please try again.')
+      setStatus('error')
+    }
+  }
+
+  if (status === 'success') {
+    return (
+      <div className="cf-success">
+        <div className="cf-success-icon">
+          <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
+            <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
+        <h3>Message sent</h3>
+        <p>Thanks for reaching out — we'll get back to you soon.</p>
+      </div>
+    )
+  }
+
+  return (
+    <form onSubmit={handleSubmit} noValidate>
+      <div className="cf-field">
+        <label className="cf-label" htmlFor="cf-name">
+          Name <span className="cf-label-optional">— optional</span>
+        </label>
+        <input
+          id="cf-name"
+          className="cf-input"
+          type="text"
+          placeholder="Your name"
+          value={fields.name}
+          onChange={handleChange('name')}
+          autoComplete="name"
+        />
+      </div>
+      <div className="cf-field">
+        <label className="cf-label" htmlFor="cf-email">Email</label>
+        <input
+          id="cf-email"
+          className={`cf-input${errors.email ? ' cf-input-error' : ''}`}
+          type="email"
+          placeholder="you@example.com"
+          value={fields.email}
+          onChange={handleChange('email')}
+          autoComplete="email"
+        />
+        {errors.email && <span className="cf-error-text">{errors.email}</span>}
+      </div>
+      <div className="cf-field cf-field-last">
+        <label className="cf-label" htmlFor="cf-message">Message</label>
+        <textarea
+          id="cf-message"
+          className={`cf-textarea${errors.message ? ' cf-input-error' : ''}`}
+          placeholder="What's on your mind?"
+          value={fields.message}
+          onChange={handleChange('message')}
+        />
+        {errors.message && <span className="cf-error-text">{errors.message}</span>}
+      </div>
+      {status === 'error' && (
+        <div className="cf-server-error">{serverError}</div>
+      )}
+      <button className="cf-submit" type="submit" disabled={status === 'submitting'}>
+        {status === 'submitting' ? 'Sending…' : 'Send message'}
+      </button>
+    </form>
+  )
+}
+
 export default function Contact({ onNavigate }) {
   const isMobile = useIsMobile()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [copied, setCopied] = useState(false)
-
-  const copyEmail = async () => {
-    try {
-      await navigator.clipboard.writeText(EMAIL)
-      setCopied(true)
-      window.setTimeout(() => setCopied(false), 1800)
-    } catch {
-      window.location.href = `mailto:${EMAIL}`
-    }
-  }
 
   return (
     <div className="contact-page min-h-screen text-[#F4F4F5] flex flex-col">
@@ -138,20 +241,8 @@ export default function Contact({ onNavigate }) {
         </header>
 
         <section className="contact-stack" aria-label="Contact options">
-          <article className="contact-card contact-card-row">
-            <div className="contact-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none">
-                <path d="M4.75 6.75h14.5v10.5H4.75V6.75Z" stroke="currentColor" strokeWidth="1.8" />
-                <path d="m5.5 7.5 6.5 5 6.5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </div>
-            <div className="contact-card-copy">
-              <span>Email</span>
-              <p>{EMAIL}</p>
-            </div>
-            <button className="contact-action" onClick={copyEmail}>
-              {copied ? 'Copied' : 'Copy email'}
-            </button>
+          <article className="contact-card contact-feature-card">
+            <ContactForm />
           </article>
 
           <article className="contact-card contact-feature-card">
