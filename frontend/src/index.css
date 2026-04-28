@@ -325,6 +325,13 @@ button:focus-visible {
   color: #E8002D;
   background: rgba(232,0,45,0.1);
   border: 1px solid rgba(232,0,45,0.34);
+  transition: box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.next-race-pill-primary:hover {
+  background: rgba(232,0,45,0.16);
+  border-color: #E8002D;
+  box-shadow: 0 0 14px rgba(232,0,45,0.18);
 }
 
 .next-race-pill-secondary {
@@ -373,7 +380,7 @@ button:focus-visible {
 .premium-bar-fill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--bar-start), #f97316 48%, #eab308);
+  background: linear-gradient(90deg, #E8002D, #f97316 48%, #eab308);
   box-shadow: none;
 }
 
@@ -573,7 +580,7 @@ button:focus-visible {
 }
 
 .h2h-vs-circle {
-  width: clamp(48px, 6vw, 64px);
+  width: clamp(40px, 5vw, 54px);
   aspect-ratio: 1;
   grid-column: 1 / -1;
   grid-row: 1;
@@ -583,7 +590,7 @@ button:focus-visible {
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background-color: #E8002D;
+  background-color: #450a0a;
   color: #fff;
   font-size: 16px;
   font-weight: 900;
@@ -646,11 +653,32 @@ button:focus-visible {
   position: relative;
 }
 
+/* Container query root — cqi resolves to this element's inline size */
+#home-race-calendar {
+  container-type: inline-size;
+}
+
 .home-calendar-scroll {
   margin: 0 -10px;
   padding: 8px 10px 18px;
+}
+
+/* ── Home-page calendar overrides (desktop: 3 cards) ─────────────────────── */
+#home-race-calendar .home-calendar-scroll {
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
-  scroll-snap-type: x proximity;
+  margin-inline: 0;
+  /* padding = (N-1)(100cqi + gap) / (2N) for N=3, gap=12px → 100cqi/3 + 4px
+     allows every card, including first and last, to snap to centre */
+  padding-inline: calc(40cqi + 4.8px);
+}
+
+#home-race-calendar .home-calendar-card {
+  /* exactly 3 cards + 2 gaps fill the container */
+  width: calc((100cqi - 4 * 12px) / 5);
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
 }
 
 .home-calendar-track {
@@ -671,7 +699,6 @@ button:focus-visible {
   gap: 7px;
   flex-shrink: 0;
   overflow: hidden;
-  scroll-snap-align: center;
   border-radius: 8px;
   background:
     linear-gradient(145deg, rgba(244,244,245,0.05), rgba(244,244,245,0.018) 42%, rgba(12,12,14,0.5)),
@@ -1214,6 +1241,21 @@ button:focus-visible {
   }
 }
 
+@keyframes loading-dots {
+  0%  { content: '.';   }
+  25% { content: '..';  }
+  50% { content: '...'; }
+  75% { content: '';    }
+}
+
+.loading-dots::after {
+  content: '';
+  display: inline-block;
+  width: 1.4em;
+  text-align: left;
+  animation: loading-dots 1.2s steps(4, end) infinite;
+}
+
 .contact-page {
   position: relative;
   overflow: hidden;
@@ -1230,7 +1272,7 @@ button:focus-visible {
   z-index: 1;
   width: min(100%, 680px);
   margin: 0 auto;
-  padding: 118px 24px 72px;
+  padding: 64px 24px 72px;
 }
 
 .contact-header {
@@ -1275,7 +1317,7 @@ button:focus-visible {
 .contact-stack {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
 }
 
 .contact-card {
@@ -1429,14 +1471,7 @@ footer.border-t {
 }
 
 .contact-chip {
-  min-height: auto;
-  padding: 6px 14px;
-  border-radius: 8px;
-  background: rgba(232,0,45,0.1);
-  border: 1px solid rgba(232,0,45,0.34);
-  color: #E8002D;
-  font-size: 13px;
-  font-weight: 600;
+  display: inline-block;
 }
 
 .contact-chip:hover {
@@ -1444,6 +1479,151 @@ footer.border-t {
   background: rgba(232,0,45,0.16);
   color: #E8002D;
   box-shadow: 0 0 14px rgba(232,0,45,0.18);
+}
+
+/* ── Contact form ─────────────────────────────────────────────────────────── */
+
+.cf-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.cf-field-last {
+  margin-bottom: 0;
+}
+
+.cf-label {
+  color: #A1A1AA;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.cf-label-optional {
+  color: #52525B;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.cf-input,
+.cf-textarea {
+  width: 100%;
+  background: rgba(12,12,14,0.6);
+  border: 1px solid rgba(244,244,245,0.1);
+  border-radius: 6px;
+  color: #F4F4F5;
+  font-size: 15px;
+  font-family: inherit;
+  padding: 10px 12px;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.cf-input::placeholder,
+.cf-textarea::placeholder {
+  color: #52525B;
+}
+
+.cf-input:focus,
+.cf-textarea:focus {
+  border-color: rgba(232,0,45,0.5);
+  box-shadow: 0 0 0 3px rgba(232,0,45,0.1);
+}
+
+.cf-input.cf-input-error,
+.cf-textarea.cf-input-error {
+  border-color: rgba(232,0,45,0.55);
+}
+
+.cf-textarea {
+  resize: vertical;
+  min-height: 116px;
+}
+
+.cf-error-text {
+  color: #F87171;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.cf-server-error {
+  margin-top: 14px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: rgba(232,0,45,0.08);
+  border: 1px solid rgba(232,0,45,0.28);
+  color: #F87171;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.cf-submit {
+  width: 100%;
+  height: 44px;
+  margin-top: 16px;
+  border-radius: 8px;
+  background: rgba(232,0,45,0.1);
+  border: 1px solid rgba(232,0,45,0.34);
+  color: #E8002D;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.cf-submit:hover:not(:disabled) {
+  background: rgba(232,0,45,0.16);
+  border-color: #E8002D;
+  box-shadow: 0 0 14px rgba(232,0,45,0.18);
+}
+
+.cf-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.cf-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 16px 0 8px;
+  gap: 12px;
+}
+
+.cf-success-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(34,197,94,0.12);
+  border: 1px solid rgba(34,197,94,0.3);
+  display: grid;
+  place-items: center;
+  color: #22C55E;
+}
+
+.cf-success h3 {
+  color: #F4F4F5;
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.cf-success p {
+  color: #A1A1AA;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
 }
 
 .calendar-scroll::-webkit-scrollbar {
@@ -1618,7 +1798,16 @@ button:active { transform: translateY(0px); opacity: 1; }
   .home-calendar-scroll {
     margin: 0 -16px;
     padding: 8px 16px 16px;
-    scroll-snap-type: x mandatory;
+  }
+
+  /* Mobile: 2 cards, padding = (N-1)(100cqi + gap) / (2N) for N=2 → 25cqi + 3px */
+  #home-race-calendar .home-calendar-scroll {
+    margin-inline: 0;
+    padding-inline: calc(25cqi + 3px);
+  }
+
+  #home-race-calendar .home-calendar-card {
+    width: calc((100cqi - 12px) / 2);
   }
 
   .home-calendar-track {
@@ -1691,7 +1880,7 @@ button:active { transform: translateY(0px); opacity: 1; }
   }
 
   .h2h-vs-circle {
-    width: 44px;
+    width: 37px;
     font-size: 13px;
   }
 
@@ -1777,7 +1966,7 @@ button:active { transform: translateY(0px); opacity: 1; }
   }
 
   .contact-shell {
-    padding: 96px 16px 52px;
+    padding: 48px 16px 52px;
   }
 
   .contact-header {
@@ -1834,3 +2023,4 @@ button:active { transform: translateY(0px); opacity: 1; }
     padding-right: 4px;
   }
 }
+

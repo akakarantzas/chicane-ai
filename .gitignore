@@ -31,3 +31,11 @@ Thumbs.db
 
 # Jupyter
 .ipynb_checkpoints/
+
+# Cache / databases
+cache/
+*.sqlite
+*.db
+
+# Claude Code local settings
+.claude/settings.local.json

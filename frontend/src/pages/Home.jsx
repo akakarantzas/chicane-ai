@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import NextRaceCircuitCard from '../components/NextRaceCircuitCard'
 import ButtonHeartbeatEffectDemo from '../components/ui/heartbeat-effect-button'
 import { nextRaceCircuit } from '../data/circuits'
+
 const RACES = [
   { round: 1,  code: 'AU', name: 'Australian GP',    country: 'Australia',     date: 'Mar 8',  status: 'completed' },
   { round: 2,  code: 'CN', name: 'Chinese GP',        country: 'China',         date: 'Mar 15', status: 'completed' },
@@ -99,7 +100,6 @@ function MobileNavDropdown({ onNavigate }) {
     </div>
   )
 }
-
 function RaceCard({ name, country, date, status, cardRef }) {
   const isCurrent   = status === 'current'
   const isCompleted = status === 'completed'
@@ -234,7 +234,6 @@ function LatestPredictionCard({ prediction, index, isMobile }) {
           className="premium-bar-fill"
           style={{
             width: isVisible ? barWidth : '0%',
-            '--bar-start': barColor,
             transition: 'width 2.88s cubic-bezier(0.2, 0.8, 0.2, 1)',
             transitionDelay: `${index * 55 + 180}ms`,
           }}
@@ -280,6 +279,100 @@ function StatCard({ number, label }) {
         zIndex: 1,
         letterSpacing: '0.05em',
       }}>{label}</span>
+    </div>
+  )
+}
+
+function GhostPredictionRow({ isMobile, onNavigate }) {
+  const rowRef = useRef(null)
+  const [isVisible, setIsVisible] = useState(false)
+  const [displayPct, setDisplayPct] = useState(0)
+  const pctValue = 1.3
+
+  useEffect(() => {
+    const node = rowRef.current
+    if (!node) return undefined
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setIsVisible(true); observer.disconnect() } },
+      { threshold: 0.35 },
+    )
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (!isVisible) return undefined
+    const duration = 2880
+    const delay = 3 * 55 + 180
+    let frameId
+    let timeoutId
+    const startAnimation = () => {
+      const start = performance.now()
+      const tick = (now) => {
+        const progress = Math.min((now - start) / duration, 1)
+        setDisplayPct(pctValue * (1 - Math.pow(1 - progress, 3)))
+        if (progress < 1) frameId = requestAnimationFrame(tick)
+      }
+      frameId = requestAnimationFrame(tick)
+    }
+    timeoutId = window.setTimeout(startAnimation, delay)
+    return () => { window.clearTimeout(timeoutId); if (frameId) cancelAnimationFrame(frameId) }
+  }, [isVisible])
+
+  return (
+    <div style={{ position: 'relative' }} ref={rowRef}>
+      <div
+        aria-hidden="true"
+        className="latest-prediction-row premium-prediction-row"
+        style={{
+          padding: isMobile ? '16px' : '24px',
+          marginBottom: 0,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '16px',
+          borderLeft: '3px solid #E8002D',
+          pointerEvents: 'none',
+          userSelect: 'none',
+        }}
+      >
+        <span
+          className="home-prediction-rank num"
+          style={{ fontSize: '22px', fontWeight: 800, color: '#A1A1AA', width: '42px', height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+        >
+          4
+        </span>
+        <span style={{ fontSize: '17px', fontWeight: 700, color: '#F4F4F5', flex: 1 }}>Hamilton</span>
+        <div className="latest-bar premium-bar-track" style={{ width: '120px', height: '5px', flexShrink: 0 }}>
+          <div className="premium-bar-fill" style={{ width: '1.3%' }} />
+        </div>
+        <span className="num" style={{ fontSize: '17px', fontWeight: 700, color: '#F4F4F5', width: '60px', flexShrink: 0, textAlign: 'right' }}>{displayPct.toFixed(1)}%</span>
+      </div>
+
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'linear-gradient(to bottom, rgba(12,12,14,0.05) 0%, rgba(12,12,14,0.97) 72%)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <button
+          onClick={() => onNavigate('predictions')}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: '#71717A',
+            fontSize: '14px',
+            cursor: 'pointer',
+            padding: '4px 12px',
+            letterSpacing: '0.02em',
+          }}
+        >
+          view all predictions
+        </button>
+      </div>
     </div>
   )
 }
@@ -357,7 +450,26 @@ export default function Home({ onNavigate }) {
     if (!card || !container) return
     const cardRect = card.getBoundingClientRect()
     const containerRect = container.getBoundingClientRect()
+    // Disable smooth so the page loads already centred — no slide-in animation
+    container.style.scrollBehavior = 'auto'
     container.scrollLeft += cardRect.left - containerRect.left - containerRect.width / 2 + cardRect.width / 2
+    container.style.scrollBehavior = ''
+  }, [])
+
+  useEffect(() => {
+    const container = calendarScrollRef.current
+    if (!container) return
+    const onWheel = (e) => {
+      const delta = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX
+      if (delta === 0) return
+      e.preventDefault()
+      container.style.scrollSnapType = 'none'
+      container.style.scrollBehavior = 'auto'
+      container.scrollLeft += delta
+      // After the wheel goes idle restore CSS — browser will smooth-snap to nearest card
+    }
+    container.addEventListener('wheel', onWheel, { passive: false })
+    return () => container.removeEventListener('wheel', onWheel)
   }, [])
 
   const scrollCalendar = (direction) => {
@@ -381,7 +493,7 @@ export default function Home({ onNavigate }) {
           <div className="brand-wrap" style={{ flex: isMobile ? '0 1 auto' : 1 }}>
             <button onClick={() => onNavigate('home')} className="brand-button" aria-label="Go to home">
               <img src="/logo-mark.png" alt="" className="brand-logo" />
-              <span className="brand-wordmark">Chicane.ai</span>
+              <span className="brand-wordmark">ChicaneAI</span>
             </button>
           </div>
 
@@ -494,10 +606,7 @@ export default function Home({ onNavigate }) {
               </button>
             </div>
           </div>
-          <div className="home-calendar-frame">
-            <button className="home-calendar-side-control home-calendar-side-control-left" type="button" aria-label="Scroll calendar left" onClick={() => scrollCalendar(-1)}>
-              ‹
-            </button>
+          <div id="home-race-calendar" className="home-calendar-frame">
             <div className="calendar-scroll home-calendar-scroll overflow-x-auto" ref={calendarScrollRef}>
               <div className="home-calendar-track">
               {RACES.map((race) => (
@@ -505,9 +614,6 @@ export default function Home({ onNavigate }) {
               ))}
               </div>
             </div>
-            <button className="home-calendar-side-control home-calendar-side-control-right" type="button" aria-label="Scroll calendar right" onClick={() => scrollCalendar(1)}>
-              ›
-            </button>
           </div>
         </div>
       </section>
@@ -534,20 +640,8 @@ export default function Home({ onNavigate }) {
             <LatestPredictionCard key={p.driver} prediction={p} index={i} isMobile={isMobile} />
           ))}
 
-          <button
-            onClick={() => onNavigate('predictions')}
-            className="secondary-action"
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#1A1A1F'
-              e.currentTarget.style.color = '#F4F4F5'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent'
-              e.currentTarget.style.color = '#A1A1AA'
-            }}
-          >
-            View full predictions →
-          </button>
+          {/* Ghost 4th row + depth fade + "view all predictions" */}
+          <GhostPredictionRow isMobile={isMobile} onNavigate={onNavigate} />
         </div>
       </section>
 
@@ -569,9 +663,10 @@ export default function Home({ onNavigate }) {
 
       {/* Footer */}
       <footer className="border-t border-white/[0.06]" style={{ padding: '28px 32px' }}>
-        <p style={{ fontSize: '14px', color: '#A1A1AA', textAlign: 'center', margin: 0 }}>© 2026 Chicane.ai, All rights reserved.</p>
+        <p style={{ fontSize: '14px', color: '#A1A1AA', textAlign: 'center', margin: 0 }}>© 2026 ChicaneAI, All rights reserved.</p>
       </footer>
 
     </div>
   )
 }
+

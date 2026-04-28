@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 
 const KEYFRAMES = `
 @keyframes heartbeat-ping {
-  0%   { transform: scale(1);    opacity: 0.4; }
+  0%   { transform: scale(1);    opacity: 0.25; }
   100% { transform: scale(1.15); opacity: 0;   }
 }
 `
@@ -40,7 +40,7 @@ export default function ButtonHeartbeatEffectDemo({ onClick, children = 'See pre
         onMouseEnter={(e) => {
           e.currentTarget.style.backgroundColor = '#E8002D'
           e.currentTarget.style.transform = 'translateY(-1px)'
-          e.currentTarget.style.boxShadow = '0 10px 24px rgba(232,0,45,0.25)'
+          e.currentTarget.style.boxShadow = '0 6px 16px rgba(232,0,45,0.15)'
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.backgroundColor = '#E8002D'
