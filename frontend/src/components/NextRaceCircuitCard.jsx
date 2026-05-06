@@ -8,6 +8,8 @@ export default function NextRaceCircuitCard({
   date,
   status,
   countryLabel,
+  trackImage = miamiTrack,
+  trackAlt = 'Race circuit',
   circuitPath,
   viewBox,
   animationDuration,
@@ -44,17 +46,19 @@ export default function NextRaceCircuitCard({
         </div>
 
         <div className="circuit-panel relative rounded-lg p-4 md:p-5">
-          <div className="relative w-full">
+          <div className="circuit-viewport relative w-full">
             <img
-              src={miamiTrack}
-              alt="Miami GP Circuit"
-              className="circuit-base-image block h-auto w-full"
+              src={trackImage}
+              alt={trackAlt}
+              className="circuit-base-image"
             />
-            <AnimatedCircuit
-              path={circuitPath}
-              viewBox={viewBox}
-              duration={animationDuration}
-            />
+            {circuitPath && viewBox && (
+              <AnimatedCircuit
+                path={circuitPath}
+                viewBox={viewBox}
+                duration={animationDuration}
+              />
+            )}
           </div>
         </div>
       </div>

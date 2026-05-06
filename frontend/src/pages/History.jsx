@@ -78,7 +78,7 @@ export default function History({ onNavigate }) {
     <div
       className="page-bg relative min-h-screen text-[#F4F4F5] flex flex-col"
       style={{
-        backgroundImage: 'url(/f1red.jpg)',
+        backgroundImage: 'url(/chicane2.png)',
       }}
     >
       {/* Dark overlay */}

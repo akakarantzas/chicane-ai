@@ -1,9 +1,9 @@
 # Chicane.ai — Design System
 
 ## Brand
-- Name: Chicane.ai
+- Name: ChicaneAI
 - Tagline: Predict. Verify. Repeat.
-- Positioning: AI-powered F1 intelligence platform
+- Positioning: AI-powered F1 analytics platform
 
 ## Colors
 - Page background: #0C0C0E

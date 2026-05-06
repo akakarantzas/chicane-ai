@@ -2,33 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import NextRaceCircuitCard from '../components/NextRaceCircuitCard'
 import ButtonHeartbeatEffectDemo from '../components/ui/heartbeat-effect-button'
 import { nextRaceCircuit } from '../data/circuits'
-
-const RACES = [
-  { round: 1,  code: 'AU', name: 'Australian GP',    country: 'Australia',     date: 'Mar 8',  status: 'completed' },
-  { round: 2,  code: 'CN', name: 'Chinese GP',        country: 'China',         date: 'Mar 15', status: 'completed' },
-  { round: 3,  code: 'JP', name: 'Japanese GP',       country: 'Japan',         date: 'Mar 29', status: 'completed' },
-  { round: 4,  code: 'BH', name: 'Bahrain GP',        country: 'Bahrain',       date: 'Apr 12', status: 'completed' },
-  { round: 5,  code: 'SA', name: 'Saudi Arabian GP',  country: 'Saudi Arabia',  date: 'Apr 19', status: 'completed' },
-  { round: 6,  code: 'US', name: 'Miami GP',          country: 'United States', date: 'May 3',  status: 'current'   },
-  { round: 7,  code: 'CA', name: 'Canadian GP',       country: 'Canada',        date: 'May 24', status: 'upcoming'  },
-  { round: 8,  code: 'MC', name: 'Monaco GP',         country: 'Monaco',        date: 'Jun 7',  status: 'upcoming'  },
-  { round: 9,  code: 'ES', name: 'Spanish GP',        country: 'Spain',         date: 'Jun 14', status: 'upcoming'  },
-  { round: 10, code: 'AT', name: 'Austrian GP',       country: 'Austria',       date: 'Jun 28', status: 'upcoming'  },
-  { round: 11, code: 'GB', name: 'British GP',        country: 'United Kingdom',date: 'Jul 5',  status: 'upcoming'  },
-  { round: 12, code: 'BE', name: 'Belgian GP',        country: 'Belgium',       date: 'Jul 19', status: 'upcoming'  },
-  { round: 13, code: 'HU', name: 'Hungarian GP',      country: 'Hungary',       date: 'Jul 26', status: 'upcoming'  },
-  { round: 14, code: 'NL', name: 'Dutch GP',          country: 'Netherlands',   date: 'Aug 23', status: 'upcoming'  },
-  { round: 15, code: 'IT', name: 'Italian GP',        country: 'Italy',         date: 'Sep 6',  status: 'upcoming'  },
-  { round: 16, code: 'ES', name: 'Spanish GP',        country: 'Spain',         date: 'Sep 13', status: 'upcoming'  },
-  { round: 17, code: 'AZ', name: 'Azerbaijan GP',     country: 'Azerbaijan',    date: 'Sep 26', status: 'upcoming'  },
-  { round: 18, code: 'SG', name: 'Singapore GP',      country: 'Singapore',     date: 'Oct 11', status: 'upcoming'  },
-  { round: 19, code: 'US', name: 'United States GP',  country: 'United States', date: 'Oct 25', status: 'upcoming'  },
-  { round: 20, code: 'MX', name: 'Mexico City GP',    country: 'Mexico',        date: 'Nov 1',  status: 'upcoming'  },
-  { round: 21, code: 'BR', name: 'Sao Paulo GP',      country: 'Brazil',        date: 'Nov 8',  status: 'upcoming'  },
-  { round: 22, code: 'US', name: 'Las Vegas GP',      country: 'United States', date: 'Nov 22', status: 'upcoming'  },
-  { round: 23, code: 'QA', name: 'Qatar GP',          country: 'Qatar',         date: 'Nov 29', status: 'upcoming'  },
-  { round: 24, code: 'AE', name: 'Abu Dhabi GP',      country: 'UAE',           date: 'Dec 6',  status: 'upcoming'  },
-]
+import { useRaceCalendar } from '../data/races'
+import canadaTrack from '../assets/circuits/canada-track-white.png'
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768)
@@ -385,7 +360,7 @@ const TOP3 = [
 
 const BAR_COLORS = ['#E8002D', '#f97316', '#eab308']
 
-const RACE_DATE = new Date('2026-05-03T19:30:00Z')
+const RACE_DATE = new Date('2026-05-24T20:00:00Z')
 
 function useCountUp(target, duration = 1500, isVisible) {
   const [count, setCount] = useState(0)
@@ -428,10 +403,12 @@ function useCountdown(target) {
 
 export default function Home({ onNavigate }) {
   const isMobile = useIsMobile()
+  const races = useRaceCalendar()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { days, hours, minutes, seconds } = useCountdown(RACE_DATE.getTime())
   const currentRaceRef = useRef(null)
   const calendarScrollRef = useRef(null)
+  const currentRaceRound = races.find((race) => race.status === 'current')?.round
   const statsRef = useRef(null)
   const [statsVisible, setStatsVisible] = useState(false)
 
@@ -454,7 +431,7 @@ export default function Home({ onNavigate }) {
     container.style.scrollBehavior = 'auto'
     container.scrollLeft += cardRect.left - containerRect.left - containerRect.width / 2 + cardRect.width / 2
     container.style.scrollBehavior = ''
-  }, [])
+  }, [currentRaceRound])
 
   useEffect(() => {
     const container = calendarScrollRef.current
@@ -563,14 +540,17 @@ export default function Home({ onNavigate }) {
         <div className="section-shell" style={{ padding: isMobile ? '0 16px' : '0 32px' }}>
           <div>
             <NextRaceCircuitCard
-              raceName="Miami Grand Prix"
-              round="Round 6 · 2026 Season"
-              venue="Miami International Autodrome"
-              date="May 3, 2026"
+              raceName="Canadian Grand Prix"
+              round="Round 5 · 2026 Season"
+              venue="Circuit Gilles-Villeneuve"
+              date="May 24, 2026"
               status="Pre-Qualifying"
-              countryLabel="Miami · US"
+              countryLabel="Montreal · CA"
+              trackImage={canadaTrack}
+              trackAlt="Canadian GP Circuit"
               circuitPath={nextRaceCircuit.path}
               viewBox={nextRaceCircuit.viewBox}
+              animationDuration={4300}
               start={nextRaceCircuit.start}
             />
           </div>
@@ -609,7 +589,7 @@ export default function Home({ onNavigate }) {
           <div id="home-race-calendar" className="home-calendar-frame">
             <div className="calendar-scroll home-calendar-scroll overflow-x-auto" ref={calendarScrollRef}>
               <div className="home-calendar-track">
-              {RACES.map((race) => (
+              {races.map((race) => (
                 <RaceCard key={race.round} {...race} cardRef={race.status === 'current' ? currentRaceRef : null} />
               ))}
               </div>

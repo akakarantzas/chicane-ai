@@ -40,7 +40,7 @@ const STAT_DEFS = [
 ]
 
 const D1_COLOR = '#E8002D'
-const D2_COLOR = '#CBD5E1'
+const D2_COLOR = '#5A6CFF'
 const HEADING_TEXT_COLOR = '#E5E7EB'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -106,8 +106,8 @@ function MobileNavDropdown({ onNavigate }) {
 function DriverInfoCard({ abbrev, accentColor }) {
   const driver = DRIVER_MAP[abbrev] ?? { abbrev, fullName: abbrev, team: '—', number: '—' }
   const glowColor = accentColor === D1_COLOR
-    ? 'rgba(232,0,45,0.3)'
-    : 'rgba(55,138,221,0.3)'
+    ? 'rgba(232,0,45,0.23)'
+    : 'rgba(90,108,255,0.23)'
 
   return (
     <div
@@ -125,7 +125,7 @@ function DriverInfoCard({ abbrev, accentColor }) {
         alignItems: 'center',
         justifyContent: 'center',
       }}>
-        <span style={{ color: abbrev === 'VER' ? '#fff' : accentColor === D2_COLOR ? '#111827' : '#fff', fontWeight: 800, fontSize: '24px', letterSpacing: '0.02em' }}>
+        <span style={{ color: '#fff', fontWeight: 800, fontSize: '24px', letterSpacing: '0.02em' }}>
           {abbrev}
         </span>
       </div>
@@ -414,7 +414,16 @@ export default function H2H({ onNavigate }) {
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#0C0C0E', color: HEADING_TEXT_COLOR }}>
+    <div
+      className="page-bg"
+      style={{
+        minHeight: '100vh',
+        color: HEADING_TEXT_COLOR,
+        backgroundImage: 'url(/chicane3.png)',
+        position: 'relative',
+      }}
+    >
+      <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: 'rgba(12,12,14,0.88)', zIndex: 0 }} />
 
       {/* ── Pulse keyframes ── */}
       <style>{`
@@ -453,7 +462,7 @@ export default function H2H({ onNavigate }) {
       </nav>
 
       {/* ── Main content ── */}
-      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: isMobile ? '0 16px' : '0 32px' }}>
+      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: isMobile ? '0 16px' : '0 32px', position: 'relative', zIndex: 1 }}>
         <section style={{ paddingTop: '80px', paddingBottom: '80px' }}>
 
           {/* ── Header ── */}
@@ -665,7 +674,7 @@ export default function H2H({ onNavigate }) {
       </div>
 
       {/* ── Footer ── */}
-      <footer className="border-t border-white/[0.06]" style={{ padding: '28px 32px' }}>
+      <footer className="border-t border-white/[0.06]" style={{ padding: '28px 32px', position: 'relative', zIndex: 1 }}>
         <p style={{ fontSize: '14px', color: '#A1A1AA', textAlign: 'center', margin: 0 }}>
           © 2026 ChicaneAI, All rights reserved.
         </p>
