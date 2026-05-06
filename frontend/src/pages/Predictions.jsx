@@ -405,7 +405,7 @@ export default function Predictions({ onNavigate, animationKey = 0 }) {
         </div>
 
         {/* Prediction rows */}
-        <section className="predictions-page-card">
+        <section className="predictions-page-card history-coming-card">
           <div className="predictions-card-header">
             <div>
               <span className="predictions-card-eyebrow">Latest Predictions</span>
