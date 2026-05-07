@@ -50,7 +50,7 @@ function MobileNavDropdown({ onNavigate }) {
     <div style={{ width: '100%', borderTop: '1px solid rgba(255,255,255,0.06)', padding: '8px 0 12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
       <button onClick={() => onNavigate?.('predictions')} className="nav-link nav-link-active" style={{ width: '100%', textAlign: 'left', padding: '12px 4px' }}>Predictions</button>
       <button onClick={() => onNavigate?.('h2h')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>H2H</button>
-      <button onClick={() => onNavigate?.('history')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>History</button>
+      <button onClick={() => onNavigate?.('history')} className="nav-link nav-link-history" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>History</button>
       <button onClick={() => onNavigate?.('season')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>Calendar</button>
       <button onClick={() => onNavigate?.('contact')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>Contact</button>
     </div>
@@ -365,7 +365,7 @@ export default function Predictions({ onNavigate, animationKey = 0 }) {
           <div className="nav-links" style={{ display: isMobile ? 'none' : 'flex' }}>
             <button onClick={() => onNavigate?.('predictions')} className="nav-link nav-link-active">Predictions</button>
             <button onClick={() => onNavigate?.('h2h')} className="nav-link">H2H</button>
-            <button onClick={() => onNavigate?.('history')} className="nav-link">History</button>
+            <button onClick={() => onNavigate?.('history')} className="nav-link nav-link-history">History</button>
             <button onClick={() => onNavigate?.('season')} className="nav-link">Calendar</button>
             <button onClick={() => onNavigate?.('contact')} className="nav-link">Contact</button>
           </div>
