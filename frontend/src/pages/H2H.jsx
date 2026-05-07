@@ -1,5 +1,9 @@
 ﻿import { useEffect, useState } from 'react'
 
+import { AnimatePresence, motion } from 'framer-motion'
+import { Check, ChevronDown } from 'lucide-react'
+import { useId, useRef } from 'react'
+
 // ─── Static driver roster ───────────────────────────────────────────────────
 const DRIVERS = [
   { abbrev: 'NOR', fullName: 'Lando Norris',      team: 'McLaren',           number: '1'  },
@@ -28,6 +32,26 @@ const DRIVERS = [
 
 const DRIVER_MAP = Object.fromEntries(DRIVERS.map((d) => [d.abbrev, d]))
 
+const TEAM_COLORS = {
+  McLaren: '#FF8000',
+  Mercedes: '#27F4D2',
+  'Red Bull Racing': '#3671C6',
+  Ferrari: '#E80020',
+  Williams: '#64C4FF',
+  'Racing Bulls': '#6692FF',
+  'Aston Martin': '#229971',
+  Haas: '#B6BABD',
+  Audi: '#52E252',
+  Sauber: '#52E252',
+  Alpine: '#FF87BC',
+  Cadillac: '#D4AF37',
+  fallback: '#FF003C',
+}
+
+function getTeamColor(teamName) {
+  return TEAM_COLORS[teamName] ?? TEAM_COLORS.fallback
+}
+
 // ─── Stats config ────────────────────────────────────────────────────────────
 const STAT_DEFS = [
   { key: 'champ_position', label: 'Championship Position', lowerIsBetter: true  },
@@ -43,9 +67,9 @@ const D1_ACTION = 'var(--red-action)'
 const D1_COLOR = 'var(--red-driver)'
 const D1_BORDER = 'var(--red-border)'
 const D1_BACKGROUND_OVERLAY = 'rgba(225, 6, 0, 0.08)'
-const D2_COLOR = '#8B7CFF'
-const D2_SECONDARY = '#C7C2FF'
-const D2_GLOW = '#6EE7FF'
+const D2_COLOR = '#AEEBFF'
+const D2_SECONDARY = '#DDF4FF'
+const D2_GLOW = '#AEEBFF'
 const HEADING_TEXT_COLOR = '#E5E7EB'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -101,40 +125,174 @@ function MobileNavDropdown({ onNavigate }) {
     <div style={{ width: '100%', borderTop: '1px solid rgba(255,255,255,0.06)', padding: '8px 0 12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
       <button onClick={() => onNavigate?.('predictions')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>Predictions</button>
       <button onClick={() => onNavigate?.('h2h')} className="nav-link nav-link-active" style={{ width: '100%', textAlign: 'left', padding: '12px 4px' }}>H2H</button>
-      <button onClick={() => onNavigate?.('history')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>History</button>
+      <button onClick={() => onNavigate?.('history')} className="nav-link nav-link-history" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>History</button>
       <button onClick={() => onNavigate?.('season')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>Calendar</button>
       <button onClick={() => onNavigate?.('contact')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>Contact</button>
     </div>
   )
 }
 
-function DriverInfoCard({ abbrev, accentColor }) {
+function DriverDropdown({ value, onChange, options, label }) {
+  const buttonRef = useRef(null)
+  const menuRef = useRef(null)
+  const listboxId = useId()
+  const [isOpen, setIsOpen] = useState(false)
+  const selectedIndex = Math.max(options.findIndex((driver) => driver.abbrev === value), 0)
+  const selected = options[selectedIndex]
+  const [activeIndex, setActiveIndex] = useState(selectedIndex)
+
+  useEffect(() => {
+    setActiveIndex(selectedIndex)
+  }, [selectedIndex])
+
+  useEffect(() => {
+    if (!isOpen) return undefined
+
+    const handlePointerDown = (event) => {
+      if (buttonRef.current?.contains(event.target) || menuRef.current?.contains(event.target)) return
+      setIsOpen(false)
+    }
+
+    document.addEventListener('pointerdown', handlePointerDown)
+    return () => document.removeEventListener('pointerdown', handlePointerDown)
+  }, [isOpen])
+
+  function chooseDriver(index) {
+    const driver = options[index]
+    if (!driver) return
+    onChange(driver.abbrev)
+    setIsOpen(false)
+    requestAnimationFrame(() => buttonRef.current?.focus())
+  }
+
+  function focusOption(index) {
+    const boundedIndex = (index + options.length) % options.length
+    setActiveIndex(boundedIndex)
+    requestAnimationFrame(() => {
+      menuRef.current?.querySelector(`[data-option-index="${boundedIndex}"]`)?.scrollIntoView({ block: 'nearest' })
+    })
+  }
+
+  function handleKeyDown(event) {
+    if (event.key === 'ArrowDown') {
+      event.preventDefault()
+      setIsOpen(true)
+      focusOption(activeIndex + 1)
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault()
+      setIsOpen(true)
+      focusOption(activeIndex - 1)
+    } else if (event.key === 'Home') {
+      event.preventDefault()
+      setIsOpen(true)
+      focusOption(0)
+    } else if (event.key === 'End') {
+      event.preventDefault()
+      setIsOpen(true)
+      focusOption(options.length - 1)
+    } else if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      if (isOpen) chooseDriver(activeIndex)
+      else setIsOpen(true)
+    } else if (event.key === 'Escape') {
+      event.preventDefault()
+      setIsOpen(false)
+      buttonRef.current?.focus()
+    }
+  }
+
+  return (
+    <div className="h2h-driver-dropdown" onKeyDown={handleKeyDown}>
+      <button
+        ref={buttonRef}
+        type="button"
+        aria-label={label}
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+        aria-controls={listboxId}
+        className="h2h-driver-dropdown-button"
+        onClick={() => setIsOpen((open) => !open)}
+      >
+        <span className="h2h-driver-dropdown-copy">
+          <span className="h2h-driver-dropdown-name">{selected.fullName}</span>
+          <span className="h2h-driver-dropdown-team">{selected.team}</span>
+        </span>
+        <ChevronDown
+          aria-hidden="true"
+          className={`h2h-driver-dropdown-chevron ${isOpen ? 'h2h-driver-dropdown-chevron-open' : ''}`}
+          size={20}
+          strokeWidth={2.2}
+        />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            ref={menuRef}
+            id={listboxId}
+            role="listbox"
+            aria-label={label}
+            aria-activedescendant={`${listboxId}-option-${activeIndex}`}
+            className="h2h-driver-dropdown-menu"
+            initial={{ opacity: 0, y: -8, scale: 0.985 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -6, scale: 0.985 }}
+            transition={{ duration: 0.18, ease: [0.2, 0.8, 0.2, 1] }}
+          >
+            {options.map((driver, index) => {
+              const isSelected = driver.abbrev === value
+              const isActive = index === activeIndex
+
+              return (
+                <button
+                  key={driver.abbrev}
+                  id={`${listboxId}-option-${index}`}
+                  type="button"
+                  role="option"
+                  aria-selected={isSelected}
+                  data-option-index={index}
+                  className={`h2h-driver-dropdown-option ${isSelected ? 'h2h-driver-dropdown-option-selected' : ''} ${isActive ? 'h2h-driver-dropdown-option-active' : ''}`}
+                  onMouseEnter={() => setActiveIndex(index)}
+                  onClick={() => chooseDriver(index)}
+                >
+                  <span className="h2h-driver-dropdown-option-main">
+                    <span className="h2h-driver-dropdown-option-name">{driver.fullName}</span>
+                    <span className="h2h-driver-dropdown-option-team">{driver.team}</span>
+                  </span>
+                  {isSelected && <Check aria-hidden="true" size={17} strokeWidth={2.4} className="h2h-driver-dropdown-check" />}
+                </button>
+              )
+            })}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
+function DriverInfoCard({ abbrev, accentColor, teamColor }) {
   const driver = DRIVER_MAP[abbrev] ?? { abbrev, fullName: abbrev, team: '—', number: '—' }
-  const isHologram = accentColor === D2_COLOR
-  const isLeftDriver = accentColor === D1_COLOR
-  const glowColor = accentColor === D1_COLOR
-    ? 'rgba(255,0,60,0.38)'
-    : 'rgba(139,124,255,0.3)'
+  const avatarColor = teamColor ?? getTeamColor(driver.team)
 
   return (
     <div
       className="h2h-driver-card"
-      style={{ borderTop: `2px solid ${isLeftDriver ? D1_BORDER : isHologram ? D2_SECONDARY : accentColor}` }}
+      style={{ borderTop: `2px solid ${avatarColor}` }}
     >
       {/* Initials circle */}
-      <div style={{
-        width: '72px',
-        height: '72px',
-        borderRadius: '50%',
-        background: isLeftDriver
-          ? 'radial-gradient(circle, var(--red-highlight), var(--red-driver))'
-          : undefined,
-        backgroundColor: isLeftDriver ? undefined : accentColor,
-        boxShadow: `0 0 14px ${glowColor}`,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}>
+      <div
+        className="transition-all duration-500"
+        style={{
+          width: '72px',
+          height: '72px',
+          borderRadius: '50%',
+          background: `radial-gradient(circle at 34% 28%, color-mix(in srgb, ${avatarColor} 58%, #FFFFFF) 0%, ${avatarColor} 54%, color-mix(in srgb, ${avatarColor} 72%, #05050A) 100%)`,
+          boxShadow: `0 0 9px color-mix(in srgb, ${avatarColor} 32%, transparent), 0 0 18px color-mix(in srgb, ${avatarColor} 14%, transparent)`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
         <span style={{ color: '#fff', fontWeight: 800, fontSize: '24px', letterSpacing: '0.02em' }}>
           {abbrev}
         </span>
@@ -142,8 +300,15 @@ function DriverInfoCard({ abbrev, accentColor }) {
       <div style={{ fontSize: '20px', fontWeight: 700, color: HEADING_TEXT_COLOR, marginTop: '12px' }}>{driver.fullName}</div>
       <div style={{ fontSize: '14px', color: '#A1A1AA', marginTop: '4px' }}>{driver.team}</div>
       <div
-        className={`num ${isHologram ? 'h2h-hologram-text' : ''}`}
-        style={{ fontSize: '18px', color: isHologram ? D2_SECONDARY : accentColor, fontWeight: 700, marginTop: '6px' }}
+        className="num"
+        style={{
+          fontSize: '18px',
+          color: avatarColor,
+          fontWeight: 700,
+          marginTop: '6px',
+          transition: 'color 0.5s ease, text-shadow 0.5s ease',
+          textShadow: `0 0 10px color-mix(in srgb, ${avatarColor} 28%, transparent)`,
+        }}
       >
         #{driver.number}
       </div>
@@ -157,8 +322,6 @@ function StatBar({ def, d1Val, d2Val }) {
   const d1Wins = win === 'd1'
   const d2Wins = win === 'd2'
   const isTie  = win === 'tie'
-
-  const dotColor = isTie ? null : (d1Wins ? D1_COLOR : D2_GLOW)
 
   return (
     <div style={{
@@ -175,18 +338,6 @@ function StatBar({ def, d1Val, d2Val }) {
         gap: '6px',
         marginBottom: '4px',
       }}>
-        {dotColor && (
-          <div
-            style={{
-              width: '6px',
-              height: '6px',
-              borderRadius: '50%',
-              backgroundColor: dotColor,
-              boxShadow: d2Wins ? `0 0 10px ${D2_GLOW}` : d1Wins ? '0 0 10px var(--red-glow)' : 'none',
-              flexShrink: 0,
-            }}
-          />
-        )}
         <div style={{
           fontSize: '11px',
           textTransform: 'uppercase',
@@ -239,7 +390,7 @@ function StatBar({ def, d1Val, d2Val }) {
           fontSize: d2Wins ? '28px' : '22px',
           fontWeight: 800,
           color: D2_SECONDARY,
-          textShadow: d2Wins ? `0 0 14px rgba(110,231,255,0.36), 0 0 28px rgba(139,124,255,0.34)` : 'none',
+          textShadow: d2Wins ? `0 0 8px rgba(244,250,255,.28), 0 0 16px rgba(127,228,255,.2)` : 'none',
           flexShrink: 0,
           transition: 'font-size 0.3s ease',
         }}>
@@ -260,7 +411,7 @@ function PredictionCard({ prediction, d1Abbrev, d2Abbrev, loading }) {
         padding: '24px',
         marginTop: '16px',
         border: '1px solid var(--red-border)',
-        boxShadow: `0 0 30px ${D1_BACKGROUND_OVERLAY}`,
+        boxShadow: `0 0 18px rgba(225,6,0,0.045)`,
         textAlign: 'center',
         color: '#A1A1AA',
         fontSize: '14px',
@@ -288,7 +439,7 @@ function PredictionCard({ prediction, d1Abbrev, d2Abbrev, loading }) {
       padding: '24px',
       marginTop: '16px',
       border: '1px solid var(--red-border)',
-      boxShadow: `0 0 30px ${D1_BACKGROUND_OVERLAY}`,
+      boxShadow: `0 0 18px rgba(225,6,0,0.045)`,
       textAlign: 'center',
     }}>
       {/* Top label */}
@@ -307,7 +458,7 @@ function PredictionCard({ prediction, d1Abbrev, d2Abbrev, loading }) {
         fontSize: '28px',
         fontWeight: 800,
         color: winnerColor,
-        textShadow: d2IsWinner ? `0 0 8px rgba(110,231,255,0.22), 0 0 18px rgba(139,124,255,0.28)` : 'none',
+        textShadow: d2IsWinner ? `0 0 5px rgba(244,250,255,.18), 0 0 10px rgba(127,228,255,.1)` : 'none',
         lineHeight: 1.1,
         marginBottom: '12px',
       }}>
@@ -332,7 +483,7 @@ function PredictionCard({ prediction, d1Abbrev, d2Abbrev, loading }) {
           fontSize: '36px',
           fontWeight: 800,
           color: !d1IsWinner ? D2_SECONDARY : '#52525B',
-          textShadow: !d1IsWinner ? `0 0 9px rgba(110,231,255,0.24), 0 0 18px rgba(139,124,255,0.3)` : 'none',
+          textShadow: !d1IsWinner ? `0 0 9px rgba(244,250,255,.3), 0 0 18px rgba(127,228,255,.2)` : 'none',
         }}>{d2Wins}</span>
       </div>
 
@@ -436,18 +587,6 @@ export default function H2H({ onNavigate }) {
     }
   }
 
-  const selectStyle = {
-    width: '100%',
-    backgroundColor: '#1A1A1F',
-    border: '1px solid rgba(255,255,255,0.1)',
-    borderRadius: '8px',
-    padding: '14px 16px',
-    color: HEADING_TEXT_COLOR,
-    fontSize: '15px',
-    cursor: 'pointer',
-    outline: 'none',
-  }
-
   return (
     <div
       className="page-bg"
@@ -482,7 +621,7 @@ export default function H2H({ onNavigate }) {
           <div className="nav-links" style={{ display: isMobile ? 'none' : 'flex' }}>
             <button onClick={() => onNavigate?.('predictions')} className="nav-link">Predictions</button>
             <button onClick={() => onNavigate?.('h2h')} className="nav-link nav-link-active">H2H</button>
-            <button onClick={() => onNavigate?.('history')} className="nav-link">History</button>
+            <button onClick={() => onNavigate?.('history')} className="nav-link nav-link-history">History</button>
             <button onClick={() => onNavigate?.('season')} className="nav-link">Calendar</button>
             <button onClick={() => onNavigate?.('contact')} className="nav-link">Contact</button>
           </div>
@@ -516,43 +655,33 @@ export default function H2H({ onNavigate }) {
 
             {/* Driver 1 column */}
             <div className="h2h-selector-cell">
-              <select
+              <DriverDropdown
                 value={d1}
-                onChange={(e) => { setD1(e.target.value); setResult(null); setPrediction(null) }}
-                style={selectStyle}
-              >
-                {DRIVERS.map((d) => (
-                  <option key={d.abbrev} value={d.abbrev} style={{ backgroundColor: '#1A1A1F' }}>
-                    {d.fullName} — {d.team}
-                  </option>
-                ))}
-              </select>
+                label="Select first driver"
+                options={DRIVERS}
+                onChange={(nextDriver) => { setD1(nextDriver); setResult(null); setPrediction(null) }}
+              />
             </div>
 
             {/* Driver 2 column */}
             <div className="h2h-selector-cell">
-              <select
+              <DriverDropdown
                 value={d2}
-                onChange={(e) => { setD2(e.target.value); setResult(null); setPrediction(null) }}
-                style={selectStyle}
-              >
-                {DRIVERS.map((d) => (
-                  <option key={d.abbrev} value={d.abbrev} style={{ backgroundColor: '#1A1A1F' }}>
-                    {d.fullName} — {d.team}
-                  </option>
-                ))}
-              </select>
+                label="Select second driver"
+                options={DRIVERS}
+                onChange={(nextDriver) => { setD2(nextDriver); setResult(null); setPrediction(null) }}
+              />
             </div>
 
           </div>
 
           {/* ── Driver info cards ── */}
           <div className="h2h-matchup-grid h2h-card-grid">
-            <DriverInfoCard abbrev={d1} accentColor={D1_COLOR} />
+            <DriverInfoCard abbrev={d1} accentColor={D1_COLOR} teamColor={getTeamColor(DRIVER_MAP[d1]?.team)} />
             <div className="h2h-vs-circle">
               VS
             </div>
-            <DriverInfoCard abbrev={d2} accentColor={D2_COLOR} />
+            <DriverInfoCard abbrev={d2} accentColor={D2_COLOR} teamColor={getTeamColor(DRIVER_MAP[d2]?.team)} />
           </div>
 
           {/* ── Compare button ── */}
@@ -650,9 +779,12 @@ export default function H2H({ onNavigate }) {
 
           {!loading && !error && !result && (
             <div style={{
-              backgroundColor: '#1A1A1F',
-              border: '1px solid var(--red-border)',
-              boxShadow: `0 0 30px ${D1_BACKGROUND_OVERLAY}, inset 0 0 30px rgba(225,6,0,0.04)`,
+              background:
+                'linear-gradient(145deg, rgba(244,244,245,0.018), rgba(244,244,245,0.006) 42%, rgba(12,12,14,0.18)), rgba(18,18,22,0.38)',
+              border: '1px solid rgba(255,0,60,0.2)',
+              boxShadow: '0 14px 30px rgba(0,0,0,0.28), inset 0 1px 0 rgba(244,244,245,0.045)',
+              backdropFilter: 'blur(14px)',
+              WebkitBackdropFilter: 'blur(14px)',
               borderRadius: '12px',
               padding: '20px 24px',
               marginTop: '24px',

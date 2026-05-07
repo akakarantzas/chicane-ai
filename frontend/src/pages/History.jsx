@@ -4,7 +4,6 @@ const MIAMI_GP_2026 = {
   race: 'Miami Grand Prix',
   circuit: 'Miami International Autodrome',
   date: 'May 3, 2026',
-  model: 'Gradient Boosting',
   status: 'Winner predicted',
   actualWinner: 'Antonelli',
   predictions: [
@@ -81,7 +80,7 @@ function MobileNavDropdown({ onNavigate }) {
     <div style={{ width: '100%', borderTop: '1px solid rgba(255,255,255,0.06)', padding: '8px 0 12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
       <button onClick={() => onNavigate('predictions')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>Predictions</button>
       <button onClick={() => onNavigate('h2h')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>H2H</button>
-      <button onClick={() => onNavigate('history')} className="nav-link nav-link-active" style={{ width: '100%', textAlign: 'left', padding: '12px 4px' }}>History</button>
+      <button onClick={() => onNavigate('history')} className="nav-link nav-link-history nav-link-active nav-link-active-history" style={{ width: '100%', textAlign: 'left', padding: '12px 4px' }}>History</button>
       <button onClick={() => onNavigate('season')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>Calendar</button>
       <button onClick={() => onNavigate('contact')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>Contact</button>
     </div>
@@ -164,16 +163,16 @@ function PredictionArchiveRow({ prediction, index, actualWinner, isMobile }) {
         <div className="predictions-bar-track" style={{ height: '9px', borderRadius: '999px', backgroundColor: 'rgba(5,5,8,0.82)', overflow: 'visible', boxShadow: 'inset 0 1px 4px rgba(0,0,0,0.9), 0 0 0 1px rgba(34,197,94,0.08)' }}>
           <div
             className="predictions-bar-fill history-archive-bar-fill"
-            style={{
-              width: '0%',
-              height: '100%',
-              borderRadius: '999px',
-              background: '#22C55E',
-              boxShadow: '0 0 10px rgba(34,197,94,0.62), 0 0 20px rgba(34,197,94,0.34)',
-              '--bar-width': `${pctValue}%`,
-              animation: 'prediction-bar-grow 2.88s cubic-bezier(0.2, 0.8, 0.2, 1) forwards',
-              animationDelay: barDelay,
-            }}
+              style={{
+                width: '0%',
+                height: '100%',
+                borderRadius: '999px',
+                background: '#22C55E',
+                boxShadow: '0 0 8px rgba(34,197,94,0.42), 0 0 16px rgba(34,197,94,0.22)',
+                '--bar-width': `${pctValue}%`,
+                animation: 'prediction-bar-grow 2.88s cubic-bezier(0.2, 0.8, 0.2, 1) forwards',
+                animationDelay: barDelay,
+              }}
           />
         </div>
       )}
@@ -219,7 +218,6 @@ function VerifiedRaceCard({ race, isMobile }) {
       <div style={{ marginTop: '26px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: '16px', marginBottom: '10px' }}>
           <span style={{ color: '#F4F4F5', fontSize: '14px', fontWeight: 800 }}>Archived prediction order</span>
-          <span style={{ color: '#A1A1AA', fontSize: '12px', fontWeight: 700 }}>{race.model}</span>
         </div>
         <ol style={{ listStyle: 'none', margin: 0, padding: 0 }}>
           {displayedPredictions.map((prediction, index) => (
@@ -286,7 +284,7 @@ export default function History({ onNavigate }) {
           <div className="nav-links" style={{ display: isMobile ? 'none' : 'flex' }}>
             <button onClick={() => onNavigate('predictions')} className="nav-link">Predictions</button>
             <button onClick={() => onNavigate('h2h')} className="nav-link">H2H</button>
-            <button onClick={() => onNavigate('history')} className="nav-link nav-link-active">History</button>
+            <button onClick={() => onNavigate('history')} className="nav-link nav-link-history nav-link-active nav-link-active-history">History</button>
             <button onClick={() => onNavigate('season')} className="nav-link">Calendar</button>
             <button onClick={() => onNavigate('contact')} className="nav-link">Contact</button>
           </div>
