@@ -39,8 +39,13 @@ const STAT_DEFS = [
   { key: 'avg_finish',     label: 'Avg Finish',            lowerIsBetter: true  },
 ]
 
-const D1_COLOR = '#E8002D'
-const D2_COLOR = '#CBD5E1'
+const D1_ACTION = 'var(--red-action)'
+const D1_COLOR = 'var(--red-driver)'
+const D1_BORDER = 'var(--red-border)'
+const D1_BACKGROUND_OVERLAY = 'rgba(225, 6, 0, 0.08)'
+const D2_COLOR = '#8B7CFF'
+const D2_SECONDARY = '#C7C2FF'
+const D2_GLOW = '#6EE7FF'
 const HEADING_TEXT_COLOR = '#E5E7EB'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -105,33 +110,43 @@ function MobileNavDropdown({ onNavigate }) {
 
 function DriverInfoCard({ abbrev, accentColor }) {
   const driver = DRIVER_MAP[abbrev] ?? { abbrev, fullName: abbrev, team: '—', number: '—' }
+  const isHologram = accentColor === D2_COLOR
+  const isLeftDriver = accentColor === D1_COLOR
   const glowColor = accentColor === D1_COLOR
-    ? 'rgba(232,0,45,0.3)'
-    : 'rgba(55,138,221,0.3)'
+    ? 'rgba(255,0,60,0.38)'
+    : 'rgba(139,124,255,0.3)'
 
   return (
     <div
       className="h2h-driver-card"
-      style={{ borderTop: `2px solid ${accentColor}` }}
+      style={{ borderTop: `2px solid ${isLeftDriver ? D1_BORDER : isHologram ? D2_SECONDARY : accentColor}` }}
     >
       {/* Initials circle */}
       <div style={{
         width: '72px',
         height: '72px',
         borderRadius: '50%',
-        backgroundColor: accentColor,
-        boxShadow: `0 0 20px ${glowColor}`,
+        background: isLeftDriver
+          ? 'radial-gradient(circle, var(--red-highlight), var(--red-driver))'
+          : undefined,
+        backgroundColor: isLeftDriver ? undefined : accentColor,
+        boxShadow: `0 0 14px ${glowColor}`,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
       }}>
-        <span style={{ color: abbrev === 'VER' ? '#fff' : accentColor === D2_COLOR ? '#111827' : '#fff', fontWeight: 800, fontSize: '24px', letterSpacing: '0.02em' }}>
+        <span style={{ color: '#fff', fontWeight: 800, fontSize: '24px', letterSpacing: '0.02em' }}>
           {abbrev}
         </span>
       </div>
       <div style={{ fontSize: '20px', fontWeight: 700, color: HEADING_TEXT_COLOR, marginTop: '12px' }}>{driver.fullName}</div>
       <div style={{ fontSize: '14px', color: '#A1A1AA', marginTop: '4px' }}>{driver.team}</div>
-      <div className="num" style={{ fontSize: '18px', color: accentColor, fontWeight: 700, marginTop: '6px' }}>#{driver.number}</div>
+      <div
+        className={`num ${isHologram ? 'h2h-hologram-text' : ''}`}
+        style={{ fontSize: '18px', color: isHologram ? D2_SECONDARY : accentColor, fontWeight: 700, marginTop: '6px' }}
+      >
+        #{driver.number}
+      </div>
     </div>
   )
 }
@@ -143,7 +158,7 @@ function StatBar({ def, d1Val, d2Val }) {
   const d2Wins = win === 'd2'
   const isTie  = win === 'tie'
 
-  const dotColor = isTie ? null : (d1Wins ? D1_COLOR : D2_COLOR)
+  const dotColor = isTie ? null : (d1Wins ? D1_COLOR : D2_GLOW)
 
   return (
     <div style={{
@@ -161,7 +176,16 @@ function StatBar({ def, d1Val, d2Val }) {
         marginBottom: '4px',
       }}>
         {dotColor && (
-          <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: dotColor, flexShrink: 0 }} />
+          <div
+            style={{
+              width: '6px',
+              height: '6px',
+              borderRadius: '50%',
+              backgroundColor: dotColor,
+              boxShadow: d2Wins ? `0 0 10px ${D2_GLOW}` : d1Wins ? '0 0 10px var(--red-glow)' : 'none',
+              flexShrink: 0,
+            }}
+          />
         )}
         <div style={{
           fontSize: '11px',
@@ -190,18 +214,22 @@ function StatBar({ def, d1Val, d2Val }) {
 
         {/* Center bar */}
         <div style={{ flex: 1, height: '8px', display: 'flex' }}>
-          <div style={{
+          <div
+            className="h2h-stat-segment-left"
+            style={{
             width: `${w1}%`,
-            backgroundColor: D1_COLOR,
             borderRadius: '99px',
             transition: 'width 0.4s ease',
-          }} />
-          <div style={{
-            width: `${w2}%`,
-            backgroundColor: D2_COLOR,
-            borderRadius: '99px',
-            transition: 'width 0.4s ease',
-          }} />
+          }}
+          />
+          <div
+            className="h2h-stat-segment-hologram"
+            style={{
+              width: `${w2}%`,
+              borderRadius: '99px',
+              transition: 'width 0.4s ease',
+            }}
+          />
         </div>
 
         {/* D2 value */}
@@ -210,7 +238,8 @@ function StatBar({ def, d1Val, d2Val }) {
           textAlign: 'left',
           fontSize: d2Wins ? '28px' : '22px',
           fontWeight: 800,
-          color: D2_COLOR,
+          color: D2_SECONDARY,
+          textShadow: d2Wins ? `0 0 14px rgba(110,231,255,0.36), 0 0 28px rgba(139,124,255,0.34)` : 'none',
           flexShrink: 0,
           transition: 'font-size 0.3s ease',
         }}>
@@ -230,8 +259,8 @@ function PredictionCard({ prediction, d1Abbrev, d2Abbrev, loading }) {
         borderRadius: '12px',
         padding: '24px',
         marginTop: '16px',
-        border: '1px solid rgba(232,0,45,0.2)',
-        boxShadow: '0 0 30px rgba(232,0,45,0.08)',
+        border: '1px solid var(--red-border)',
+        boxShadow: `0 0 30px ${D1_BACKGROUND_OVERLAY}`,
         textAlign: 'center',
         color: '#A1A1AA',
         fontSize: '14px',
@@ -244,7 +273,8 @@ function PredictionCard({ prediction, d1Abbrev, d2Abbrev, loading }) {
   if (!prediction) return null
 
   const winnerAbbrev = prediction.predicted_winner?.toUpperCase()
-  const winnerColor  = winnerAbbrev === d1Abbrev.toUpperCase() ? D1_COLOR : D2_COLOR
+  const d2IsWinner = winnerAbbrev === d2Abbrev.toUpperCase()
+  const winnerColor  = winnerAbbrev === d1Abbrev.toUpperCase() ? D1_COLOR : D2_SECONDARY
   const confidencePct = Math.round((prediction.confidence ?? 0) * 100)
 
   const d1Wins = prediction.h2h_record?.driver1_wins ?? 0
@@ -257,8 +287,8 @@ function PredictionCard({ prediction, d1Abbrev, d2Abbrev, loading }) {
       borderRadius: '12px',
       padding: '24px',
       marginTop: '16px',
-      border: '1px solid rgba(232,0,45,0.2)',
-      boxShadow: '0 0 30px rgba(232,0,45,0.08)',
+      border: '1px solid var(--red-border)',
+      boxShadow: `0 0 30px ${D1_BACKGROUND_OVERLAY}`,
       textAlign: 'center',
     }}>
       {/* Top label */}
@@ -277,6 +307,7 @@ function PredictionCard({ prediction, d1Abbrev, d2Abbrev, loading }) {
         fontSize: '28px',
         fontWeight: 800,
         color: winnerColor,
+        textShadow: d2IsWinner ? `0 0 8px rgba(110,231,255,0.22), 0 0 18px rgba(139,124,255,0.28)` : 'none',
         lineHeight: 1.1,
         marginBottom: '12px',
       }}>
@@ -300,7 +331,8 @@ function PredictionCard({ prediction, d1Abbrev, d2Abbrev, loading }) {
         <span className="num" style={{
           fontSize: '36px',
           fontWeight: 800,
-          color: !d1IsWinner ? D2_COLOR : '#52525B',
+          color: !d1IsWinner ? D2_SECONDARY : '#52525B',
+          textShadow: !d1IsWinner ? `0 0 9px rgba(110,231,255,0.24), 0 0 18px rgba(139,124,255,0.3)` : 'none',
         }}>{d2Wins}</span>
       </div>
 
@@ -321,7 +353,10 @@ function PredictionCard({ prediction, d1Abbrev, d2Abbrev, loading }) {
           backgroundColor: '#27272A',
           overflow: 'visible',
         }}>
-          <div className="h2h-confidence-bar-fill" style={{ '--bar-width': `${confidencePct}%` }} />
+          <div
+            className={`h2h-confidence-bar-fill ${d2IsWinner ? 'h2h-confidence-bar-fill-hologram' : ''}`}
+            style={{ '--bar-width': `${confidencePct}%` }}
+          />
         </div>
         <div className="num" style={{
           fontSize: '14px',
@@ -414,13 +449,22 @@ export default function H2H({ onNavigate }) {
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#0C0C0E', color: HEADING_TEXT_COLOR }}>
+    <div
+      className="page-bg"
+      style={{
+        minHeight: '100vh',
+        color: HEADING_TEXT_COLOR,
+        backgroundImage: 'url(/chicane3.png)',
+        position: 'relative',
+      }}
+    >
+      <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: 'rgba(12,12,14,0.88)', zIndex: 0 }} />
 
       {/* ── Pulse keyframes ── */}
       <style>{`
         @keyframes pulse {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(232,0,45,0.4); }
-          50%       { box-shadow: 0 0 0 12px rgba(232,0,45,0); }
+          0%, 100% { box-shadow: 0 0 0 0 rgba(255,0,60,0.4); }
+          50%       { box-shadow: 0 0 0 12px rgba(255,0,60,0); }
         }
       `}</style>
 
@@ -453,7 +497,7 @@ export default function H2H({ onNavigate }) {
       </nav>
 
       {/* ── Main content ── */}
-      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: isMobile ? '0 16px' : '0 32px' }}>
+      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: isMobile ? '0 16px' : '0 32px', position: 'relative', zIndex: 1 }}>
         <section style={{ paddingTop: '80px', paddingBottom: '80px' }}>
 
           {/* ── Header ── */}
@@ -464,7 +508,7 @@ export default function H2H({ onNavigate }) {
             <p style={{ fontSize: '15px', color: '#A1A1AA', marginTop: '10px', marginBottom: 0 }}>
               Compare F1 drivers using real performance data
             </p>
-            <div style={{ width: '60px', height: '3px', backgroundColor: '#E8002D', marginTop: '8px', borderRadius: '2px' }} />
+            <div style={{ width: '60px', height: '3px', backgroundColor: D1_COLOR, marginTop: '8px', borderRadius: '2px' }} />
           </div>
 
           {/* ── Driver selection row ── */}
@@ -520,16 +564,16 @@ export default function H2H({ onNavigate }) {
             style={{
               width: '100%',
               height: '44px',
-              backgroundColor: btnHovered && !loading ? '#c8002a' : '#E8002D',
+              backgroundColor: D1_COLOR,
               color: '#fff',
-              border: '1px solid rgba(232,0,45,0.5)',
+              border: '1px solid var(--red-border)',
               borderRadius: '8px',
               fontSize: '15px',
               fontWeight: 600,
               cursor: loading ? 'not-allowed' : 'pointer',
               opacity: loading ? 0.6 : 1,
               boxShadow: btnHovered && !loading
-                ? '0 3px 8px rgba(232,0,45,0.12)'
+                ? '0 3px 8px rgba(225,6,0,0.18)'
                 : 'none',
               transition: 'background-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease',
             }}
@@ -560,7 +604,7 @@ export default function H2H({ onNavigate }) {
                     {[0, 1].map((j) => (
                       <span key={j} className="f1-light" style={{
                         width: '14px', height: '14px', borderRadius: '999px',
-                        background: '#2A0A10', display: 'block',
+                        background: D1_BACKGROUND_OVERLAY, display: 'block',
                         animation: `f1-light-seq 2.6s ease-in-out ${i * 0.28}s infinite`,
                       }} />
                     ))}
@@ -575,7 +619,7 @@ export default function H2H({ onNavigate }) {
               }}>
                 <span style={{
                   width: '6px', height: '6px', borderRadius: '99px',
-                  background: '#E8002D',
+                  background: D1_COLOR,
                   animation: 'f1-pulse 1s ease-in-out infinite',
                 }} />
                 Fetching real F1 data...
@@ -583,23 +627,23 @@ export default function H2H({ onNavigate }) {
 
               <style>{`
                 @keyframes f1-light-seq {
-                  0%, 8%    { background: #2A0A10; box-shadow: none; }
-                  12%, 72%  { background: #E8002D; box-shadow: 0 0 12px rgba(232,0,45,0.7); }
-                  76%, 100% { background: #2A0A10; box-shadow: none; }
+                  0%, 8%    { background: rgba(225,6,0,0.08); box-shadow: none; }
+                  12%, 72%  { background: var(--red-driver); box-shadow: 0 0 12px var(--red-glow); }
+                  76%, 100% { background: rgba(225,6,0,0.08); box-shadow: none; }
                 }
                 @keyframes f1-pulse {
                   0%, 100% { opacity: 0.35; }
                   50%      { opacity: 1; }
                 }
                 @media (prefers-reduced-motion: reduce) {
-                  .f1-light { animation: none !important; background: #E8002D !important; }
+                  .f1-light { animation: none !important; background: var(--red-driver) !important; }
                 }
               `}</style>
             </div>
           )}
 
           {error && !loading && (
-            <div style={{ textAlign: 'center', color: '#E8002D', fontSize: '15px', marginTop: '40px' }}>
+            <div style={{ textAlign: 'center', color: D1_COLOR, fontSize: '15px', marginTop: '40px' }}>
               {error}
             </div>
           )}
@@ -607,8 +651,8 @@ export default function H2H({ onNavigate }) {
           {!loading && !error && !result && (
             <div style={{
               backgroundColor: '#1A1A1F',
-              border: '1px solid rgba(232,0,45,0.2)',
-              boxShadow: '0 0 30px rgba(232,0,45,0.08), inset 0 0 30px rgba(232,0,45,0.03)',
+              border: '1px solid var(--red-border)',
+              boxShadow: `0 0 30px ${D1_BACKGROUND_OVERLAY}, inset 0 0 30px rgba(225,6,0,0.04)`,
               borderRadius: '12px',
               padding: '20px 24px',
               marginTop: '24px',
@@ -665,7 +709,7 @@ export default function H2H({ onNavigate }) {
       </div>
 
       {/* ── Footer ── */}
-      <footer className="border-t border-white/[0.06]" style={{ padding: '28px 32px' }}>
+      <footer className="border-t border-white/[0.06]" style={{ padding: '28px 32px', position: 'relative', zIndex: 1 }}>
         <p style={{ fontSize: '14px', color: '#A1A1AA', textAlign: 'center', margin: 0 }}>
           © 2026 ChicaneAI, All rights reserved.
         </p>

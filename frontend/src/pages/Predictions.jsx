@@ -347,7 +347,7 @@ export default function Predictions({ onNavigate, animationKey = 0 }) {
     <div
       className="page-bg relative min-h-screen text-[#F4F4F5] flex flex-col"
       style={{
-        backgroundImage: 'url(/f1pred.jpg)',
+        backgroundImage: 'url(/chicane4.png)',
       }}
     >
       {/* Dark overlay */}
@@ -405,7 +405,7 @@ export default function Predictions({ onNavigate, animationKey = 0 }) {
         </div>
 
         {/* Prediction rows */}
-        <section className="predictions-page-card">
+        <section className="predictions-page-card history-coming-card">
           <div className="predictions-card-header">
             <div>
               <span className="predictions-card-eyebrow">Latest Predictions</span>

@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --red-action: #E10600;
+  --red-driver: #FF003C;
+  --red-energy: #FF174F;
+  --red-highlight: #FF4D73;
+  --red-border: rgba(255, 0, 60, 0.45);
+  --red-glow: rgba(255, 0, 60, 0.55);
+}
+
 @font-face {
   font-family: "Formula1";
   src: url("/fonts/Formula1-Regular_web_0.ttf") format("truetype");
@@ -50,6 +59,14 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: #E8002D;
+}
+
+body.history-scrollbar::-webkit-scrollbar-thumb {
+  background: #22C55E;
+}
+
+body.history-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #22C55E;
 }
 
 html {
@@ -316,7 +333,16 @@ button:focus-visible {
   box-shadow: inset 0 1px 0 rgba(244,244,245,0.04);
 }
 
+.circuit-viewport {
+  aspect-ratio: 829 / 301;
+}
+
 .circuit-base-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
   opacity: 0;
   filter: none;
 }
@@ -559,6 +585,150 @@ button:focus-visible {
   border-radius: 8px;
 }
 
+.h2h-driver-card-hologram {
+  position: relative;
+  overflow: hidden;
+  color: #F4F2FF;
+  background:
+    radial-gradient(circle at 72% 18%, rgba(110,231,255,0.16) 0%, rgba(110,231,255,0.055) 24%, rgba(110,231,255,0) 48%),
+    linear-gradient(135deg, #0B0F1E 0%, #171C35 45%, #22195A 100%) !important;
+  border-color: rgba(199,194,255,0.22) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(244,242,255,0.12),
+    inset 0 -20px 34px rgba(139,124,255,0.05),
+    0 0 12px rgba(110,231,255,0.12),
+    0 0 32px rgba(139,124,255,0.18);
+}
+
+.h2h-driver-card-hologram::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent, rgba(110,231,255,0.07), transparent),
+    repeating-linear-gradient(180deg, rgba(244,242,255,0.055) 0 1px, transparent 1px 7px);
+  mix-blend-mode: screen;
+  opacity: 0.28;
+}
+
+.h2h-driver-card-hologram::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  border-radius: inherit;
+  border: 1px solid rgba(110,231,255,0.22);
+  opacity: 0;
+  transition: opacity 0.2s ease, box-shadow 0.2s ease;
+}
+
+.h2h-driver-card-hologram:hover {
+  border-color: rgba(199,194,255,0.42) !important;
+  box-shadow:
+    0 0 12px rgba(110,231,255,.35),
+    0 0 32px rgba(139,124,255,.45),
+    inset 0 1px 0 rgba(244,242,255,0.14);
+}
+
+.h2h-driver-card-hologram:hover::after {
+  opacity: 1;
+}
+
+.h2h-driver-card-hologram > * {
+  position: relative;
+  z-index: 1;
+}
+
+.h2h-avatar-hologram {
+  position: relative;
+  background:
+    radial-gradient(circle at 38% 30%, #F4F2FF 0%, #C7C2FF 18%, #8B7CFF 48%, #22195A 76%, #0B0F1E 100%);
+  border: 1px solid rgba(199,194,255,0.72);
+  box-shadow:
+    0 0 12px rgba(110,231,255,.35),
+    0 0 32px rgba(139,124,255,.45),
+    inset 0 0 18px rgba(244,242,255,0.22);
+}
+
+.h2h-avatar-hologram::before {
+  content: "";
+  position: absolute;
+  inset: -7px;
+  border-radius: inherit;
+  border: 1px solid rgba(110,231,255,0.18);
+  box-shadow: 0 0 22px rgba(110,231,255,0.22);
+}
+
+.h2h-avatar-hologram::after {
+  content: "";
+  position: absolute;
+  inset: 9px;
+  border-radius: inherit;
+  border: 1px solid rgba(244,242,255,0.2);
+  background: radial-gradient(circle, rgba(110,231,255,0.18), transparent 62%);
+  mix-blend-mode: screen;
+}
+
+.h2h-hologram-text {
+  text-shadow:
+    0 0 10px rgba(110,231,255,0.35),
+    0 0 22px rgba(139,124,255,0.42);
+}
+
+.h2h-stat-segment-left {
+  position: relative;
+  overflow: visible;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.24) 0%, rgba(255,255,255,0.08) 34%, rgba(255,255,255,0) 100%),
+    linear-gradient(90deg, var(--red-driver) 0%, var(--red-energy) 45%, var(--red-highlight) 100%);
+  box-shadow:
+    inset 0 0 8px rgba(255,255,255,.18),
+    0 0 5px rgba(255,0,60,.62),
+    0 0 10px rgba(255,0,60,.48),
+    0 0 20px rgba(255,0,60,.32),
+    0 0 36px rgba(255,0,60,.18);
+}
+
+.h2h-stat-segment-left::after {
+  content: "";
+  position: absolute;
+  inset: -5px -1px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--red-border), rgba(255,23,79,0.32), rgba(255,77,115,0.24));
+  filter: blur(9px);
+  opacity: 0.54;
+  z-index: -1;
+}
+
+.h2h-stat-segment-hologram {
+  position: relative;
+  overflow: visible;
+  background: linear-gradient(90deg, #8B7CFF 0%, #C7C2FF 21%, #6EE7FF 29%, #8B7CFF 50%, #C7C2FF 71%, #6EE7FF 79%, #8B7CFF 100%);
+  background-size: 200% 100%;
+  box-shadow:
+    0 0 10px rgba(110,231,255,.26),
+    0 0 26px rgba(139,124,255,.34);
+  animation: h2h-hologram-flow 3.2s linear infinite;
+  will-change: background-position;
+}
+
+.h2h-stat-segment-hologram::after {
+  content: "";
+  position: absolute;
+  inset: -4px 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(139,124,255,0.2), rgba(110,231,255,0.26), rgba(199,194,255,0.16));
+  filter: blur(8px);
+  opacity: 0.5;
+  z-index: -1;
+}
+
+@keyframes h2h-hologram-flow {
+  from { background-position: 0% 50%; }
+  to { background-position: 100% 50%; }
+}
+
 .h2h-surface-card {
   background:
     linear-gradient(145deg, rgba(244,244,245,0.05), rgba(244,244,245,0.018) 42%, rgba(12,12,14,0.5)),
@@ -590,7 +760,9 @@ button:focus-visible {
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background-color: #450a0a;
+  background: linear-gradient(145deg, color-mix(in srgb, var(--red-highlight) 42%, #0C0C0E), color-mix(in srgb, var(--red-driver) 38%, #0C0C0E));
+  border: 1px solid rgba(255,0,60,0.26);
+  box-shadow: 0 0 10px rgba(255,0,60,0.18);
   color: #fff;
   font-size: 16px;
   font-weight: 900;
@@ -1178,7 +1350,12 @@ button:focus-visible {
   z-index: 1;
   height: 100%;
   border-radius: 99px;
-  background: linear-gradient(to right, #E8002D, #FF6B35, #FFB800);
+  background: linear-gradient(90deg, var(--red-driver), var(--red-energy), var(--red-highlight));
+  box-shadow:
+    inset 0 0 8px rgba(255,255,255,.18),
+    0 0 5px rgba(255,0,60,.62),
+    0 0 10px rgba(255,0,60,.48),
+    0 0 20px rgba(255,0,60,.32);
   animation: h2h-bar-grow 1.4s cubic-bezier(0.2, 0.8, 0.2, 1) 0.3s forwards;
   width: 0%;
 }
@@ -1194,9 +1371,27 @@ button:focus-visible {
   inset: 0;
   z-index: -1;
   border-radius: inherit;
-  background: linear-gradient(to right, #E8002D, #FF6B35, #FFB800);
+  background: linear-gradient(90deg, var(--red-driver), var(--red-energy), var(--red-highlight));
   filter: blur(6px);
   opacity: 0.6;
+}
+
+.h2h-confidence-bar-fill-hologram {
+  background: linear-gradient(90deg, #8B7CFF 0%, #C7C2FF 21%, #6EE7FF 29%, #8B7CFF 50%, #C7C2FF 71%, #6EE7FF 79%, #8B7CFF 100%);
+  background-size: 200% 100%;
+  box-shadow:
+    0 0 10px rgba(110,231,255,.26),
+    0 0 26px rgba(139,124,255,.34);
+  animation:
+    h2h-bar-grow 1.4s cubic-bezier(0.2, 0.8, 0.2, 1) 0.3s forwards,
+    h2h-hologram-flow 3.2s linear infinite;
+  will-change: width, background-position;
+}
+
+.h2h-confidence-bar-fill-hologram::after {
+  background: linear-gradient(90deg, #8B7CFF, #6EE7FF, #C7C2FF);
+  filter: blur(8px);
+  opacity: 0.68;
 }
 
 .predictions-bar-fill::after {
@@ -1208,6 +1403,12 @@ button:focus-visible {
   background: linear-gradient(90deg, #E8002D, #FF7A00, #FFD000);
   filter: blur(6px);
   opacity: 0.6;
+}
+
+.history-archive-bar-fill::after {
+  background: #22C55E;
+  filter: blur(6px);
+  opacity: 0.62;
 }
 
 @keyframes prediction-row-enter {
