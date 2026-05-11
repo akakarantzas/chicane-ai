@@ -63,39 +63,6 @@ Then run:
 .\venv\Scripts\Activate.ps1
 ```
 
-## Deployment
-
-### Frontend on Vercel
-
-Deploy the `frontend` directory as a Vite app:
-
-```text
-Root Directory: frontend
-Build Command: npm run build
-Output Directory: dist
-```
-
-Set this Vercel environment variable to the public URL of the deployed backend:
-
-```text
-VITE_API_BASE_URL=https://your-backend-domain.com
-```
-
-### Backend
-
-Deploy the FastAPI backend on a Python host such as Render, Railway, Fly.io, or a VPS:
-
-```powershell
-python -m pip install -r requirements.txt
-python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT
-```
-
-Set `CORS_ORIGINS` on the backend to the deployed Vercel URL:
-
-```text
-CORS_ORIGINS=https://your-vercel-app.vercel.app
-```
-
 ## What's Next
 
 - Mobile responsiveness
