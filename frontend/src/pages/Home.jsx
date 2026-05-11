@@ -1,80 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
+import AppNav from '../components/AppNav'
 import NextRaceCircuitCard from '../components/NextRaceCircuitCard'
 import ButtonHeartbeatEffectDemo from '../components/ui/heartbeat-effect-button'
 import { nextRaceCircuit } from '../data/circuits'
 import { useRaceCalendar } from '../data/races'
+import useIsMobile from '../hooks/useIsMobile'
 import canadaTrack from '../assets/circuits/canada-track-white.png'
 
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768)
-
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768)
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
-
-  return isMobile
-}
-
-function HamburgerButton({ onClick, isOpen }) {
-  return (
-    <button
-      onClick={onClick}
-      aria-label={isOpen ? 'Close navigation menu' : 'Open navigation menu'}
-      aria-expanded={isOpen}
-      style={{
-        width: '44px',
-        height: '44px',
-        borderRadius: '8px',
-        border: '1px solid rgba(255,255,255,0.1)',
-        backgroundColor: 'transparent',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '5px',
-        flexShrink: 0,
-      }}
-    >
-      {[0, 1, 2].map((line) => (
-        <span
-          key={line}
-          style={{
-            width: '20px',
-            height: '2px',
-            borderRadius: '2px',
-            backgroundColor: '#F4F4F5',
-            display: 'block',
-          }}
-        />
-      ))}
-    </button>
-  )
-}
-
-function MobileNavDropdown({ onNavigate }) {
-  const navigate = (page) => {
-    onNavigate(page)
-  }
-
-  return (
-    <div style={{
-      width: '100%',
-      borderTop: '1px solid rgba(255,255,255,0.06)',
-      padding: '8px 0 12px',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '4px',
-    }}>
-      <button onClick={() => navigate('predictions')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>Predictions</button>
-      <button onClick={() => navigate('h2h')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>H2H</button>
-      <button onClick={() => navigate('history')} className="nav-link nav-link-history" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>History</button>
-      <button onClick={() => navigate('season')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>Calendar</button>
-      <button onClick={() => navigate('contact')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>Contact</button>
-    </div>
-  )
-}
 function RaceCard({ name, country, date, status, cardRef }) {
   const isCurrent   = status === 'current'
   const isCompleted = status === 'completed'
@@ -404,7 +336,6 @@ function useCountdown(target) {
 export default function Home({ onNavigate }) {
   const isMobile = useIsMobile()
   const races = useRaceCalendar()
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { days, hours, minutes, seconds } = useCountdown(RACE_DATE.getTime())
   const currentRaceRef = useRef(null)
   const calendarScrollRef = useRef(null)
@@ -463,40 +394,7 @@ export default function Home({ onNavigate }) {
     <div className="home-page min-h-screen bg-[#0C0C0E] text-[#F4F4F5] flex flex-col">
 
       {/* Navbar */}
-      <nav className="app-nav hero-nav" style={{ padding: isMobile ? '0 16px' : '0 24px' }}>
-        <div className="app-nav-inner" style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: '52px', gap: '16px' }}>
-
-          {/* Left: logo */}
-          <div className="brand-wrap" style={{ flex: isMobile ? '0 1 auto' : 1 }}>
-            <button onClick={() => onNavigate('home')} className="brand-button" aria-label="Go to home">
-              <img src="/logo-mark.png" alt="" className="brand-logo" />
-              <span className="brand-wordmark">ChicaneAI</span>
-            </button>
-          </div>
-
-          {/* Center: nav links */}
-          <div className="nav-links" style={{ display: isMobile ? 'none' : 'flex' }}>
-            <button onClick={() => onNavigate('predictions')} className="nav-link">Predictions</button>
-            <button onClick={() => onNavigate('h2h')} className="nav-link">H2H</button>
-            <button onClick={() => onNavigate('history')} className="nav-link nav-link-history">History</button>
-            <button onClick={() => onNavigate('season')} className="nav-link">Calendar</button>
-            <button onClick={() => onNavigate('contact')} className="nav-link">Contact</button>
-
-          </div>
-
-          {isMobile && (
-            <HamburgerButton
-              isOpen={isMenuOpen}
-              onClick={() => setIsMenuOpen((open) => !open)}
-            />
-          )}
-
-          {/* Right: spacer */}
-          <div className="nav-spacer flex-1" style={{ display: isMobile ? 'none' : 'block' }} />
-
-        </div>
-        {isMobile && isMenuOpen && <MobileNavDropdown onNavigate={onNavigate} />}
-      </nav>
+      <AppNav onNavigate={onNavigate} variant="hero" />
 
       {/* Hero */}
       <section className="hero-section home-hero flex-1 flex flex-col items-center justify-center text-center px-6" style={{ position: 'relative', minHeight: '100vh', height: '100vh', overflow: 'hidden', backgroundColor: '#0C0C0E', paddingTop: isMobile ? '84px' : '96px', paddingBottom: isMobile ? '72px' : '96px', paddingLeft: isMobile ? '20px' : '80px', paddingRight: isMobile ? '20px' : '80px', textAlign: 'center' }}>

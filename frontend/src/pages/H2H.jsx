@@ -4,6 +4,8 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Check, ChevronDown } from 'lucide-react'
 import { useId, useRef } from 'react'
 
+import AppNav from '../components/AppNav'
+import useIsMobile from '../hooks/useIsMobile'
 import { apiUrl } from '../lib/api'
 
 // ─── Static driver roster ───────────────────────────────────────────────────
@@ -89,50 +91,7 @@ function winner(v1, v2, lowerIsBetter) {
   return v1 > v2 ? 'd1' : 'd2'
 }
 
-// ─── Shared hooks ─────────────────────────────────────────────────────────────
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768)
-  useEffect(() => {
-    const handler = () => setIsMobile(window.innerWidth < 768)
-    window.addEventListener('resize', handler)
-    return () => window.removeEventListener('resize', handler)
-  }, [])
-  return isMobile
-}
-
 // ─── Subcomponents ────────────────────────────────────────────────────────────
-function HamburgerButton({ onClick, isOpen }) {
-  return (
-    <button
-      onClick={onClick}
-      aria-label={isOpen ? 'Close navigation menu' : 'Open navigation menu'}
-      aria-expanded={isOpen}
-      style={{
-        width: '44px', height: '44px', borderRadius: '8px',
-        border: '1px solid rgba(255,255,255,0.1)', backgroundColor: 'transparent',
-        display: 'flex', flexDirection: 'column', alignItems: 'center',
-        justifyContent: 'center', gap: '5px', flexShrink: 0,
-      }}
-    >
-      {[0, 1, 2].map((i) => (
-        <span key={i} style={{ width: '20px', height: '2px', borderRadius: '2px', backgroundColor: '#F4F4F5', display: 'block' }} />
-      ))}
-    </button>
-  )
-}
-
-function MobileNavDropdown({ onNavigate }) {
-  return (
-    <div style={{ width: '100%', borderTop: '1px solid rgba(255,255,255,0.06)', padding: '8px 0 12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-      <button onClick={() => onNavigate?.('predictions')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>Predictions</button>
-      <button onClick={() => onNavigate?.('h2h')} className="nav-link nav-link-active" style={{ width: '100%', textAlign: 'left', padding: '12px 4px' }}>H2H</button>
-      <button onClick={() => onNavigate?.('history')} className="nav-link nav-link-history" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>History</button>
-      <button onClick={() => onNavigate?.('season')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>Calendar</button>
-      <button onClick={() => onNavigate?.('contact')} className="nav-link" style={{ width: '100%', textAlign: 'left', padding: '12px 4px', color: '#A1A1AA' }}>Contact</button>
-    </div>
-  )
-}
-
 function DriverDropdown({ value, onChange, options, label }) {
   const buttonRef = useRef(null)
   const menuRef = useRef(null)
@@ -539,7 +498,6 @@ function PredictionCard({ prediction, d1Abbrev, d2Abbrev, loading }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function H2H({ onNavigate }) {
   const isMobile = useIsMobile()
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [btnHovered, setBtnHovered] = useState(false)
 
   const [d1, setD1] = useState('ANT')
@@ -609,32 +567,7 @@ export default function H2H({ onNavigate }) {
       `}</style>
 
       {/* ── Navbar ── */}
-      <nav className="app-nav" style={{ padding: isMobile ? '0 16px' : '0 24px' }}>
-        <div className="app-nav-inner" style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: '52px', gap: '16px' }}>
-
-          <div className="brand-wrap" style={{ flex: isMobile ? '0 1 auto' : 1 }}>
-            <button onClick={() => onNavigate?.('home')} className="brand-button" aria-label="Go to home">
-              <img src="/logo-mark.png" alt="" className="brand-logo" />
-              <span className="brand-wordmark">ChicaneAI</span>
-            </button>
-          </div>
-
-          <div className="nav-links" style={{ display: isMobile ? 'none' : 'flex' }}>
-            <button onClick={() => onNavigate?.('predictions')} className="nav-link">Predictions</button>
-            <button onClick={() => onNavigate?.('h2h')} className="nav-link nav-link-active">H2H</button>
-            <button onClick={() => onNavigate?.('history')} className="nav-link nav-link-history">History</button>
-            <button onClick={() => onNavigate?.('season')} className="nav-link">Calendar</button>
-            <button onClick={() => onNavigate?.('contact')} className="nav-link">Contact</button>
-          </div>
-
-          {isMobile && (
-            <HamburgerButton isOpen={isMenuOpen} onClick={() => setIsMenuOpen((o) => !o)} />
-          )}
-
-          <div className="nav-spacer flex-1" style={{ display: isMobile ? 'none' : 'block' }} />
-        </div>
-        {isMobile && isMenuOpen && <MobileNavDropdown onNavigate={onNavigate} />}
-      </nav>
+      <AppNav activePage="h2h" onNavigate={onNavigate} />
 
       {/* ── Main content ── */}
       <div style={{ maxWidth: '1280px', margin: '0 auto', padding: isMobile ? '0 16px' : '0 32px', position: 'relative', zIndex: 1 }}>
