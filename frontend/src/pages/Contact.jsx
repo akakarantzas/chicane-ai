@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 
+import { apiUrl } from '../lib/api'
+
 const FEATURE_CHIPS = [
   'Lap time comparison',
   'Fantasy optimizer',
@@ -116,7 +118,7 @@ function ContactForm() {
     setErrors({})
     setStatus('submitting')
     try {
-      const res = await fetch('http://localhost:8000/api/contact', {
+      const res = await fetch(apiUrl('/api/contact'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(fields),

@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 
+import { apiUrl } from '../lib/api'
+
 const POSITION_COLORS = ['#E8002D', '#f97316', '#eab308']
 
 function positionColor(i) {
@@ -286,7 +288,7 @@ export default function Predictions({ onNavigate, animationKey = 0 }) {
   const [showAllPredictions, setShowAllPredictions] = useState(false)
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/predictions/next-race')
+    fetch(apiUrl('/api/predictions/next-race'))
       .then((res) => {
         if (!res.ok) throw new Error(`Server error: ${res.status}`)
         return res.json()

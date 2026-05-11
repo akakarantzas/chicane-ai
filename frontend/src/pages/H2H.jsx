@@ -4,6 +4,8 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Check, ChevronDown } from 'lucide-react'
 import { useId, useRef } from 'react'
 
+import { apiUrl } from '../lib/api'
+
 // ─── Static driver roster ───────────────────────────────────────────────────
 const DRIVERS = [
   { abbrev: 'NOR', fullName: 'Lando Norris',      team: 'McLaren',           number: '1'  },
@@ -558,8 +560,8 @@ export default function H2H({ onNavigate }) {
 
     // Fire both fetches in parallel
     const [compareRes, predictRes] = await Promise.allSettled([
-      fetch(`http://localhost:8000/api/h2h/compare?driver1=${d1}&driver2=${d2}&year=2026`),
-      fetch(`http://localhost:8000/api/h2h/predict?driver1=${d1}&driver2=${d2}`),
+      fetch(apiUrl(`/api/h2h/compare?driver1=${d1}&driver2=${d2}&year=2026`)),
+      fetch(apiUrl(`/api/h2h/predict?driver1=${d1}&driver2=${d2}`)),
     ])
 
     // Handle compare
