@@ -3,6 +3,7 @@ import AppNav from '../components/AppNav'
 import NextRaceCircuitCard from '../components/NextRaceCircuitCard'
 import ButtonHeartbeatEffectDemo from '../components/ui/heartbeat-effect-button'
 import { nextRaceCircuit } from '../data/circuits'
+import { MIAMI_TOP_PREDICTIONS } from '../data/predictions'
 import { useRaceCalendar } from '../data/races'
 import useIsMobile from '../hooks/useIsMobile'
 import canadaTrack from '../assets/circuits/canada-track-white.png'
@@ -284,11 +285,7 @@ function GhostPredictionRow({ isMobile, onNavigate }) {
   )
 }
 
-const TOP3 = [
-  { driver: 'Antonelli', probability: 0.7091 },
-  { driver: 'Russell',   probability: 0.1787 },
-  { driver: 'Leclerc',   probability: 0.0606 },
-]
+const TOP3 = MIAMI_TOP_PREDICTIONS
 
 const BAR_COLORS = ['#E8002D', '#f97316', '#eab308']
 

@@ -2,34 +2,11 @@ from fastapi import APIRouter
 import json
 import os
 
+from app.data.drivers import PREDICTION_DRIVER_GRID_2026
+
 router = APIRouter(prefix="/api/predictions")
 
 _JSON_PATH = os.path.join(os.path.dirname(__file__), '..', 'models', 'miami_predictions.json')
-
-_DRIVER_ROSTER_2026 = [
-    {"driver": "Norris", "team": "McLaren"},
-    {"driver": "Piastri", "team": "McLaren"},
-    {"driver": "Russell", "team": "Mercedes"},
-    {"driver": "Antonelli", "team": "Mercedes"},
-    {"driver": "Verstappen", "team": "Red Bull Racing"},
-    {"driver": "Hadjar", "team": "Red Bull Racing"},
-    {"driver": "Leclerc", "team": "Ferrari"},
-    {"driver": "Hamilton", "team": "Ferrari"},
-    {"driver": "Albon", "team": "Williams"},
-    {"driver": "Sainz", "team": "Williams"},
-    {"driver": "Lindblad", "team": "Racing Bulls"},
-    {"driver": "Lawson", "team": "Racing Bulls"},
-    {"driver": "Stroll", "team": "Aston Martin"},
-    {"driver": "Alonso", "team": "Aston Martin"},
-    {"driver": "Ocon", "team": "Haas"},
-    {"driver": "Bearman", "team": "Haas"},
-    {"driver": "Hulkenberg", "team": "Audi"},
-    {"driver": "Bortoleto", "team": "Audi"},
-    {"driver": "Gasly", "team": "Alpine"},
-    {"driver": "Colapinto", "team": "Alpine"},
-    {"driver": "Perez", "team": "Cadillac"},
-    {"driver": "Bottas", "team": "Cadillac"},
-]
 
 
 def _load_predictions():
@@ -48,7 +25,7 @@ def _complete_2026_grid(predictions: list[dict]) -> list[dict]:
     }
 
     completed = list(predictions)
-    for index, driver in enumerate(_DRIVER_ROSTER_2026):
+    for index, driver in enumerate(PREDICTION_DRIVER_GRID_2026):
         key = driver["driver"].lower()
         if key in by_driver:
             continue

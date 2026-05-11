@@ -6,6 +6,8 @@ from urllib.request import urlopen
 import fastf1
 from fastapi import APIRouter, HTTPException
 
+from app.data.drivers import DRIVER_ROSTER_2026
+
 router = APIRouter(prefix="/api/h2h")
 
 CACHE_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "..", "cache")
@@ -35,31 +37,6 @@ RACES_BY_YEAR = {
 NEXT_RACE = "Miami Grand Prix"
 OPENF1_BASE_URL = "https://api.openf1.org/v1"
 JOLPICA_BASE_URL = "https://api.jolpi.ca/ergast/f1"
-
-DRIVER_ROSTER_2026 = {
-    "NOR": {"full_name": "Lando Norris", "team": "McLaren", "number": "1"},
-    "PIA": {"full_name": "Oscar Piastri", "team": "McLaren", "number": "81"},
-    "RUS": {"full_name": "George Russell", "team": "Mercedes", "number": "63"},
-    "ANT": {"full_name": "Kimi Antonelli", "team": "Mercedes", "number": "12"},
-    "VER": {"full_name": "Max Verstappen", "team": "Red Bull Racing", "number": "3"},
-    "HAD": {"full_name": "Isack Hadjar", "team": "Red Bull Racing", "number": "6"},
-    "LEC": {"full_name": "Charles Leclerc", "team": "Ferrari", "number": "16"},
-    "HAM": {"full_name": "Lewis Hamilton", "team": "Ferrari", "number": "44"},
-    "ALB": {"full_name": "Alex Albon", "team": "Williams", "number": "23"},
-    "SAI": {"full_name": "Carlos Sainz", "team": "Williams", "number": "55"},
-    "LIN": {"full_name": "Arvid Lindblad", "team": "Racing Bulls", "number": "41"},
-    "LAW": {"full_name": "Liam Lawson", "team": "Racing Bulls", "number": "30"},
-    "STR": {"full_name": "Lance Stroll", "team": "Aston Martin", "number": "18"},
-    "ALO": {"full_name": "Fernando Alonso", "team": "Aston Martin", "number": "14"},
-    "OCO": {"full_name": "Esteban Ocon", "team": "Haas", "number": "31"},
-    "BEA": {"full_name": "Oliver Bearman", "team": "Haas", "number": "87"},
-    "HUL": {"full_name": "Nico Hulkenberg", "team": "Audi", "number": "27"},
-    "BOR": {"full_name": "Gabriel Bortoleto", "team": "Audi", "number": "5"},
-    "GAS": {"full_name": "Pierre Gasly", "team": "Alpine", "number": "10"},
-    "COL": {"full_name": "Franco Colapinto", "team": "Alpine", "number": "43"},
-    "PER": {"full_name": "Sergio Perez", "team": "Cadillac", "number": "11"},
-    "BOT": {"full_name": "Valtteri Bottas", "team": "Cadillac", "number": "77"},
-}
 
 DRIVER_NUMBER_TO_ABBREV = {
     meta["number"]: abbrev
