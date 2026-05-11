@@ -65,7 +65,6 @@ const STAT_DEFS = [
   { key: 'avg_finish',     label: 'Avg Finish',            lowerIsBetter: true  },
 ]
 
-const D1_ACTION = 'var(--red-action)'
 const D1_COLOR = 'var(--red-driver)'
 const D1_BORDER = 'var(--red-border)'
 const D1_BACKGROUND_OVERLAY = 'rgba(225, 6, 0, 0.08)'
@@ -272,7 +271,7 @@ function DriverDropdown({ value, onChange, options, label }) {
   )
 }
 
-function DriverInfoCard({ abbrev, accentColor, teamColor }) {
+function DriverInfoCard({ abbrev, teamColor }) {
   const driver = DRIVER_MAP[abbrev] ?? { abbrev, fullName: abbrev, team: '—', number: '—' }
   const avatarColor = teamColor ?? getTeamColor(driver.team)
 
@@ -679,11 +678,11 @@ export default function H2H({ onNavigate }) {
 
           {/* ── Driver info cards ── */}
           <div className="h2h-matchup-grid h2h-card-grid">
-            <DriverInfoCard abbrev={d1} accentColor={D1_COLOR} teamColor={getTeamColor(DRIVER_MAP[d1]?.team)} />
+            <DriverInfoCard abbrev={d1} teamColor={getTeamColor(DRIVER_MAP[d1]?.team)} />
             <div className="h2h-vs-circle">
               VS
             </div>
-            <DriverInfoCard abbrev={d2} accentColor={D2_COLOR} teamColor={getTeamColor(DRIVER_MAP[d2]?.team)} />
+            <DriverInfoCard abbrev={d2} teamColor={getTeamColor(DRIVER_MAP[d2]?.team)} />
           </div>
 
           {/* ── Compare button ── */}

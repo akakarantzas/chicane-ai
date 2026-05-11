@@ -59,7 +59,7 @@ function MobileNavDropdown({ onNavigate }) {
   )
 }
 
-function PredictionRow({ prediction, index, maxProb, isLast, isExtra = false, extraIndex = 0 }) {
+function PredictionRow({ prediction, index, isLast, isExtra = false, extraIndex = 0 }) {
   const [isHovered, setIsHovered] = useState(false)
   const pctValue = prediction.probability * 100
   const [displayPct, setDisplayPct] = useState(0)
@@ -341,7 +341,6 @@ export default function Predictions({ onNavigate, animationKey = 0 }) {
 
   const { race, circuit, predictions } = data
   const raceTitle = race !== 'TBD' ? race.replace(/\bGP\b/g, 'Grand Prix') : 'Next Race'
-  const maxProb = predictions[0]?.probability ?? 1
   const visiblePredictions = showAllPredictions ? predictions : predictions.slice(0, 5)
   const hiddenCount = Math.max(predictions.length - 5, 0)
 
@@ -431,7 +430,6 @@ export default function Predictions({ onNavigate, animationKey = 0 }) {
                 key={`${animationKey}-${p.driver}`}
                 prediction={p}
                 index={i}
-                maxProb={maxProb}
                 isLast={i === visiblePredictions.length - 1}
                 isExtra={i >= 5}
                 extraIndex={Math.max(i - 5, 0)}

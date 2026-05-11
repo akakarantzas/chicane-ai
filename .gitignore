@@ -28,6 +28,8 @@ env/
 # OS
 .DS_Store
 Thumbs.db
+Microsoft/
+/package-lock.json
 
 # Jupyter
 .ipynb_checkpoints/
