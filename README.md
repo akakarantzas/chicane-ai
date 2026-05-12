@@ -65,7 +65,6 @@ Then run:
 
 ## What's Next
 
-- Mobile responsiveness
 - Model improvements
 - Deployment
 
