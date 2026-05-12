@@ -73,9 +73,17 @@ html {
   overflow-y: scroll;
 }
 
+html,
+body,
+#root {
+  width: 100%;
+  max-width: 100%;
+}
+
 body {
   font-family: Helvetica, Arial, sans-serif;
   background: #0C0C0E;
+  overflow-x: hidden;
 }
 
 button:focus-visible {
@@ -1242,6 +1250,8 @@ button.nav-link.nav-link-active.nav-link-active-history:hover {
 
 .page-shell {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   position: relative;
   z-index: 1;
   padding-top: 64px;
@@ -1704,6 +1714,7 @@ button.nav-link.nav-link-active.nav-link-active-history:hover {
   position: relative;
   z-index: 1;
   width: min(100%, 680px);
+  min-width: 0;
   margin: 0 auto;
   padding: 64px 24px 72px;
 }
@@ -2087,7 +2098,29 @@ button:active { transform: translateY(0px); opacity: 1; }
   transform: translateY(-2px);
 }
 
-@media (max-width: 768px) {
+@media (min-width: 768px) and (max-width: 900px) {
+  .app-nav {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .nav-links {
+    gap: 16px;
+    font-size: 0.88rem;
+  }
+
+  .brand-logo {
+    height: 40px;
+    width: 40px;
+    margin-right: -9px;
+  }
+
+  .brand-wordmark {
+    font-size: 1.28rem;
+  }
+}
+
+@media (max-width: 767px) {
   .app-nav {
     padding: 8px 16px 12px;
   }
@@ -2149,6 +2182,8 @@ button:active { transform: translateY(0px); opacity: 1; }
 
   .section-shell {
     padding: 0 16px;
+    max-width: 100%;
+    min-width: 0;
   }
 
   .section-band {
@@ -2156,9 +2191,22 @@ button:active { transform: translateY(0px); opacity: 1; }
     padding-bottom: 48px;
   }
 
+  .home-page,
+  .page-bg,
+  .contact-page {
+    overflow-x: hidden;
+  }
+
+  .next-race-card,
+  .predictions-page-card,
+  .history-coming-card,
+  .contact-card {
+    max-width: 100%;
+  }
+
   .hero-section {
-    min-height: 100vh !important;
-    height: 100vh !important;
+    min-height: 100svh !important;
+    height: 100svh !important;
     padding-top: 84px !important;
     padding-left: 20px !important;
     padding-right: 20px !important;
@@ -2171,6 +2219,8 @@ button:active { transform: translateY(0px); opacity: 1; }
 
   .hero-content {
     transform: translateY(-5vh);
+    width: 100%;
+    max-width: 42rem;
   }
 
   .hero-actions {
@@ -2231,6 +2281,8 @@ button:active { transform: translateY(0px); opacity: 1; }
   .home-calendar-scroll {
     margin: 0 -16px;
     padding: 8px 16px 16px;
+    max-width: 100%;
+    overflow-x: auto;
   }
 
   /* Mobile: 2 cards, padding = (N-1)(100cqi + gap) / (2N) for N=2 → 25cqi + 3px */
@@ -2345,6 +2397,7 @@ button:active { transform: translateY(0px); opacity: 1; }
   .prediction-row-main {
     align-items: flex-start !important;
     gap: 10px;
+    min-width: 0;
   }
 
   .predictions-page-card {
@@ -2444,6 +2497,81 @@ button:active { transform: translateY(0px); opacity: 1; }
   }
 }
 
+@media (max-width: 430px) {
+  .countdown-card {
+    padding: 12px 6px !important;
+  }
+
+  .countdown-value {
+    font-size: 2.05rem !important;
+  }
+
+  .countdown-label {
+    font-size: 9px;
+    letter-spacing: 0.08em;
+  }
+
+  .home-calendar-title {
+    font-size: 24px;
+  }
+
+  .h2h-matchup-grid,
+  .h2h-card-grid {
+    gap: 6px;
+  }
+
+  .h2h-driver-dropdown-button {
+    grid-template-columns: minmax(0, 1fr) 20px;
+    padding: 10px 10px 10px 12px;
+  }
+
+  .h2h-driver-dropdown-name {
+    font-size: 14px;
+  }
+
+  .h2h-driver-dropdown-team {
+    font-size: 11px;
+  }
+
+  .h2h-driver-card {
+    min-height: 166px;
+    padding: 14px 8px;
+  }
+
+  .h2h-vs-circle {
+    width: 34px;
+    font-size: 12px;
+  }
+
+  .predictions-page-card {
+    padding: 14px;
+  }
+
+  .predictions-page-row {
+    grid-template-columns: 38px minmax(0, 1fr);
+    padding: 13px 10px !important;
+    gap: 10px !important;
+  }
+
+  .predictions-page-row .prediction-row-main {
+    grid-template-columns: minmax(0, 1fr) 58px;
+    gap: 8px;
+  }
+
+  .predictions-rank {
+    width: 38px !important;
+    height: 38px !important;
+  }
+
+  .predictions-percent {
+    font-size: 14px;
+  }
+
+  .contact-header h1 {
+    font-size: 34px;
+  }
+}
+
 @media (max-width: 420px) {
   .nav-links {
     justify-content: space-between;
@@ -2454,6 +2582,40 @@ button:active { transform: translateY(0px); opacity: 1; }
     text-align: center;
     padding-left: 4px;
     padding-right: 4px;
+  }
+}
+
+@media (max-width: 390px) {
+  .section-shell,
+  .page-shell {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+
+  .contact-shell {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .countdown-grid {
+    gap: 6px !important;
+  }
+
+  .countdown-card {
+    min-height: 96px !important;
+  }
+
+  .h2h-driver-card > div:nth-child(2) {
+    font-size: 14px !important;
+  }
+
+  .h2h-driver-card > div:nth-child(3) {
+    font-size: 11px !important;
+  }
+
+  .home-calendar-card {
+    min-height: 150px;
+    padding: 24px 14px 28px;
   }
 }
 
