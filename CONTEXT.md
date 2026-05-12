@@ -1,125 +1,192 @@
-# Chicane.ai — Project Context
+# ChicaneAI - Project Context
 
-## What it is
-AI-powered F1 analytics and race prediction platform built by Apostolos Kakarantzas,
-IT student at Deree - The American College of Greece, specializing in Intelligent Systems & Automation.
+## What It Is
+
+AI-powered Formula 1 analytics and race prediction platform built by Apostolos Kakarantzas, IT student at Deree - The American College of Greece, specializing in Intelligent Systems & Automation.
 
 ## Stack
-- Frontend: React + Tailwind CSS (Vite), running on localhost:5173
-- Backend: FastAPI (Python), running on localhost:8000
-- ML Models: Gradient Boosting classifier (race predictions) + scoring model (H2H predictions)
-- Data source: FastF1 library (real F1 timing and results data)
-- Database: PostgreSQL (planned, not yet implemented)
-- Hosting: Not yet deployed
+
+- Frontend: React + Tailwind CSS with Vite
+- Backend: FastAPI with Python
+- ML/data: scikit-learn models, pre-generated prediction data, and FastF1-powered H2H stats
+- Data source: FastF1 plus fallback external F1 APIs inside the H2H backend logic
+- Database: none currently; PostgreSQL is planned but not implemented
+- Deployment status: ready for frontend deployment once backend hosting, CORS, and environment variables are configured
 
 ## Repo
+
 github.com/akakarantzas/chicane-ai
 
-## Project structure
+## Project Structure
+
+```text
 chicane-ai/
-├── frontend/
-│   ├── public/ (hero-bg.png, hero-video.mp4, logo-mark.png, white-f1-car.png, reference images)
-│   └── src/
-│       ├── pages/
-│       │   ├── Home.jsx (main landing page)
-│       │   ├── Predictions.jsx (full race win probability page)
-│       │   ├── H2H.jsx (head to head driver comparison)
-│       │   ├── History.jsx (past predictions vs actual results)
-│       │   ├── Season.jsx (2026 race calendar)
-│       │   └── Contact.jsx (contact page)
-│       ├── App.jsx (routing via useState, pages: home/predictions/h2h/history/calendar/contact)
-│       └── index.css (global styles + scrollbar + hover states)
-├── backend/
-│   └── app/
-│       ├── main.py (FastAPI app, CORS for localhost:5173)
-│       ├── routers/
-│       │   ├── predictions.py (GET /api/predictions/next-race — reads miami_predictions.json)
-│       │   ├── races.py (GET /api/races/)
-│       │   └── h2h.py (GET /api/h2h/compare, GET /api/h2h/predict — uses FastF1)
-│       └── models/
-│           ├── rf_model.pkl (original Monaco RF model)
-│           ├── miami_model.pkl (Miami GP Gradient Boosting model)
-│           └── miami_predictions.json (pre-generated predictions served by API)
-├── design.md (living design system)
-├── CONTEXT.md (this file)
-└── README.md
++-- frontend/
+|   +-- public/                  Static assets, fonts, logo, hero video
+|   +-- src/
+|       +-- App.jsx              useState-based page routing
+|       +-- main.jsx             React entry point
+|       +-- index.css            Global design, layout, animation, responsive CSS
+|       +-- assets/circuits/     Circuit image assets
+|       +-- components/
+|       |   +-- AppNav.jsx
+|       |   +-- AnimatedCircuit.jsx
+|       |   +-- NextRaceCircuitCard.jsx
+|       |   +-- ui/
+|       +-- data/
+|       |   +-- circuits.js
+|       |   +-- drivers.js
+|       |   +-- predictions.js
+|       |   +-- races.js
+|       +-- hooks/
+|       |   +-- useIsMobile.js
+|       +-- lib/
+|       |   +-- api.js           Backend API URL helper
+|       +-- pages/
+|           +-- Home.jsx
+|           +-- Predictions.jsx
+|           +-- H2H.jsx
+|           +-- History.jsx
+|           +-- Season.jsx
+|           +-- Contact.jsx
++-- backend/
+|   +-- app/
+|       +-- main.py              FastAPI app, CORS, router registration
+|       +-- data/
+|       |   +-- drivers.py       Shared backend driver/team constants
+|       +-- models/
+|       |   +-- rf_model.pkl
+|       |   +-- predict.py
+|       |   +-- miami_predictions.json
+|       +-- routers/
+|           +-- contact.py
+|           +-- h2h.py
+|           +-- predictions.py
++-- audit.md
++-- design.md
++-- README.md
++-- security_audit.md
+```
 
-## Navigation tabs (current)
-Predictions · H2H · History · Calendar · Contact
+## Current Navigation
 
-## Current site state (as of April 2026)
-- Home page: looping video hero (hero-video.mp4), "Miami GP predictions now live!" badge,
-  "Predict. Verify. Repeat." tagline, stats bar, Next Race countdown (Miami GP May 3 2026),
-  Race Calendar with scrollable cards, Latest Prediction preview, 24/11/22/6 stats with count-up animation
-- Predictions page: full Miami GP win probability table with gradient bars
-- H2H page: driver comparison with real FastF1 data, VS badge, comparison bars,
-  Miami GP H2H prediction card below results with confidence bar
-- History page: Monaco 2025 verified prediction card (4/4 top finishers identified)
-- Season/Calendar page: 2026 season race cards, scrollable
-- Contact page: email, GitHub, LinkedIn cards with feature requests section
+Predictions - H2H - History - Calendar - Contact
 
-## Credibility anchor
-Correctly identified all 4 top finishers at 2025 Monaco GP before the race
-(Norris P1, Leclerc P2, Piastri P3, Verstappen P4 — group prediction, not finishing order)
+Navigation is handled in `frontend/src/App.jsx` with local React state. There is no URL router or deep-linking yet.
 
-## Miami GP 2026 Predictions (current)
-P1: Antonelli (Mercedes) — 70.9%
-P2: Russell (Mercedes) — 17.9%
-P3: Leclerc (Ferrari) — 6.1%
-P4: Hamilton (Ferrari) — 1.3%
-P5: Verstappen (Red Bull) — 1.3%
-Model: Gradient Boosting, trained on 2022-2026 F1 data using FastF1
-Repo: github.com/akakarantzas/f1-2026-miami-grand-prix-winner-prediction
+## Current Site State
 
-## Backend API endpoints
-GET /api/health → {"status": "ok"}
-GET /api/predictions/next-race → Miami GP predictions from miami_predictions.json
-GET /api/races/ → placeholder races list
-GET /api/h2h/compare?driver1=ANT&driver2=VER&year=2026 → real FastF1 H2H stats
-GET /api/h2h/predict?driver1=ANT&driver2=VER → H2H winner prediction using scoring model
+- Home: video hero, race countdown, next-race circuit card, scrollable 2026 race calendar, latest prediction preview, and season stats.
+- Predictions: full next-race prediction table fetched from the backend, with animated probability bars and show-more behavior.
+- H2H: driver selectors, driver comparison cards, FastF1-backed comparison results, and H2H prediction card.
+- History: verified Miami 2026 prediction archive with actual winner comparison.
+- Calendar: scrollable 2026 race calendar using shared frontend race data.
+- Contact: contact form posting to the backend plus feature request chips.
 
-## Design system (summary — full details in design.md)
-- Background: #0C0C0E
-- Cards: #1A1A1F, borderRadius 12px, padding 24px
-- Surface: #27272A
-- Accent red: #E8002D
-- P1: #E8002D, P2: #FF6B35, P3: #FFB800
-- Primary text: #F4F4F5, Muted: #A1A1AA
-- Border: rgba(255,255,255,0.06)
-- Logo: DM Sans italic 600 -0.05em letter-spacing
-- Body: Helvetica, Arial, sans-serif
+## Prediction Data
+
+Current prediction data is centered around the 2026 Miami Grand Prix result set.
+
+- P1: Antonelli, Mercedes, 70.9%
+- P2: Russell, Mercedes, 17.9%
+- P3: Leclerc, Ferrari, 6.1%
+- P4: Hamilton, Ferrari, 1.3%
+- P5: Verstappen, Red Bull Racing, 1.3%
+
+Frontend preview data lives in `frontend/src/data/predictions.js`.
+Backend API prediction data is served from `backend/app/models/miami_predictions.json`.
+
+## Backend API Endpoints
+
+- `GET /api/health` returns backend health status.
+- `GET /api/predictions/next-race` returns the current prediction payload.
+- `GET /api/h2h/compare?driver1=ANT&driver2=VER&year=2026` returns driver comparison stats.
+- `GET /api/h2h/predict?driver1=ANT&driver2=VER` returns H2H winner prediction data.
+- `POST /api/contact` accepts contact form submissions.
+
+There is no `/api/races` endpoint anymore. Race calendar data is frontend-local in `frontend/src/data/races.js`.
+
+## Configuration
+
+Frontend backend URL:
+
+- Local default: `http://localhost:8000`
+- Deployment: set `VITE_API_BASE_URL` to the deployed backend URL.
+
+Backend CORS:
+
+- Configured in `backend/app/main.py`
+- Local defaults: `http://localhost:5173`, `http://127.0.0.1:5173`
+- Deployment: set `CORS_ORIGINS` to include the Vercel frontend domain.
+
+Contact form:
+
+- Requires `RESEND_API_KEY` and `CONTACT_EMAIL` in the backend environment.
+
+## Design System Summary
+
+- Background: `#0C0C0E`
+- Card/surface: `#1A1A1F`, `#27272A`
+- Accent red: `#E8002D`
+- Primary text: `#F4F4F5`
+- Muted text: `#A1A1AA`
 - Buttons: 44px height, 8px radius
-- Sections: 80px top/bottom padding, maxWidth 1280px centered, padding 0 32px
-- Scrollbar: #E8002D thumb, #0C0C0E track
+- Cards: mostly 8px radius in current implementation
+- Content width: max 1280px, centered
+- Mobile responsiveness: implemented with shared mobile nav and targeted responsive CSS
 
-## What's done ✅
-- All 6 pages complete and working
-- Real ML predictions served via FastAPI
-- FastF1 H2H comparison with live data
-- H2H ML prediction card with confidence bar
-- Count-up animation on stats cards
-- Design system enforced (buttons, cards, typography, spacing)
-- Hover states on all interactive elements
-- Custom scrollbar
-- Monaco 2025 prediction documented in History
-- All code on GitHub
+See `design.md` for the fuller design reference.
 
-## What's next 🔜
-- Mobile responsiveness (critical before deployment)
-- Deployment: Render (backend) + Vercel (frontend)
-- Update countdown and predictions after Miami GP result
-- Add Miami GP result to History page after the race
-- Drivers standings page
-- Post-Miami H2H result verification
+## What's Done
 
-## How to start locally
-Terminal 1: cd Documents\chicane-ai\frontend && npm run dev
-Terminal 2: cd Documents\chicane-ai\backend && python -m uvicorn app.main:app --reload
-Terminal 3 (Claude Code): cd Documents\chicane-ai && claude
-Browser: http://localhost:5173
+- All 6 current pages are implemented.
+- Shared navbar and mobile menu are centralized in `AppNav.jsx`.
+- Shared mobile breakpoint hook is centralized in `useIsMobile.js`.
+- Frontend driver, race, and prediction constants are centralized under `frontend/src/data/`.
+- Backend driver/team constants are centralized in `backend/app/data/drivers.py`.
+- Unused races backend router was removed.
+- Frontend API URL handling is centralized in `frontend/src/lib/api.js`.
+- Mobile responsiveness pass was completed and the frontend build passed.
+- Project documentation filenames are standardized to lowercase except `README.md`.
 
-## How to save progress
-cd Documents\chicane-ai
-git add .
-git commit -m "description"
+## What's Next
+
+- Deploy backend to a reachable host.
+- Deploy frontend through Vercel.
+- Configure production backend URL and backend CORS.
+- Add linting and basic smoke tests.
+- Add CI/build checks.
+- Add URL routing/deep-linking later if needed.
+- Continue model improvements and post-race verification updates.
+
+## Local Development
+
+Frontend:
+
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+
+Backend:
+
+```powershell
+cd backend
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python -m uvicorn app.main:app --reload
+```
+
+Frontend runs at `http://localhost:5173`.
+Backend runs at `http://127.0.0.1:8000`.
+
+## Save Progress
+
+```powershell
+git status
+git add <files>
+git commit -m "short descriptive message"
 git push
+```
