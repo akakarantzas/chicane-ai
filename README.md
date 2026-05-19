@@ -39,6 +39,8 @@ Runs on `http://localhost:5173`
 
 ### Backend
 
+Recommended: Python 3.12.
+
 ```powershell
 cd backend
 python -m venv venv
@@ -50,6 +52,16 @@ python -m uvicorn app.main:app --reload
 Runs on `http://127.0.0.1:8000`
 
 Health check: `http://127.0.0.1:8000/api/health`
+
+Run backend tests:
+
+```powershell
+cd backend
+python -m pip install -r requirements.txt
+python -m pytest
+```
+
+For the contact form, copy `backend/.env.example` to `backend/.env` and fill in the Resend/contact values. The H2H cache TTL can be adjusted with `H2H_CACHE_TTL_SECONDS`.
 
 If PowerShell blocks the activation script, allow local scripts for your user:
 
