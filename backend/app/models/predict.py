@@ -1,8 +1,9 @@
-import os
+from pathlib import Path
+
 import joblib
 import pandas as pd
 
-_MODEL_PATH = os.path.join(os.path.dirname(__file__), "rf_model.pkl")
+_MODEL_PATH = Path(__file__).resolve().parent / "rf_model.pkl"
 _model = None
 
 FEATURES = [
@@ -21,6 +22,7 @@ FEATURES = [
 
 
 def get_model():
+    """Lazily load the optional sklearn model used by future inference helpers."""
     global _model
     if _model is None:
         try:
@@ -33,11 +35,11 @@ def get_model():
 
 
 def get_predictions(drivers: list[dict]) -> list[dict]:
-    """
-    Args:
-        drivers: list of dicts, each with a "driver" key plus all 11 feature keys.
-    Returns:
-        Sorted list of {"driver": str, "probability": float} dicts, highest probability first.
+    """Run optional model inference.
+
+    The active `/api/predictions/next-race` route serves
+    `miami_predictions.json`; this helper is kept for explicit/future model
+    inference and loads `rf_model.pkl` only when called.
     """
     names = [d["driver"] for d in drivers]
     df = pd.DataFrame(drivers)[FEATURES]

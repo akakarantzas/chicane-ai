@@ -1,4 +1,5 @@
 import pytest
+import sys
 
 from app.routers import predictions
 
@@ -24,6 +25,21 @@ def test_next_race_predictions_preserve_current_miami_values(client):
     )
     assert antonelli["team"] == "Mercedes"
     assert antonelli["probability"] == pytest.approx(0.7091)
+
+
+def test_next_race_predictions_use_json_without_model_import(client, monkeypatch):
+    sys.modules.pop("app.models.predict", None)
+
+    def fail_model_load(path):
+        raise AssertionError("JSON prediction endpoint should not load rf_model.pkl")
+
+    monkeypatch.setattr("joblib.load", fail_model_load)
+
+    response = client.get("/api/predictions/next-race")
+
+    assert response.status_code == 200
+    assert response.json()["predictions"]
+    assert "app.models.predict" not in sys.modules
 
 
 def test_missing_prediction_json_returns_clear_server_error(client, monkeypatch, tmp_path):
