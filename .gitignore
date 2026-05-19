@@ -9,6 +9,7 @@ build/
 
 # Python
 __pycache__/
+*.pyc
 *.py[cod]
 *.egg-info/
 .venv/
