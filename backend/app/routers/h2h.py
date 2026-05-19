@@ -17,8 +17,7 @@ from app.services.h2h_logic import (
 router = APIRouter(prefix="/api/h2h")
 
 CACHE_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "..", "cache")
-os.makedirs(CACHE_DIR, exist_ok=True)
-fastf1.Cache.enable_cache(CACHE_DIR)
+_fastf1_cache_enabled = False
 
 RACES_BY_YEAR = {
     2024: [
@@ -115,7 +114,19 @@ def _roster_meta_by_number(driver_number) -> dict | None:
     return DRIVER_ROSTER_2026.get(abbrev) if abbrev else None
 
 
+def _ensure_fastf1_cache_enabled() -> None:
+    global _fastf1_cache_enabled
+    if _fastf1_cache_enabled:
+        return
+
+    os.makedirs(CACHE_DIR, exist_ok=True)
+    fastf1.Cache.enable_cache(CACHE_DIR)
+    _fastf1_cache_enabled = True
+
+
 def _load_fastf1_results(year: int, race_names: list[str], strict: bool) -> list[dict]:
+    _ensure_fastf1_cache_enabled()
+
     rows = []
     for name in race_names:
         try:
@@ -277,6 +288,8 @@ def _load_results(year: int, strict: bool = True) -> list[dict]:
 
 @router.get("/predict")
 def predict_h2h(driver1: str, driver2: str):
+    # Keep this handler sync: FastAPI runs sync endpoints in a threadpool, and
+    # the expensive season loads are additionally guarded by the in-process cache.
     abbrev1, abbrev2 = _validate_driver_pair(driver1, driver2)
 
     all_rows: list[dict] = []
@@ -288,6 +301,7 @@ def predict_h2h(driver1: str, driver2: str):
 
 @router.get("/compare")
 def compare_drivers(driver1: str, driver2: str, year: int = 2026):
+    # Keep this handler sync for the same reason as /predict.
     abbrev1, abbrev2 = _validate_driver_pair(driver1, driver2)
     year = _validate_year(year)
 

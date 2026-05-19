@@ -80,6 +80,68 @@ def test_h2h_compare_uses_separate_cache_entries_by_year(
     assert calls == [(2026, True), (2025, True)]
 
 
+def test_fastf1_cache_is_enabled_lazily(monkeypatch):
+    calls = []
+    monkeypatch.setattr(h2h, "_fastf1_cache_enabled", False)
+    monkeypatch.setattr(h2h.os, "makedirs", lambda path, exist_ok=True: calls.append(("makedirs", path, exist_ok)))
+    monkeypatch.setattr(h2h.fastf1.Cache, "enable_cache", lambda path: calls.append(("enable_cache", path)))
+    monkeypatch.setattr(h2h.fastf1, "get_session", lambda *args, **kwargs: (_ for _ in ()).throw(RuntimeError("no live fastf1")))
+
+    assert h2h._load_fastf1_results(2026, ["Australia"], strict=False) == []
+    assert h2h._load_fastf1_results(2026, ["China"], strict=False) == []
+
+    assert calls == [
+        ("makedirs", h2h.CACHE_DIR, True),
+        ("enable_cache", h2h.CACHE_DIR),
+    ]
+
+
+def test_load_results_falls_back_when_fastf1_fails(monkeypatch, sample_h2h_rows):
+    calls = []
+
+    def fail_fastf1(year, race_names, strict):
+        calls.append("fastf1")
+        raise RuntimeError("fastf1 unavailable")
+
+    def load_jolpica(year):
+        calls.append("jolpica")
+        return sample_h2h_rows
+
+    def load_openf1(year):
+        calls.append("openf1")
+        return []
+
+    monkeypatch.setattr(h2h, "_load_fastf1_results", fail_fastf1)
+    monkeypatch.setattr(h2h, "_load_jolpica_results", load_jolpica)
+    monkeypatch.setattr(h2h, "_load_openf1_results", load_openf1)
+
+    assert h2h._load_results(2026) == sample_h2h_rows
+    assert calls == ["fastf1", "jolpica", "openf1"]
+
+
+def test_load_results_uses_openf1_if_jolpica_fails(monkeypatch, sample_h2h_rows):
+    calls = []
+
+    def load_fastf1(year, race_names, strict):
+        calls.append("fastf1")
+        return []
+
+    def fail_jolpica(year):
+        calls.append("jolpica")
+        raise RuntimeError("jolpica unavailable")
+
+    def load_openf1(year):
+        calls.append("openf1")
+        return sample_h2h_rows
+
+    monkeypatch.setattr(h2h, "_load_fastf1_results", load_fastf1)
+    monkeypatch.setattr(h2h, "_load_jolpica_results", fail_jolpica)
+    monkeypatch.setattr(h2h, "_load_openf1_results", load_openf1)
+
+    assert h2h._load_results(2026) == sample_h2h_rows
+    assert calls == ["fastf1", "jolpica", "openf1"]
+
+
 def test_h2h_compare_normalizes_lowercase_driver_codes(
     client, monkeypatch, sample_h2h_rows, block_live_h2h_sources
 ):
