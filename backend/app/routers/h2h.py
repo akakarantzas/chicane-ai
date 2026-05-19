@@ -145,7 +145,7 @@ def _load_fastf1_results(year: int, race_names: list[str], strict: bool) -> list
                     "year": year,
                     "source": "fastf1",
                 })
-        except Exception as exc:
+        except Exception:
             if strict and not rows:
                 # Keep trying external sources before surfacing a hard failure.
                 continue
