@@ -44,6 +44,31 @@ DRIVER_NUMBER_TO_ABBREV = {
 }
 
 
+def _normalise_driver_code(value: str) -> str:
+    return value.strip().upper()
+
+
+def _validate_driver_code(value: str, label: str) -> str:
+    code = _normalise_driver_code(value)
+    if code not in DRIVER_ROSTER_2026:
+        raise HTTPException(status_code=400, detail=f"Unknown {label}: {value}")
+    return code
+
+
+def _validate_driver_pair(driver1: str, driver2: str) -> tuple[str, str]:
+    abbrev1 = _validate_driver_code(driver1, "driver1")
+    abbrev2 = _validate_driver_code(driver2, "driver2")
+    if abbrev1 == abbrev2:
+        raise HTTPException(status_code=400, detail="Drivers must be different.")
+    return abbrev1, abbrev2
+
+
+def _validate_year(year: int) -> int:
+    if year not in RACES_BY_YEAR:
+        raise HTTPException(status_code=400, detail=f"Unsupported year: {year}")
+    return year
+
+
 def _fetch_json(url: str, timeout: int = 8):
     with urlopen(url, timeout=timeout) as response:
         return json.loads(response.read().decode("utf-8"))
@@ -314,22 +339,16 @@ def _get_driver_meta(rows: list[dict], abbrev: str) -> dict:
 
 @router.get("/predict")
 def predict_h2h(driver1: str, driver2: str):
+    abbrev1, abbrev2 = _validate_driver_pair(driver1, driver2)
+
     # ── Gather data across all configured seasons ──────────────────────────
     all_rows: list[dict] = []
     for year in sorted(RACES_BY_YEAR.keys()):
         all_rows.extend(_load_results(year, strict=False))
 
-    abbrev1 = driver1.upper()
-    abbrev2 = driver2.upper()
-
     # Validate at least one driver is present somewhere
     rows1 = [r for r in all_rows if r["abbreviation"].upper() == abbrev1]
     rows2 = [r for r in all_rows if r["abbreviation"].upper() == abbrev2]
-
-    if not rows1 and abbrev1 not in DRIVER_ROSTER_2026:
-        raise HTTPException(status_code=404, detail=f"Driver '{driver1}' not found in historical data")
-    if not rows2 and abbrev2 not in DRIVER_ROSTER_2026:
-        raise HTTPException(status_code=404, detail=f"Driver '{driver2}' not found in historical data")
 
     meta1 = _get_driver_meta(all_rows, abbrev1)
     meta2 = _get_driver_meta(all_rows, abbrev2)
@@ -466,13 +485,16 @@ def predict_h2h(driver1: str, driver2: str):
 
 @router.get("/compare")
 def compare_drivers(driver1: str, driver2: str, year: int = 2026):
+    abbrev1, abbrev2 = _validate_driver_pair(driver1, driver2)
+    year = _validate_year(year)
+
     rows = _load_results(year)
 
-    stats1 = _build_stats(rows, driver1)
-    stats2 = _build_stats(rows, driver2)
+    stats1 = _build_stats(rows, abbrev1)
+    stats2 = _build_stats(rows, abbrev2)
 
-    stats1["champ_position"] = _championship_position(rows, driver1)
-    stats2["champ_position"] = _championship_position(rows, driver2)
+    stats1["champ_position"] = _championship_position(rows, abbrev1)
+    stats2["champ_position"] = _championship_position(rows, abbrev2)
 
     return {
         "year": year,
