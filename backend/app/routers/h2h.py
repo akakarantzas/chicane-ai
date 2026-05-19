@@ -7,6 +7,7 @@ import fastf1
 from fastapi import APIRouter, HTTPException
 
 from app.data.drivers import DRIVER_ROSTER_2026
+from app.services.h2h_cache import get_cached_season_results
 from app.services.h2h_logic import (
     build_h2h_prediction,
     build_stats,
@@ -280,7 +281,7 @@ def predict_h2h(driver1: str, driver2: str):
 
     all_rows: list[dict] = []
     for year in sorted(RACES_BY_YEAR.keys()):
-        all_rows.extend(_load_results(year, strict=False))
+        all_rows.extend(get_cached_season_results(year, _load_results, strict=False))
 
     return build_h2h_prediction(all_rows, abbrev1, abbrev2, NEXT_RACE)
 
@@ -290,7 +291,7 @@ def compare_drivers(driver1: str, driver2: str, year: int = 2026):
     abbrev1, abbrev2 = _validate_driver_pair(driver1, driver2)
     year = _validate_year(year)
 
-    rows = _load_results(year)
+    rows = get_cached_season_results(year, _load_results)
 
     stats1 = build_stats(rows, abbrev1)
     stats2 = build_stats(rows, abbrev2)

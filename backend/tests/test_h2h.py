@@ -31,6 +31,55 @@ def test_h2h_compare_valid_request_uses_mocked_loader(
     assert data["driver2"]["wins"] == 1
 
 
+def test_h2h_compare_reuses_cached_data_for_same_year(
+    client, monkeypatch, sample_h2h_rows, block_live_h2h_sources
+):
+    calls = []
+
+    def fake_load_results(year, strict=True):
+        calls.append((year, strict))
+        return sample_h2h_rows
+
+    monkeypatch.setattr(h2h, "_load_results", fake_load_results)
+
+    for _ in range(2):
+        response = client.get(
+            "/api/h2h/compare",
+            params={"driver1": "NOR", "driver2": "PIA", "year": 2026},
+        )
+        assert response.status_code == 200
+
+    assert calls == [(2026, True)]
+
+
+def test_h2h_compare_uses_separate_cache_entries_by_year(
+    client, monkeypatch, sample_h2h_rows, block_live_h2h_sources
+):
+    calls = []
+
+    def fake_load_results(year, strict=True):
+        calls.append((year, strict))
+        return [
+            {**row, "year": year, "race": f"{row['race']} {year}"}
+            for row in sample_h2h_rows
+        ]
+
+    monkeypatch.setattr(h2h, "_load_results", fake_load_results)
+
+    response_2026 = client.get(
+        "/api/h2h/compare",
+        params={"driver1": "NOR", "driver2": "PIA", "year": 2026},
+    )
+    response_2025 = client.get(
+        "/api/h2h/compare",
+        params={"driver1": "NOR", "driver2": "PIA", "year": 2025},
+    )
+
+    assert response_2026.status_code == 200
+    assert response_2025.status_code == 200
+    assert calls == [(2026, True), (2025, True)]
+
+
 def test_h2h_compare_normalizes_lowercase_driver_codes(
     client, monkeypatch, sample_h2h_rows, block_live_h2h_sources
 ):
@@ -141,6 +190,30 @@ def test_h2h_predict_valid_request_uses_mocked_loader(
     assert data["next_race"] == h2h.NEXT_RACE
     assert data["predicted_winner"] in {"NOR", "PIA"}
     assert data["h2h_record"]["total_races"] == 2
+
+
+def test_h2h_predict_reuses_cached_data_across_seasons(
+    client, monkeypatch, sample_h2h_rows, block_live_h2h_sources
+):
+    calls = []
+
+    def fake_load_results(year, strict=True):
+        calls.append((year, strict))
+        return [
+            {**row, "year": year, "race": f"{row['race']} {year}"}
+            for row in sample_h2h_rows
+        ]
+
+    monkeypatch.setattr(h2h, "_load_results", fake_load_results)
+
+    for _ in range(2):
+        response = client.get(
+            "/api/h2h/predict",
+            params={"driver1": "NOR", "driver2": "PIA"},
+        )
+        assert response.status_code == 200
+
+    assert calls == [(2024, False), (2025, False), (2026, False)]
 
 
 def test_h2h_predict_normalizes_driver_codes(

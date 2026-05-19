@@ -3,13 +3,16 @@ from fastapi.testclient import TestClient
 
 from app.main import app
 from app.routers import contact
+from app.services.h2h_cache import clear_h2h_cache
 
 
 @pytest.fixture(autouse=True)
-def clear_contact_rate_store():
+def clear_process_state():
     contact._RATE_STORE.clear()
+    clear_h2h_cache()
     yield
     contact._RATE_STORE.clear()
+    clear_h2h_cache()
 
 
 @pytest.fixture
