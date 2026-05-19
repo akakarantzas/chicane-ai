@@ -4,3 +4,5 @@ python-dotenv
 joblib
 pandas
 fastf1
+pytest
+httpx
