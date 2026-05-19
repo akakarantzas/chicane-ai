@@ -1,7 +1,3 @@
-from urllib.error import URLError
-
-import pytest
-
 from app.routers import contact
 
 
@@ -53,37 +49,11 @@ def test_contact_missing_env_vars_return_controlled_response(client, monkeypatch
     assert response.json()["detail"] == "Email service not configured."
 
 
-def test_contact_placeholder_env_vars_currently_attempt_send(
-    client, monkeypatch
-):
+def test_contact_placeholder_env_vars_are_configuration_error(client, monkeypatch):
     calls = []
     monkeypatch.setenv("RESEND_API_KEY", "re_placeholder_replace_me")
     monkeypatch.setenv("CONTACT_EMAIL", "you@example.com")
 
-    def fake_urlopen(req, timeout=10):
-        calls.append((req, timeout))
-        raise URLError("blocked test send")
-
-    monkeypatch.setattr(contact, "urlopen", fake_urlopen)
-
-    response = client.post(
-        "/api/contact",
-        json={"name": "Test", "email": "test@example.com", "message": "Hello"},
-    )
-
-    assert response.status_code == 502
-    assert calls
-
-
-@pytest.mark.xfail(
-    reason="Future behavior: placeholder contact env vars should be treated as missing configuration."
-)
-def test_contact_placeholder_env_vars_should_be_configuration_error(
-    client, monkeypatch
-):
-    calls = []
-    monkeypatch.setenv("RESEND_API_KEY", "re_placeholder_replace_me")
-    monkeypatch.setenv("CONTACT_EMAIL", "you@example.com")
     monkeypatch.setattr(contact, "urlopen", lambda *args, **kwargs: calls.append(args))
 
     response = client.post(
@@ -92,6 +62,7 @@ def test_contact_placeholder_env_vars_should_be_configuration_error(
     )
 
     assert response.status_code == 500
+    assert response.json()["detail"] == "Email service not configured."
     assert not calls
 
 

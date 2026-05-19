@@ -17,7 +17,7 @@ def test_app_main_imports_without_model_predict_module():
     assert "app.models.predict" not in sys.modules
 
 
-def test_predict_module_currently_loads_model_at_import(monkeypatch):
+def test_predict_module_import_does_not_load_model(monkeypatch):
     unload_predict_module()
     calls = []
 
@@ -33,12 +33,35 @@ def test_predict_module_currently_loads_model_at_import(monkeypatch):
 
     module = importlib.import_module("app.models.predict")
 
-    assert calls
-    assert module._model.__class__ is FakeModel
+    assert calls == []
+    assert module._model is None
     unload_predict_module()
 
 
-def test_predict_module_currently_raises_when_model_file_is_missing(monkeypatch):
+def test_predict_module_get_model_loads_once_and_caches(monkeypatch):
+    unload_predict_module()
+    calls = []
+
+    class FakeModel:
+        pass
+
+    fake_model = FakeModel()
+
+    def fake_load(path):
+        calls.append(path)
+        return fake_model
+
+    monkeypatch.setattr("joblib.load", fake_load)
+
+    module = importlib.import_module("app.models.predict")
+
+    assert module.get_model() is fake_model
+    assert module.get_model() is fake_model
+    assert len(calls) == 1
+    unload_predict_module()
+
+
+def test_predict_module_get_model_raises_clear_error_when_model_file_is_missing(monkeypatch):
     unload_predict_module()
 
     def fake_load(path):
@@ -46,16 +69,14 @@ def test_predict_module_currently_raises_when_model_file_is_missing(monkeypatch)
 
     monkeypatch.setattr("joblib.load", fake_load)
 
+    module = importlib.import_module("app.models.predict")
     with pytest.raises(RuntimeError, match="Model file not found"):
-        importlib.import_module("app.models.predict")
+        module.get_model()
 
     unload_predict_module()
 
 
-@pytest.mark.xfail(
-    reason="Future behavior: model loading should be lazy so missing rf_model.pkl does not break module import."
-)
-def test_predict_module_should_not_crash_import_when_model_file_is_missing(monkeypatch):
+def test_predict_module_imports_when_model_file_is_missing(monkeypatch):
     unload_predict_module()
 
     def fake_load(path):
@@ -63,5 +84,7 @@ def test_predict_module_should_not_crash_import_when_model_file_is_missing(monke
 
     monkeypatch.setattr("joblib.load", fake_load)
 
-    importlib.import_module("app.models.predict")
+    module = importlib.import_module("app.models.predict")
+
+    assert module._model is None
     unload_predict_module()

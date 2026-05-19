@@ -3,11 +3,7 @@ import joblib
 import pandas as pd
 
 _MODEL_PATH = os.path.join(os.path.dirname(__file__), "rf_model.pkl")
-
-try:
-    _model = joblib.load(_MODEL_PATH)
-except FileNotFoundError:
-    raise RuntimeError(f"Model file not found at {_MODEL_PATH}. Ensure rf_model.pkl is present.")
+_model = None
 
 FEATURES = [
     "grid",
@@ -24,6 +20,18 @@ FEATURES = [
 ]
 
 
+def get_model():
+    global _model
+    if _model is None:
+        try:
+            _model = joblib.load(_MODEL_PATH)
+        except FileNotFoundError as exc:
+            raise RuntimeError(
+                f"Model file not found at {_MODEL_PATH}. Ensure rf_model.pkl is present."
+            ) from exc
+    return _model
+
+
 def get_predictions(drivers: list[dict]) -> list[dict]:
     """
     Args:
@@ -33,7 +41,7 @@ def get_predictions(drivers: list[dict]) -> list[dict]:
     """
     names = [d["driver"] for d in drivers]
     df = pd.DataFrame(drivers)[FEATURES]
-    probabilities = _model.predict_proba(df)[:, 1]
+    probabilities = get_model().predict_proba(df)[:, 1]
 
     results = [
         {"driver": name, "probability": round(float(prob), 4)}

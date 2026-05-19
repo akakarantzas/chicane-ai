@@ -1,20 +1,29 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 import json
-import os
+from json import JSONDecodeError
+from pathlib import Path
 
 from app.data.drivers import PREDICTION_DRIVER_GRID_2026
 
 router = APIRouter(prefix="/api/predictions")
 
-_JSON_PATH = os.path.join(os.path.dirname(__file__), '..', 'models', 'miami_predictions.json')
+_JSON_PATH = Path(__file__).resolve().parent.parent / "models" / "miami_predictions.json"
 
 
 def _load_predictions():
     try:
-        with open(_JSON_PATH, 'r') as f:
+        with Path(_JSON_PATH).open("r", encoding="utf-8") as f:
             return json.load(f)
     except FileNotFoundError:
-        return []
+        raise HTTPException(
+            status_code=500,
+            detail="Prediction data file is missing.",
+        )
+    except JSONDecodeError:
+        raise HTTPException(
+            status_code=500,
+            detail="Prediction data file is malformed.",
+        )
 
 
 def _complete_2026_grid(predictions: list[dict]) -> list[dict]:

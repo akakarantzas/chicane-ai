@@ -17,12 +17,34 @@ _EMAIL_RE = re.compile(r'^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$')
 _RATE_STORE: dict[str, list[float]] = defaultdict(list)
 _RATE_LIMIT = 3
 _RATE_WINDOW = 3600
+_PLACEHOLDER_VALUES = {
+    "re_placeholder_replace_me",
+    "you@example.com",
+}
 
 
 class ContactPayload(BaseModel):
     name: str | None = None
     email: str
     message: str
+
+
+def _is_placeholder(value: str) -> bool:
+    normalized = value.strip().lower()
+    return (
+        not normalized
+        or normalized in _PLACEHOLDER_VALUES
+        or "placeholder" in normalized
+        or "replace_me" in normalized
+    )
+
+
+def _get_contact_config() -> tuple[str, str]:
+    api_key = os.getenv("RESEND_API_KEY", "")
+    to_email = os.getenv("CONTACT_EMAIL", "")
+    if _is_placeholder(api_key) or _is_placeholder(to_email):
+        raise HTTPException(status_code=500, detail="Email service not configured.")
+    return api_key.strip(), to_email.strip()
 
 
 @router.post("/contact")
@@ -43,10 +65,7 @@ def submit_contact(payload: ContactPayload, request: FastAPIRequest):
         raise HTTPException(status_code=429, detail="Too many submissions. Please try again later.")
     _RATE_STORE[ip] = recent + [now]
 
-    api_key = os.getenv("RESEND_API_KEY", "")
-    to_email = os.getenv("CONTACT_EMAIL", "")
-    if not api_key or not to_email:
-        raise HTTPException(status_code=500, detail="Email service not configured.")
+    api_key, to_email = _get_contact_config()
 
     name_str = html.escape(payload.name.strip()) if payload.name and payload.name.strip() else "Anonymous"
     email_str = html.escape(payload.email.strip())
@@ -56,7 +75,7 @@ def submit_contact(payload: ContactPayload, request: FastAPIRequest):
         "from": "onboarding@resend.dev",
         "to": [to_email],
         "reply_to": payload.email.strip(),
-        "subject": f"ChicaneAI — message from {name_str}",
+        "subject": f"ChicaneAI - message from {name_str}",
         "html": (
             f"<p><strong>Name:</strong> {name_str}</p>"
             f"<p><strong>Email:</strong> {email_str}</p>"
