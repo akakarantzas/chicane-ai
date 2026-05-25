@@ -1,5 +1,4 @@
 import AnimatedCircuit from './AnimatedCircuit'
-import miamiTrack from '../assets/circuits/miami-track-white.png'
 
 export default function NextRaceCircuitCard({
   raceName,
@@ -8,11 +7,16 @@ export default function NextRaceCircuitCard({
   date,
   status,
   countryLabel,
-  trackImage = miamiTrack,
+  trackImage = null,
   trackAlt = 'Race circuit',
+  showTrackImage = false,
   circuitPath,
   viewBox,
   animationDuration,
+  showAnimatedPath = true,
+  showDebugPath = false,
+  pathVariant = 'glow',
+  alignOverlayWithTrackImage = false,
 }) {
   return (
     <article className="next-race-card relative overflow-hidden p-6 md:p-8">
@@ -46,17 +50,24 @@ export default function NextRaceCircuitCard({
         </div>
 
         <div className="circuit-panel relative rounded-lg p-4 md:p-5">
-          <div className="circuit-viewport relative w-full">
-            <img
-              src={trackImage}
-              alt={trackAlt}
-              className="circuit-base-image"
-            />
+          <div className={`circuit-viewport relative w-full ${alignOverlayWithTrackImage ? 'circuit-viewport-image-ratio' : ''}`}>
+            {trackImage && (
+              <img
+                src={trackImage}
+                alt={trackAlt}
+                className={`circuit-base-image ${showTrackImage || !circuitPath ? 'circuit-base-image-visible circuit-track-image-aligned' : ''}`}
+              />
+            )}
             {circuitPath && viewBox && (
               <AnimatedCircuit
                 path={circuitPath}
                 viewBox={viewBox}
                 duration={animationDuration}
+                showPath={showAnimatedPath}
+                showDebugPath={showDebugPath}
+                pathVariant={pathVariant}
+                preserveAspectRatio={alignOverlayWithTrackImage ? 'xMidYMid meet' : 'none'}
+                className={alignOverlayWithTrackImage ? 'circuit-overlay-image-aligned' : ''}
               />
             )}
           </div>

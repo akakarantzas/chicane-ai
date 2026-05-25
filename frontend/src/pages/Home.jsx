@@ -2,11 +2,12 @@ import { useEffect, useRef, useState } from 'react'
 import AppNav from '../components/AppNav'
 import NextRaceCircuitCard from '../components/NextRaceCircuitCard'
 import ButtonHeartbeatEffectDemo from '../components/ui/heartbeat-effect-button'
-import { nextRaceCircuit } from '../data/circuits'
+import { circuits } from '../data/circuits'
 import { MIAMI_TOP_PREDICTIONS } from '../data/predictions'
-import { useRaceCalendar } from '../data/races'
+import { getNextRace, useRaceCalendar } from '../data/races'
 import useIsMobile from '../hooks/useIsMobile'
 import canadaTrack from '../assets/circuits/canada-track-white.png'
+import monacoTrack from '../assets/circuits/monaco-track-white.png'
 
 function RaceCard({ name, country, date, status, cardRef }) {
   const isCurrent   = status === 'current'
@@ -289,8 +290,6 @@ const TOP3 = MIAMI_TOP_PREDICTIONS
 
 const BAR_COLORS = ['#E8002D', '#f97316', '#eab308']
 
-const RACE_DATE = new Date('2026-05-24T20:00:00Z')
-
 function useCountUp(target, duration = 1500, isVisible) {
   const [count, setCount] = useState(0)
   useEffect(() => {
@@ -315,6 +314,8 @@ function useCountdown(target) {
   const [timeLeft, setTimeLeft] = useState(() => Math.max(0, target - Date.now()))
 
   useEffect(() => {
+    setTimeLeft(Math.max(0, target - Date.now()))
+
     const id = setInterval(() => {
       setTimeLeft(Math.max(0, target - Date.now()))
     }, 1000)
@@ -332,13 +333,20 @@ function useCountdown(target) {
 
 export default function Home({ onNavigate }) {
   const isMobile = useIsMobile()
-  const races = useRaceCalendar()
-  const { days, hours, minutes, seconds } = useCountdown(RACE_DATE.getTime())
+  const races = useRaceCalendar(1000)
+  const currentRace = races.find((race) => race.status === 'current') ?? getNextRace()
+  const countdownTarget = new Date(currentRace.raceAt).getTime()
+  const { days, hours, minutes, seconds } = useCountdown(countdownTarget)
   const currentRaceRef = useRef(null)
   const calendarScrollRef = useRef(null)
-  const currentRaceRound = races.find((race) => race.status === 'current')?.round
+  const currentRaceRound = currentRace?.round
   const statsRef = useRef(null)
   const [statsVisible, setStatsVisible] = useState(false)
+  const currentRaceName = currentRace.name.replace(/\bGP\b/g, 'Grand Prix')
+  const currentRaceDate = `${currentRace.date}, 2026`
+  const currentRaceCountryLabel = `${currentRace.country} · ${currentRace.code}`
+  const currentRaceCircuit = currentRace.code === 'MC' ? circuits.monaco : currentRace.code === 'CA' ? circuits.canada : null
+  const currentRaceTrackImage = currentRace.code === 'MC' ? monacoTrack : currentRace.code === 'CA' ? canadaTrack : null
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -435,18 +443,22 @@ export default function Home({ onNavigate }) {
         <div className="section-shell" style={{ padding: isMobile ? '0 16px' : '0 32px' }}>
           <div>
             <NextRaceCircuitCard
-              raceName="Canadian Grand Prix"
-              round="Round 5 · 2026 Season"
-              venue="Circuit Gilles-Villeneuve"
-              date="May 24, 2026"
+              raceName={currentRaceName}
+              round={`Round ${currentRace.round} · 2026 Season`}
+              venue={currentRace.venue ?? 'Race weekend'}
+              date={currentRaceDate}
               status="Pre-Qualifying"
-              countryLabel="Montreal · CA"
-              trackImage={canadaTrack}
-              trackAlt="Canadian GP Circuit"
-              circuitPath={nextRaceCircuit.path}
-              viewBox={nextRaceCircuit.viewBox}
+              countryLabel={currentRaceCountryLabel}
+              trackImage={currentRaceTrackImage}
+              trackAlt={`${currentRaceName} Circuit`}
+              showTrackImage={currentRace.code === 'MC'}
+              circuitPath={currentRaceCircuit?.path}
+              viewBox={currentRaceCircuit?.viewBox}
               animationDuration={4300}
-              start={nextRaceCircuit.start}
+              showAnimatedPath={currentRace.code !== 'MC'}
+              showDebugPath={false}
+              pathVariant="glow"
+              alignOverlayWithTrackImage={currentRace.code === 'MC'}
             />
           </div>
             <div style={{ marginTop: isMobile ? '24px' : '32px' }}>

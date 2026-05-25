@@ -354,6 +354,10 @@ button.nav-link.nav-link-active.nav-link-active-history:hover {
   aspect-ratio: 829 / 301;
 }
 
+.circuit-viewport-image-ratio {
+  aspect-ratio: 1672 / 941;
+}
+
 .circuit-base-image {
   position: absolute;
   inset: 0;
@@ -362,6 +366,16 @@ button.nav-link.nav-link-active.nav-link-active-history:hover {
   object-fit: contain;
   opacity: 0;
   filter: none;
+}
+
+.circuit-base-image-visible {
+  opacity: 0.92;
+  filter: drop-shadow(0 0 7px rgba(255,245,245,0.18)) drop-shadow(0 0 16px rgba(232,0,45,0.18));
+}
+
+.circuit-track-image-aligned,
+.circuit-overlay-image-aligned {
+  transform-origin: center;
 }
 
 .next-race-pill-primary {

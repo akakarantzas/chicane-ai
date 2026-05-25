@@ -6,6 +6,11 @@ export default function AnimatedCircuit({
   path,
   viewBox = '0 0 800 420',
   duration = DEFAULT_DURATION,
+  showPath = true,
+  showDebugPath = false,
+  pathVariant = 'glow',
+  preserveAspectRatio = 'none',
+  className = '',
 }) {
   const pathRef = useRef(null)
   const [marker, setMarker] = useState({ x: 0, y: 0 })
@@ -37,43 +42,71 @@ export default function AnimatedCircuit({
   return (
     <svg
       viewBox={viewBox}
-      className="pointer-events-none absolute inset-0 h-full w-full"
-      preserveAspectRatio="none"
+      className={`pointer-events-none absolute inset-0 h-full w-full ${className}`}
+      preserveAspectRatio={preserveAspectRatio}
       fill="none"
       role="img"
       aria-label="Animated Miami GP circuit marker"
     >
-      <path
-        d={path}
-        stroke="rgba(232, 0, 45, 0.22)"
-        strokeWidth="18"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
-        style={{ filter: 'blur(7px)' }}
-      />
-      <path
-        d={path}
-        stroke="rgba(255, 245, 245, 0.24)"
-        strokeWidth="10"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
-        style={{
-          filter: 'drop-shadow(0 0 4px rgba(255,245,245,0.28)) drop-shadow(0 0 12px rgba(232,0,45,0.42))',
-        }}
-      />
-      <path
-        d={path}
-        stroke="#FFF5F5"
-        strokeWidth="4.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
-        style={{
-          filter: 'drop-shadow(0 0 3px rgba(255,245,245,0.42)) drop-shadow(0 0 7px rgba(232,0,45,0.72)) drop-shadow(0 0 15px rgba(232,0,45,0.38))',
-        }}
-      />
+      {showPath && (
+        pathVariant === 'plain' ? (
+          <path
+            d={path}
+            stroke="#FFF5F5"
+            strokeWidth="26"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            fill="none"
+            style={{
+              filter: 'drop-shadow(0 0 6px rgba(255,245,245,0.22))',
+            }}
+          />
+        ) : (
+          <>
+            <path
+              d={path}
+              stroke="rgba(232, 0, 45, 0.22)"
+              strokeWidth="18"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              fill="none"
+              style={{ filter: 'blur(7px)' }}
+            />
+            <path
+              d={path}
+              stroke="rgba(255, 245, 245, 0.24)"
+              strokeWidth="10"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              fill="none"
+              style={{
+                filter: 'drop-shadow(0 0 4px rgba(255,245,245,0.28)) drop-shadow(0 0 12px rgba(232,0,45,0.42))',
+              }}
+            />
+            <path
+              d={path}
+              stroke="#FFF5F5"
+              strokeWidth="4.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              fill="none"
+              style={{
+                filter: 'drop-shadow(0 0 3px rgba(255,245,245,0.42)) drop-shadow(0 0 7px rgba(232,0,45,0.72)) drop-shadow(0 0 15px rgba(232,0,45,0.38))',
+              }}
+            />
+          </>
+        )
+      )}
+      {showDebugPath && (
+        <path
+          d={path}
+          stroke="red"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+        />
+      )}
       {/* Geometry path used for getTotalLength/getPointAtLength only. */}
       <path
         ref={pathRef}

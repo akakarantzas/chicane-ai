@@ -1,0 +1,19 @@
+Monaco circuit animation fix
+
+Problem:
+- The red marker was not staying inside the Monaco white track line.
+- Earlier manual SVG paths did not match the visible PNG centerline.
+- SVG-only rendering made the Monaco track shape look wrong.
+
+Fix:
+- Restored monaco-track-white.png as the visible circuit.
+- Kept the SVG overlay only for marker animation.
+- Matched the Monaco SVG viewBox to the PNG dimensions: 0 0 1672 941.
+- Replaced the hand-drawn Monaco path with a centerline path traced from the actual PNG skeleton.
+- Left the animation system unchanged: requestAnimationFrame, path.getTotalLength(), and path.getPointAtLength().
+
+Important:
+- The visible track is the PNG.
+- The animation truth is MONACO_CENTERLINE_PATH in frontend/src/data/circuits.js.
+- Do not use CSS offsets or hardcoded marker positions to fix alignment.
+- If alignment needs tuning, temporarily show the SVG path as a red debug stroke and adjust the path points.

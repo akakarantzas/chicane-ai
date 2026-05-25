@@ -46,16 +46,16 @@ export function getNextRace(now = new Date()) {
   return getRaceCalendar(now).find((race) => race.status === 'current') ?? RACE_SCHEDULE[RACE_SCHEDULE.length - 1]
 }
 
-export function useRaceCalendar() {
+export function useRaceCalendar(refreshMs = 60_000) {
   const [races, setRaces] = useState(() => getRaceCalendar())
 
   useEffect(() => {
     const id = window.setInterval(() => {
       setRaces(getRaceCalendar())
-    }, 60_000)
+    }, refreshMs)
 
     return () => window.clearInterval(id)
-  }, [])
+  }, [refreshMs])
 
   return races
 }
