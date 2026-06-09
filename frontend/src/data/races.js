@@ -9,7 +9,7 @@ const RACE_SCHEDULE = [
   { round: 6,  code: 'US', name: 'Miami GP',         country: 'United States',  date: 'May 3',  raceAt: '2026-05-03T23:59:59Z' },
   { round: 7,  code: 'CA', name: 'Canadian GP',      country: 'Canada',         date: 'May 24', raceAt: '2026-05-24T23:59:59Z' },
   { round: 8,  code: 'MC', name: 'Monaco GP',        country: 'Monaco',         date: 'Jun 7',  raceAt: '2026-06-07T23:59:59Z' },
-  { round: 9,  code: 'ES', name: 'Spanish GP',       country: 'Spain',          date: 'Jun 14', raceAt: '2026-06-14T23:59:59Z' },
+  { round: 9,  code: 'ES', name: 'Barcelona-Catalunya GP', country: 'Spain',    date: 'Jun 14', raceAt: '2026-06-14T13:00:00Z', venue: 'Circuit de Barcelona-Catalunya', city: 'Barcelona' },
   { round: 10, code: 'AT', name: 'Austrian GP',      country: 'Austria',        date: 'Jun 28', raceAt: '2026-06-28T23:59:59Z' },
   { round: 11, code: 'GB', name: 'British GP',       country: 'United Kingdom', date: 'Jul 5',  raceAt: '2026-07-05T23:59:59Z' },
   { round: 12, code: 'BE', name: 'Belgian GP',       country: 'Belgium',        date: 'Jul 19', raceAt: '2026-07-19T23:59:59Z' },

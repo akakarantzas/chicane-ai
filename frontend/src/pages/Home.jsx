@@ -344,7 +344,7 @@ export default function Home({ onNavigate }) {
   const [statsVisible, setStatsVisible] = useState(false)
   const currentRaceName = currentRace.name.replace(/\bGP\b/g, 'Grand Prix')
   const currentRaceDate = `${currentRace.date}, 2026`
-  const currentRaceCountryLabel = `${currentRace.country} · ${currentRace.code}`
+  const currentRaceCountryLabel = `${currentRace.city ?? currentRace.country} · ${currentRace.code}`
   const currentRaceCircuit = currentRace.code === 'MC' ? circuits.monaco : currentRace.code === 'CA' ? circuits.canada : null
   const currentRaceTrackImage = currentRace.code === 'MC' ? monacoTrack : currentRace.code === 'CA' ? canadaTrack : null
 
