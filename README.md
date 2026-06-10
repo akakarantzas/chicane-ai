@@ -75,6 +75,33 @@ Then run:
 .\venv\Scripts\Activate.ps1
 ```
 
+## Barcelona Model Update
+
+Train and export the Barcelona-Catalunya model in the standalone ML repo:
+
+```powershell
+cd ..\f1-2026-barcelona-catalunya-grand-prix-winner-prediction
+python train_barcelona_catalunya.py
+```
+
+Sync the exported app artifacts into `chicane-ai`:
+
+```powershell
+cd ..\chicane-ai
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\sync_barcelona_model.ps1
+```
+
+Verify before committing:
+
+```powershell
+cd backend
+python -m pytest tests
+cd ..\frontend
+npm run build
+```
+
+Commit synced artifacts only when the exported predictions or metadata changed.
+
 ## What's Next
 
 - Model improvements
