@@ -23,11 +23,11 @@ def test_next_race_predictions_preserve_current_barcelona_catalunya_values(clien
     assert isinstance(data["predictions"], list)
     assert data["predictions"]
 
-    piastri = next(
-        item for item in data["predictions"] if item["driver"] == "Piastri"
+    antonelli = next(
+        item for item in data["predictions"] if item["driver"] == "Antonelli"
     )
-    assert piastri["team"] == "McLaren"
-    assert piastri["probability"] == pytest.approx(0.2602)
+    assert antonelli["team"] == "Mercedes"
+    assert antonelli["probability"] == pytest.approx(0.2704)
 
 
 def test_next_race_predictions_use_json_without_model_import(client, monkeypatch):
