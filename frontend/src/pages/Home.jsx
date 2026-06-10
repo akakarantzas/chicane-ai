@@ -6,6 +6,7 @@ import { circuits } from '../data/circuits'
 import { LATEST_TOP_PREDICTIONS } from '../data/predictions'
 import { getNextRace, useRaceCalendar } from '../data/races'
 import useIsMobile from '../hooks/useIsMobile'
+import { apiUrl } from '../lib/api'
 import canadaTrack from '../assets/circuits/canada-track-white.png'
 import monacoTrack from '../assets/circuits/monaco-track-white.png'
 
@@ -192,11 +193,11 @@ function StatCard({ number, label }) {
   )
 }
 
-function GhostPredictionRow({ isMobile, onNavigate }) {
+function GhostPredictionRow({ isMobile, onNavigate, prediction, index = 3 }) {
   const rowRef = useRef(null)
   const [isVisible, setIsVisible] = useState(false)
   const [displayPct, setDisplayPct] = useState(0)
-  const pctValue = 1.3
+  const pctValue = prediction.probability * 100
 
   useEffect(() => {
     const node = rowRef.current
@@ -212,7 +213,7 @@ function GhostPredictionRow({ isMobile, onNavigate }) {
   useEffect(() => {
     if (!isVisible) return undefined
     const duration = 2880
-    const delay = 3 * 55 + 180
+    const delay = index * 55 + 180
     let frameId
     let timeoutId
     const startAnimation = () => {
@@ -248,11 +249,11 @@ function GhostPredictionRow({ isMobile, onNavigate }) {
           className="home-prediction-rank num"
           style={{ fontSize: '22px', fontWeight: 800, color: '#A1A1AA', width: '42px', height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
         >
-          4
+          {index + 1}
         </span>
-        <span style={{ fontSize: '17px', fontWeight: 700, color: '#F4F4F5', flex: 1 }}>Hamilton</span>
+        <span style={{ fontSize: '17px', fontWeight: 700, color: '#F4F4F5', flex: 1 }}>{prediction.driver}</span>
         <div className="latest-bar premium-bar-track" style={{ width: '120px', height: '5px', flexShrink: 0 }}>
-          <div className="premium-bar-fill" style={{ width: '1.3%' }} />
+          <div className="premium-bar-fill" style={{ width: `${pctValue}%` }} />
         </div>
         <span className="num" style={{ fontSize: '17px', fontWeight: 700, color: '#F4F4F5', width: '60px', flexShrink: 0, textAlign: 'right' }}>{displayPct.toFixed(1)}%</span>
       </div>
@@ -285,8 +286,6 @@ function GhostPredictionRow({ isMobile, onNavigate }) {
     </div>
   )
 }
-
-const TOP3 = LATEST_TOP_PREDICTIONS
 
 const BAR_COLORS = ['#E8002D', '#f97316', '#eab308']
 
@@ -342,11 +341,20 @@ export default function Home({ onNavigate }) {
   const currentRaceRound = currentRace?.round
   const statsRef = useRef(null)
   const [statsVisible, setStatsVisible] = useState(false)
+  const [predictionPreview, setPredictionPreview] = useState({
+    race: 'Barcelona-Catalunya GP',
+    status: 'Pre-Qualifying',
+    predictions: LATEST_TOP_PREDICTIONS,
+  })
   const currentRaceName = currentRace.name.replace(/\bGP\b/g, 'Grand Prix')
   const currentRaceDate = `${currentRace.date}, 2026`
   const currentRaceCountryLabel = `${currentRace.city ?? currentRace.country} · ${currentRace.code}`
   const currentRaceCircuit = currentRace.code === 'MC' ? circuits.monaco : currentRace.code === 'CA' ? circuits.canada : null
   const currentRaceTrackImage = currentRace.code === 'MC' ? monacoTrack : currentRace.code === 'CA' ? canadaTrack : null
+  const latestPredictions = predictionPreview.predictions
+  const topPredictions = latestPredictions.slice(0, 3)
+  const ghostPrediction = latestPredictions[3]
+  const predictionRaceTitle = predictionPreview.race.replace(/\bGP\b/g, 'Grand Prix')
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -355,6 +363,36 @@ export default function Home({ onNavigate }) {
     )
     if (statsRef.current) observer.observe(statsRef.current)
     return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    let isMounted = true
+
+    fetch(apiUrl('/api/predictions/next-race'))
+      .then((res) => {
+        if (!res.ok) throw new Error(`Server error: ${res.status}`)
+        return res.json()
+      })
+      .then((json) => {
+        if (!isMounted || !Array.isArray(json.predictions) || json.predictions.length === 0) return
+        setPredictionPreview({
+          race: json.race ?? 'Barcelona-Catalunya GP',
+          status: json.status ?? 'Pre-Qualifying',
+          predictions: json.predictions,
+        })
+      })
+      .catch(() => {
+        if (!isMounted) return
+        setPredictionPreview({
+          race: 'Barcelona-Catalunya GP',
+          status: 'Pre-Qualifying',
+          predictions: LATEST_TOP_PREDICTIONS,
+        })
+      })
+
+    return () => {
+      isMounted = false
+    }
   }, [])
 
   useEffect(() => {
@@ -447,7 +485,7 @@ export default function Home({ onNavigate }) {
               round={`Round ${currentRace.round} · 2026 Season`}
               venue={currentRace.venue ?? 'Race weekend'}
               date={currentRaceDate}
-              status="Pre-Qualifying"
+              status={predictionPreview.status}
               countryLabel={currentRaceCountryLabel}
               trackImage={currentRaceTrackImage}
               trackAlt={`${currentRaceName} Circuit`}
@@ -515,20 +553,22 @@ export default function Home({ onNavigate }) {
             <span className="section-kicker" style={{ fontSize: '13px', fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Latest Prediction</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '24px', flexWrap: 'wrap', lineHeight: 1.2 }}>
-            <span style={{ fontSize: '14px', color: '#A1A1AA', lineHeight: 1.2 }}>Barcelona-Catalunya Grand Prix</span>
+            <span style={{ fontSize: '14px', color: '#A1A1AA', lineHeight: 1.2 }}>{predictionRaceTitle}</span>
             <span style={{ fontSize: '14px', color: '#A1A1AA', lineHeight: 1.2 }}>·</span>
             <span style={{ color: '#E8002D', fontSize: '14px', fontWeight: 600, lineHeight: 1.2 }}>
-              Pre-Qualifying
+              {predictionPreview.status}
             </span>
           </div>
 
           {/* Driver cards */}
-          {TOP3.map((p, i) => (
+          {topPredictions.map((p, i) => (
             <LatestPredictionCard key={p.driver} prediction={p} index={i} isMobile={isMobile} />
           ))}
 
           {/* Ghost 4th row + depth fade + "view all predictions" */}
-          <GhostPredictionRow isMobile={isMobile} onNavigate={onNavigate} />
+          {ghostPrediction && (
+            <GhostPredictionRow isMobile={isMobile} onNavigate={onNavigate} prediction={ghostPrediction} />
+          )}
         </div>
       </section>
 
