@@ -3,6 +3,8 @@ import json
 from json import JSONDecodeError
 from pathlib import Path
 
+from pydantic import BaseModel, Field
+
 from app.data.drivers import PREDICTION_DRIVER_GRID_2026
 
 router = APIRouter(prefix="/api/predictions")
@@ -10,6 +12,29 @@ router = APIRouter(prefix="/api/predictions")
 _MODELS_DIR = Path(__file__).resolve().parent.parent / "models"
 _PREDICTIONS_PATH = _MODELS_DIR / "barcelona_catalunya_predictions.json"
 _METADATA_PATH = _MODELS_DIR / "barcelona_catalunya_metadata.json"
+
+
+class PredictionItem(BaseModel):
+    driver: str
+    team: str
+    probability: float
+
+
+class PredictionMetadata(BaseModel):
+    training_samples: int | None = None
+    training_races_loaded: int | None = None
+    validation: dict = Field(default_factory=dict)
+    prediction_input: dict = Field(default_factory=dict)
+    backtest_summary: dict = Field(default_factory=dict)
+
+
+class NextRacePredictionResponse(BaseModel):
+    race: str
+    circuit: str
+    predictions: list[PredictionItem]
+    model_version: str | None = None
+    status: str
+    metadata: PredictionMetadata
 
 
 def _load_json(path: Path | str, missing_detail: str, malformed_detail: str):
@@ -83,7 +108,7 @@ def _complete_2026_grid(predictions: list[dict]) -> list[dict]:
 
     return sorted(completed, key=lambda item: item.get("probability", 0), reverse=True)
 
-@router.get("/next-race")
+@router.get("/next-race", response_model=NextRacePredictionResponse)
 def get_next_race_prediction():
     predictions = _complete_2026_grid(_load_predictions())
     metadata = _load_metadata()
