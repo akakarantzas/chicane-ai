@@ -94,6 +94,18 @@ def test_invalid_prediction_json_returns_clear_server_error(client, monkeypatch,
     assert response.headers["content-type"].startswith("application/json")
 
 
+def test_invalid_prediction_json_structure_returns_clear_server_error(client, monkeypatch, tmp_path):
+    invalid_file = tmp_path / "barcelona_catalunya_predictions.json"
+    invalid_file.write_text('[{"driver": "Antonelli", "probability": 0.27}]', encoding="utf-8")
+    monkeypatch.setattr(predictions, "_PREDICTIONS_PATH", str(invalid_file))
+
+    response = client.get("/api/predictions/next-race")
+
+    assert response.status_code == 500
+    assert response.json()["detail"] == "Prediction data file has invalid structure."
+    assert response.headers["content-type"].startswith("application/json")
+
+
 def test_missing_prediction_metadata_returns_clear_server_error(client, monkeypatch, tmp_path):
     missing_file = tmp_path / "missing_metadata.json"
     monkeypatch.setattr(predictions, "_METADATA_PATH", str(missing_file))
@@ -114,4 +126,16 @@ def test_invalid_prediction_metadata_returns_clear_server_error(client, monkeypa
 
     assert response.status_code == 500
     assert response.json()["detail"] == "Prediction metadata file is malformed."
+    assert response.headers["content-type"].startswith("application/json")
+
+
+def test_invalid_prediction_metadata_structure_returns_clear_server_error(client, monkeypatch, tmp_path):
+    invalid_file = tmp_path / "barcelona_catalunya_metadata.json"
+    invalid_file.write_text('{"race": "Barcelona-Catalunya GP"}', encoding="utf-8")
+    monkeypatch.setattr(predictions, "_METADATA_PATH", str(invalid_file))
+
+    response = client.get("/api/predictions/next-race")
+
+    assert response.status_code == 500
+    assert response.json()["detail"] == "Prediction metadata file has invalid structure."
     assert response.headers["content-type"].startswith("application/json")

@@ -54,18 +54,60 @@ def _load_json(path: Path | str, missing_detail: str, malformed_detail: str):
 
 
 def _load_predictions():
-    return _load_json(
+    data = _load_json(
         _PREDICTIONS_PATH,
         "Prediction data file is missing.",
         "Prediction data file is malformed.",
     )
+    _validate_predictions(data)
+    return data
 
 
 def _load_metadata():
-    return _load_json(
+    data = _load_json(
         _METADATA_PATH,
         "Prediction metadata file is missing.",
         "Prediction metadata file is malformed.",
+    )
+    _validate_metadata(data)
+    return data
+
+
+def _validate_predictions(data):
+    if not isinstance(data, list) or not data:
+        _raise_invalid_prediction_data()
+
+    for item in data:
+        if not isinstance(item, dict):
+            _raise_invalid_prediction_data()
+        if not isinstance(item.get("driver"), str) or not item["driver"].strip():
+            _raise_invalid_prediction_data()
+        if not isinstance(item.get("team"), str) or not item["team"].strip():
+            _raise_invalid_prediction_data()
+        if not isinstance(item.get("probability"), (int, float)):
+            _raise_invalid_prediction_data()
+
+
+def _validate_metadata(data):
+    if not isinstance(data, dict):
+        _raise_invalid_prediction_metadata()
+
+    for field in ("race", "circuit", "model_version"):
+        if not isinstance(data.get(field), str) or not data[field].strip():
+            _raise_invalid_prediction_metadata()
+
+
+def _raise_invalid_prediction_data():
+    raise HTTPException(
+        status_code=500,
+        detail="Prediction data file has invalid structure.",
+    )
+
+
+def _raise_invalid_prediction_metadata():
+    raise HTTPException(
+        status_code=500,
+        detail="Prediction metadata file has invalid structure.",
     )
 
 
