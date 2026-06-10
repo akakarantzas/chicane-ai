@@ -3,7 +3,6 @@ import AppNav from '../components/AppNav'
 import NextRaceCircuitCard from '../components/NextRaceCircuitCard'
 import ButtonHeartbeatEffectDemo from '../components/ui/heartbeat-effect-button'
 import { circuits } from '../data/circuits'
-import { LATEST_TOP_PREDICTIONS } from '../data/predictions'
 import { getNextRace, useRaceCalendar } from '../data/races'
 import useIsMobile from '../hooks/useIsMobile'
 import { fetchNextRacePrediction } from '../lib/predictions'
@@ -344,7 +343,7 @@ export default function Home({ onNavigate }) {
   const [predictionPreview, setPredictionPreview] = useState({
     race: 'Barcelona-Catalunya GP',
     status: 'Pre-Qualifying',
-    predictions: LATEST_TOP_PREDICTIONS,
+    predictions: [],
   })
   const currentRaceName = currentRace.name.replace(/\bGP\b/g, 'Grand Prix')
   const currentRaceDate = `${currentRace.date}, 2026`
@@ -381,8 +380,8 @@ export default function Home({ onNavigate }) {
         if (!isMounted) return
         setPredictionPreview({
           race: 'Barcelona-Catalunya GP',
-          status: 'Pre-Qualifying',
-          predictions: LATEST_TOP_PREDICTIONS,
+          status: 'Unavailable',
+          predictions: [],
         })
       })
 
@@ -557,9 +556,15 @@ export default function Home({ onNavigate }) {
           </div>
 
           {/* Driver cards */}
-          {topPredictions.map((p, i) => (
-            <LatestPredictionCard key={p.driver} prediction={p} index={i} isMobile={isMobile} />
-          ))}
+          {topPredictions.length > 0 ? (
+            topPredictions.map((p, i) => (
+              <LatestPredictionCard key={p.driver} prediction={p} index={i} isMobile={isMobile} />
+            ))
+          ) : (
+            <p style={{ color: '#A1A1AA', fontSize: '14px', margin: 0 }}>
+              Predictions unavailable right now.
+            </p>
+          )}
 
           {/* Ghost 4th row + depth fade + "view all predictions" */}
           {ghostPrediction && (

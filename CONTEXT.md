@@ -36,7 +36,6 @@ chicane-ai/
 |       +-- data/
 |       |   +-- circuits.js
 |       |   +-- drivers.js
-|       |   +-- predictions.js
 |       |   +-- races.js
 |       +-- hooks/
 |       |   +-- useIsMobile.js
@@ -93,7 +92,7 @@ Current prediction data is centered around the 2026 Barcelona-Catalunya Grand Pr
 - P4: Russell, Mercedes, 14.9%
 - P5: Verstappen, Red Bull Racing, 2.8%
 
-Frontend preview data lives in `frontend/src/data/predictions.js`.
+Frontend prediction views load from `GET /api/predictions/next-race`.
 Backend API prediction data is served from `backend/app/models/barcelona_catalunya_predictions.json` with metadata from `backend/app/models/barcelona_catalunya_metadata.json`.
 
 ## Backend API Endpoints
