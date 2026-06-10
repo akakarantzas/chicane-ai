@@ -344,6 +344,7 @@ export default function Home({ onNavigate }) {
     race: 'Barcelona-Catalunya GP',
     status: 'Pre-Qualifying',
     predictions: [],
+    loading: true,
   })
   const currentRaceName = currentRace.name.replace(/\bGP\b/g, 'Grand Prix')
   const currentRaceDate = `${currentRace.date}, 2026`
@@ -374,6 +375,7 @@ export default function Home({ onNavigate }) {
           race: json.race ?? 'Barcelona-Catalunya GP',
           status: json.status ?? 'Pre-Qualifying',
           predictions: json.predictions,
+          loading: false,
         })
       })
       .catch(() => {
@@ -382,6 +384,7 @@ export default function Home({ onNavigate }) {
           race: 'Barcelona-Catalunya GP',
           status: 'Unavailable',
           predictions: [],
+          loading: false,
         })
       })
 
@@ -556,7 +559,11 @@ export default function Home({ onNavigate }) {
           </div>
 
           {/* Driver cards */}
-          {topPredictions.length > 0 ? (
+          {predictionPreview.loading ? (
+            <p style={{ color: '#A1A1AA', fontSize: '14px', margin: 0 }}>
+              Loading predictions...
+            </p>
+          ) : topPredictions.length > 0 ? (
             topPredictions.map((p, i) => (
               <LatestPredictionCard key={p.driver} prediction={p} index={i} isMobile={isMobile} />
             ))
