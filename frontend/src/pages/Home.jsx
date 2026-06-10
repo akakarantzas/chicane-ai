@@ -3,7 +3,7 @@ import AppNav from '../components/AppNav'
 import NextRaceCircuitCard from '../components/NextRaceCircuitCard'
 import ButtonHeartbeatEffectDemo from '../components/ui/heartbeat-effect-button'
 import { circuits } from '../data/circuits'
-import { MIAMI_TOP_PREDICTIONS } from '../data/predictions'
+import { LATEST_TOP_PREDICTIONS } from '../data/predictions'
 import { getNextRace, useRaceCalendar } from '../data/races'
 import useIsMobile from '../hooks/useIsMobile'
 import canadaTrack from '../assets/circuits/canada-track-white.png'
@@ -286,7 +286,7 @@ function GhostPredictionRow({ isMobile, onNavigate }) {
   )
 }
 
-const TOP3 = MIAMI_TOP_PREDICTIONS
+const TOP3 = LATEST_TOP_PREDICTIONS
 
 const BAR_COLORS = ['#E8002D', '#f97316', '#eab308']
 
@@ -418,7 +418,7 @@ export default function Home({ onNavigate }) {
         <div className="hero-content relative max-w-2xl mx-auto space-y-6" style={{ zIndex: 2, textAlign: 'center' }}>
           {/* Badge */}
           <span className="hero-badge inline-flex items-center font-medium rounded-full" style={{ fontSize: '0.9rem', padding: '6px 14px' }}>
-            Miami GP predictions now live!
+            Barcelona-Catalunya predictions now live!
           </span>
 
           <h1 className="hero-title tracking-tight" style={{ fontSize: isMobile ? '42px' : '72px' }}>
@@ -515,7 +515,7 @@ export default function Home({ onNavigate }) {
             <span className="section-kicker" style={{ fontSize: '13px', fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Latest Prediction</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '24px', flexWrap: 'wrap', lineHeight: 1.2 }}>
-            <span style={{ fontSize: '14px', color: '#A1A1AA', lineHeight: 1.2 }}>Miami Grand Prix</span>
+            <span style={{ fontSize: '14px', color: '#A1A1AA', lineHeight: 1.2 }}>Barcelona-Catalunya Grand Prix</span>
             <span style={{ fontSize: '14px', color: '#A1A1AA', lineHeight: 1.2 }}>·</span>
             <span style={{ color: '#E8002D', fontSize: '14px', fontWeight: 600, lineHeight: 1.2 }}>
               Pre-Qualifying

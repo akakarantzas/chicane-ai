@@ -1,0 +1,30 @@
+{
+  "race": "Barcelona-Catalunya GP",
+  "circuit": "Circuit de Barcelona-Catalunya",
+  "model_version": "barcelona-catalunya-hgb-calibrated-1.0",
+  "training_samples": 651,
+  "training_races_loaded": 32,
+  "features": [
+    "GridPosition",
+    "DriverCode",
+    "TeamName",
+    "AvgPoints5",
+    "AvgGrid5",
+    "AvgFinish5",
+    "WinRate10",
+    "TeamAvgPoints5",
+    "BarcelonaExperience",
+    "BarcelonaWinRate",
+    "IsStreetCircuit"
+  ],
+  "validation": {
+    "roc_auc": 0.9757,
+    "log_loss": 0.0785,
+    "brier_score": 0.026
+  },
+  "prediction_postprocess": {
+    "model_weight": 0.75,
+    "form_prior_weight": 0.25,
+    "floor_before_normalization": 0.001
+  }
+}

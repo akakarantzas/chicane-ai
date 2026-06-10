@@ -37,8 +37,8 @@ def get_model():
 def get_predictions(drivers: list[dict]) -> list[dict]:
     """Run optional model inference.
 
-    The active `/api/predictions/next-race` route serves
-    `miami_predictions.json`; this helper is kept for explicit/future model
+    The active `/api/predictions/next-race` route serves a precomputed
+    prediction JSON; this helper is kept for explicit/future model
     inference and loads `rf_model.pkl` only when called.
     """
     names = [d["driver"] for d in drivers]

@@ -37,8 +37,13 @@ Microsoft/
 
 # Cache / databases
 cache/
+.tmp-*/
 *.sqlite
 *.db
+
+# Local server logs
+*.stdout.log
+*.stderr.log
 
 # Claude Code local settings
 .claude/settings.local.json

@@ -7,7 +7,7 @@ from app.data.drivers import PREDICTION_DRIVER_GRID_2026
 
 router = APIRouter(prefix="/api/predictions")
 
-_JSON_PATH = Path(__file__).resolve().parent.parent / "models" / "miami_predictions.json"
+_JSON_PATH = Path(__file__).resolve().parent.parent / "models" / "barcelona_catalunya_predictions.json"
 
 
 def _load_predictions():
@@ -51,9 +51,9 @@ def _complete_2026_grid(predictions: list[dict]) -> list[dict]:
 def get_next_race_prediction():
     predictions = _complete_2026_grid(_load_predictions())
     return {
-        "race": "Miami GP",
-        "circuit": "Miami International Autodrome",
+        "race": "Barcelona-Catalunya GP",
+        "circuit": "Circuit de Barcelona-Catalunya",
         "predictions": predictions,
-        "model_version": "2.0",
+        "model_version": "barcelona-catalunya-hgb-calibrated-1.0",
         "status": "Pre-Qualifying"
     }
