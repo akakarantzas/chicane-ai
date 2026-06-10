@@ -37,7 +37,7 @@ def test_next_race_predictions_use_json_without_model_import(client, monkeypatch
     sys.modules.pop("app.models.predict", None)
 
     def fail_model_load(path):
-        raise AssertionError("JSON prediction endpoint should not load rf_model.pkl")
+        raise AssertionError("JSON prediction endpoint should not load a pickle model")
 
     monkeypatch.setattr("joblib.load", fail_model_load)
 

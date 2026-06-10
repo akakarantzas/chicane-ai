@@ -55,9 +55,9 @@ chicane-ai/
 |       +-- data/
 |       |   +-- drivers.py       Shared backend driver/team constants
 |       +-- models/
-|       |   +-- rf_model.pkl
-|       |   +-- predict.py
-|       |   +-- miami_predictions.json
+|       |   +-- barcelona_catalunya_predictions.json
+|       |   +-- barcelona_catalunya_metadata.json
+|       |   +-- barcelona_catalunya_model.pkl
 |       +-- routers/
 |           +-- contact.py
 |           +-- h2h.py
@@ -85,16 +85,16 @@ Navigation is handled in `frontend/src/App.jsx` with local React state. There is
 
 ## Prediction Data
 
-Current prediction data is centered around the 2026 Miami Grand Prix result set.
+Current prediction data is centered around the 2026 Barcelona-Catalunya Grand Prix.
 
-- P1: Antonelli, Mercedes, 70.9%
-- P2: Russell, Mercedes, 17.9%
-- P3: Leclerc, Ferrari, 6.1%
-- P4: Hamilton, Ferrari, 1.3%
-- P5: Verstappen, Red Bull Racing, 1.3%
+- P1: Antonelli, Mercedes, 27.0%
+- P2: Norris, McLaren, 24.1%
+- P3: Piastri, McLaren, 22.5%
+- P4: Russell, Mercedes, 14.9%
+- P5: Verstappen, Red Bull Racing, 2.8%
 
 Frontend preview data lives in `frontend/src/data/predictions.js`.
-Backend API prediction data is served from `backend/app/models/miami_predictions.json`.
+Backend API prediction data is served from `backend/app/models/barcelona_catalunya_predictions.json` with metadata from `backend/app/models/barcelona_catalunya_metadata.json`.
 
 ## Backend API Endpoints
 
