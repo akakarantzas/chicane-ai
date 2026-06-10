@@ -48,6 +48,29 @@ def test_next_race_predictions_use_json_without_model_import(client, monkeypatch
     assert "app.models.predict" not in sys.modules
 
 
+def test_next_race_predictions_openapi_uses_response_schema(client):
+    response = client.get("/openapi.json")
+
+    assert response.status_code == 200
+    schema = response.json()
+    next_race_response = schema["paths"]["/api/predictions/next-race"]["get"]["responses"]["200"]
+    assert next_race_response["content"]["application/json"]["schema"]["$ref"] == (
+        "#/components/schemas/NextRacePredictionResponse"
+    )
+
+    response_schema = schema["components"]["schemas"]["NextRacePredictionResponse"]
+    assert response_schema["required"] == [
+        "race",
+        "circuit",
+        "predictions",
+        "status",
+        "metadata",
+    ]
+    assert response_schema["properties"]["predictions"]["items"]["$ref"] == (
+        "#/components/schemas/PredictionItem"
+    )
+
+
 def test_missing_prediction_json_returns_clear_server_error(client, monkeypatch, tmp_path):
     missing_file = tmp_path / "missing_predictions.json"
     monkeypatch.setattr(predictions, "_PREDICTIONS_PATH", str(missing_file))
