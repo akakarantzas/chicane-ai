@@ -6,7 +6,7 @@ import { circuits } from '../data/circuits'
 import { LATEST_TOP_PREDICTIONS } from '../data/predictions'
 import { getNextRace, useRaceCalendar } from '../data/races'
 import useIsMobile from '../hooks/useIsMobile'
-import { apiUrl } from '../lib/api'
+import { fetchNextRacePrediction } from '../lib/predictions'
 import canadaTrack from '../assets/circuits/canada-track-white.png'
 import monacoTrack from '../assets/circuits/monaco-track-white.png'
 
@@ -368,11 +368,7 @@ export default function Home({ onNavigate }) {
   useEffect(() => {
     let isMounted = true
 
-    fetch(apiUrl('/api/predictions/next-race'))
-      .then((res) => {
-        if (!res.ok) throw new Error(`Server error: ${res.status}`)
-        return res.json()
-      })
+    fetchNextRacePrediction()
       .then((json) => {
         if (!isMounted || !Array.isArray(json.predictions) || json.predictions.length === 0) return
         setPredictionPreview({
