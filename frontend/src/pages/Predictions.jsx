@@ -289,7 +289,7 @@ export default function Predictions({ onNavigate, animationKey = 0 }) {
     )
   }
 
-  const { race, circuit, predictions } = data
+  const { race, circuit, predictions, status } = data
   const raceTitle = race !== 'TBD' ? race.replace(/\bGP\b/g, 'Grand Prix') : 'Next Race'
   const visiblePredictions = showAllPredictions ? predictions : predictions.slice(0, 5)
   const hiddenCount = Math.max(predictions.length - 5, 0)
@@ -325,7 +325,7 @@ export default function Predictions({ onNavigate, animationKey = 0 }) {
                 whiteSpace: 'nowrap',
                 flexShrink: 0,
               }}>
-                Pre-Qualifying
+                {status}
               </span>
             </div>
           )}
