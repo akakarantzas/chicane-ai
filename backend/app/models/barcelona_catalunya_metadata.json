@@ -27,6 +27,11 @@
     "form_prior_weight": 0.25,
     "floor_before_normalization": 0.001
   },
+  "prediction_input": {
+    "grid_source": "projected_grid",
+    "grid_override_file": null,
+    "overridden_drivers": []
+  },
   "backtest": {
     "races": [
       {

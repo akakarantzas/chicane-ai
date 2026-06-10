@@ -7,23 +7,59 @@ from app.data.drivers import PREDICTION_DRIVER_GRID_2026
 
 router = APIRouter(prefix="/api/predictions")
 
-_JSON_PATH = Path(__file__).resolve().parent.parent / "models" / "barcelona_catalunya_predictions.json"
+_MODELS_DIR = Path(__file__).resolve().parent.parent / "models"
+_PREDICTIONS_PATH = _MODELS_DIR / "barcelona_catalunya_predictions.json"
+_METADATA_PATH = _MODELS_DIR / "barcelona_catalunya_metadata.json"
 
 
-def _load_predictions():
+def _load_json(path: Path | str, missing_detail: str, malformed_detail: str):
     try:
-        with Path(_JSON_PATH).open("r", encoding="utf-8") as f:
+        with Path(path).open("r", encoding="utf-8") as f:
             return json.load(f)
     except FileNotFoundError:
         raise HTTPException(
             status_code=500,
-            detail="Prediction data file is missing.",
+            detail=missing_detail,
         )
     except JSONDecodeError:
         raise HTTPException(
             status_code=500,
-            detail="Prediction data file is malformed.",
+            detail=malformed_detail,
         )
+
+
+def _load_predictions():
+    return _load_json(
+        _PREDICTIONS_PATH,
+        "Prediction data file is missing.",
+        "Prediction data file is malformed.",
+    )
+
+
+def _load_metadata():
+    return _load_json(
+        _METADATA_PATH,
+        "Prediction metadata file is missing.",
+        "Prediction metadata file is malformed.",
+    )
+
+
+def _prediction_status(metadata: dict) -> str:
+    prediction_input = metadata.get("prediction_input", {})
+    if prediction_input.get("grid_source") == "qualifying_grid":
+        return "Post-Qualifying"
+    return "Pre-Qualifying"
+
+
+def _public_metadata(metadata: dict) -> dict:
+    backtest = metadata.get("backtest", {})
+    return {
+        "training_samples": metadata.get("training_samples"),
+        "training_races_loaded": metadata.get("training_races_loaded"),
+        "validation": metadata.get("validation", {}),
+        "prediction_input": metadata.get("prediction_input", {}),
+        "backtest_summary": backtest.get("summary", {}),
+    }
 
 
 def _complete_2026_grid(predictions: list[dict]) -> list[dict]:
@@ -50,10 +86,12 @@ def _complete_2026_grid(predictions: list[dict]) -> list[dict]:
 @router.get("/next-race")
 def get_next_race_prediction():
     predictions = _complete_2026_grid(_load_predictions())
+    metadata = _load_metadata()
     return {
-        "race": "Barcelona-Catalunya GP",
-        "circuit": "Circuit de Barcelona-Catalunya",
+        "race": metadata.get("race", "Barcelona-Catalunya GP"),
+        "circuit": metadata.get("circuit", "Circuit de Barcelona-Catalunya"),
         "predictions": predictions,
-        "model_version": "barcelona-catalunya-hgb-calibrated-1.0",
-        "status": "Pre-Qualifying"
+        "model_version": metadata.get("model_version"),
+        "status": _prediction_status(metadata),
+        "metadata": _public_metadata(metadata),
     }
