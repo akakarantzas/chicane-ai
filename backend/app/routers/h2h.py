@@ -39,7 +39,7 @@ RACES_BY_YEAR = {
     2026: ["Australia", "China", "Japan"],
 }
 
-NEXT_RACE = "Miami Grand Prix"
+NEXT_RACE = "Barcelona-Catalunya Grand Prix"
 OPENF1_BASE_URL = "https://api.openf1.org/v1"
 JOLPICA_BASE_URL = "https://api.jolpi.ca/ergast/f1"
 

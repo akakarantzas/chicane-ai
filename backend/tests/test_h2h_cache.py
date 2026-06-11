@@ -22,6 +22,28 @@ def test_cache_can_be_cleared_between_calls(monkeypatch):
     assert calls == [(2026, True), (2026, True)]
 
 
+def test_strict_and_non_strict_loads_use_separate_cache_entries(monkeypatch):
+    calls = []
+    monkeypatch.setenv("H2H_CACHE_TTL_SECONDS", "21600")
+
+    def loader(year, strict=True):
+        calls.append((year, strict))
+        label = "strict" if strict else "relaxed"
+        return [{"year": year, "race": label, "abbreviation": "NOR"}]
+
+    assert h2h_cache.get_cached_season_results(2026, loader, strict=False) == [
+        {"year": 2026, "race": "relaxed", "abbreviation": "NOR"}
+    ]
+    assert h2h_cache.get_cached_season_results(2026, loader, strict=True) == [
+        {"year": 2026, "race": "strict", "abbreviation": "NOR"}
+    ]
+    assert h2h_cache.get_cached_season_results(2026, loader, strict=False) == [
+        {"year": 2026, "race": "relaxed", "abbreviation": "NOR"}
+    ]
+
+    assert calls == [(2026, False), (2026, True)]
+
+
 def test_expired_cache_entry_refreshes(monkeypatch):
     calls = []
     now = [100.0]

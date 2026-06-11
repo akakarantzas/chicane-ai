@@ -19,7 +19,7 @@ def test_next_race_predictions_preserve_current_barcelona_catalunya_values(clien
     assert {"race", "circuit", "predictions", "model_version", "status"} <= set(data)
     assert data["race"] == "Barcelona-Catalunya GP"
     assert data["circuit"] == "Circuit de Barcelona-Catalunya"
-    assert data["model_version"] == "barcelona-catalunya-hgb-calibrated-1.0"
+    assert data["model_version"] == "barcelona-catalunya-hgb-calibrated-1.1"
     assert data["status"] == "Pre-Qualifying"
     assert data["metadata"]["prediction_input"]["grid_source"] == "projected_grid"
     assert data["metadata"]["backtest_summary"]["top3_accuracy"] == pytest.approx(1.0)
@@ -30,7 +30,7 @@ def test_next_race_predictions_preserve_current_barcelona_catalunya_values(clien
         item for item in data["predictions"] if item["driver"] == "Antonelli"
     )
     assert antonelli["team"] == "Mercedes"
-    assert antonelli["probability"] == pytest.approx(0.2704)
+    assert antonelli["probability"] == pytest.approx(0.2591)
 
 
 def test_next_race_predictions_use_json_without_model_import(client, monkeypatch):
@@ -97,6 +97,26 @@ def test_invalid_prediction_json_returns_clear_server_error(client, monkeypatch,
 def test_invalid_prediction_json_structure_returns_clear_server_error(client, monkeypatch, tmp_path):
     invalid_file = tmp_path / "barcelona_catalunya_predictions.json"
     invalid_file.write_text('[{"driver": "Antonelli", "probability": 0.27}]', encoding="utf-8")
+    monkeypatch.setattr(predictions, "_PREDICTIONS_PATH", str(invalid_file))
+
+    response = client.get("/api/predictions/next-race")
+
+    assert response.status_code == 500
+    assert response.json()["detail"] == "Prediction data file has invalid structure."
+    assert response.headers["content-type"].startswith("application/json")
+
+
+@pytest.mark.parametrize("probability", [-0.1, 1.1, True])
+def test_invalid_prediction_probability_returns_clear_server_error(
+    client, monkeypatch, tmp_path, probability
+):
+    invalid_file = tmp_path / "barcelona_catalunya_predictions.json"
+    payload = (
+        '[{"driver": "Antonelli", '
+        '"team": "Mercedes", '
+        f'"probability": {str(probability).lower()}}}]'
+    )
+    invalid_file.write_text(payload, encoding="utf-8")
     monkeypatch.setattr(predictions, "_PREDICTIONS_PATH", str(invalid_file))
 
     response = client.get("/api/predictions/next-race")

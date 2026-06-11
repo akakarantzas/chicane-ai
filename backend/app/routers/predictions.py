@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 import json
 from json import JSONDecodeError
+import math
 from pathlib import Path
 
 from pydantic import BaseModel, Field
@@ -84,7 +85,14 @@ def _validate_predictions(data):
             _raise_invalid_prediction_data()
         if not isinstance(item.get("team"), str) or not item["team"].strip():
             _raise_invalid_prediction_data()
-        if not isinstance(item.get("probability"), (int, float)):
+        probability = item.get("probability")
+        if (
+            not isinstance(probability, (int, float))
+            or isinstance(probability, bool)
+            or not math.isfinite(probability)
+            or probability < 0
+            or probability > 1
+        ):
             _raise_invalid_prediction_data()
 
 

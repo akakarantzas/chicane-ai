@@ -12,7 +12,7 @@ class CacheEntry:
     loaded_at: float
 
 
-_season_cache: dict[int, CacheEntry] = {}
+_season_cache: dict[tuple[int, bool], CacheEntry] = {}
 
 
 def get_h2h_cache_ttl_seconds() -> int:
@@ -38,12 +38,13 @@ def get_cached_season_results(
 ) -> list[dict]:
     now = time.monotonic()
     ttl = get_h2h_cache_ttl_seconds()
-    entry = _season_cache.get(year)
+    cache_key = (year, strict)
+    entry = _season_cache.get(cache_key)
 
     if entry and now - entry.loaded_at < ttl:
         return list(entry.rows)
 
     rows = loader(year, strict=strict)
     if rows:
-        _season_cache[year] = CacheEntry(rows=list(rows), loaded_at=now)
+        _season_cache[cache_key] = CacheEntry(rows=list(rows), loaded_at=now)
     return rows
