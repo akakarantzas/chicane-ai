@@ -363,7 +363,7 @@ function PredictionCard({ prediction, d1Abbrev, d2Abbrev, loading }) {
         color: '#A1A1AA',
         marginBottom: '8px',
       }}>
-        Miami GP Head to Head Winner Prediction
+        Barcelona-Catalunya Grand Prix Head to Head Winner Prediction
       </div>
 
       {/* Winner name */}
