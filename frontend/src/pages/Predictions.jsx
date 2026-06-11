@@ -294,7 +294,7 @@ export default function Predictions({ onNavigate, animationKey = 0 }) {
     <div
       className="page-bg relative min-h-screen text-[#F4F4F5] flex flex-col"
       style={{
-        backgroundImage: 'url(/chicane4.png)',
+        backgroundImage: 'url(/predictions-bg.png)',
       }}
     >
       {/* Dark overlay */}

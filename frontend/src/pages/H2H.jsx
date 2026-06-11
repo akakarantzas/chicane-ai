@@ -505,7 +505,7 @@ export default function H2H({ onNavigate }) {
       style={{
         minHeight: '100vh',
         color: HEADING_TEXT_COLOR,
-        backgroundImage: 'url(/chicane3.png)',
+        backgroundImage: 'url(/h2h-bg.png)',
         position: 'relative',
       }}
     >
