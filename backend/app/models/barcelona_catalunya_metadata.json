@@ -339,13 +339,19 @@
       }
     },
     "market_odds": {
-      "market_source": "User-provided Barcelona-Catalunya pre-race market note",
+      "market_source": "formula1.com betting guide and pre-race sportsbook consensus",
       "market_as_of": "2026-06-13",
       "market_odds_file": "market_odds.json",
       "drivers": [
-        "ANT"
+        "ANT",
+        "HAM",
+        "LEC",
+        "NOR",
+        "PIA",
+        "RUS",
+        "VER"
       ],
-      "book_overround": 0.5
+      "book_overround": 1.1972
     },
     "selection": {
       "method": "walk_forward_grid_search",

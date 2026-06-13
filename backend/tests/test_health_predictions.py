@@ -31,14 +31,22 @@ def test_next_race_predictions_preserve_current_barcelona_catalunya_values(clien
     assert postprocess["contender_probability_mass"] == pytest.approx(0.93)
     assert postprocess["win_contenders"] == ["ANT", "HAM", "LEC", "NOR", "PIA", "RUS", "VER"]
     assert postprocess["market_odds"]["market_odds_file"] == "market_odds.json"
-    assert postprocess["market_odds"]["drivers"] == ["ANT"]
-    assert postprocess["market_odds"]["book_overround"] == pytest.approx(0.5)
+    assert postprocess["market_odds"]["drivers"] == [
+        "ANT",
+        "HAM",
+        "LEC",
+        "NOR",
+        "PIA",
+        "RUS",
+        "VER",
+    ]
+    assert postprocess["market_odds"]["book_overround"] == pytest.approx(1.1972)
 
     antonelli = next(
         item for item in data["predictions"] if item["driver"] == "Antonelli"
     )
     assert antonelli["team"] == "Mercedes"
-    assert antonelli["probability"] == pytest.approx(0.3293)
+    assert antonelli["probability"] == pytest.approx(0.2825)
 
 
 def test_next_race_predictions_use_json_without_model_import(client, monkeypatch):

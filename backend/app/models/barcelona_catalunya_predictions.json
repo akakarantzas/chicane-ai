@@ -2,37 +2,37 @@
   {
     "driver": "Antonelli",
     "team": "Mercedes",
-    "probability": 0.3293
+    "probability": 0.2825
   },
   {
     "driver": "Norris",
     "team": "McLaren",
-    "probability": 0.2446
+    "probability": 0.2511
   },
   {
     "driver": "Piastri",
     "team": "McLaren",
-    "probability": 0.167
+    "probability": 0.172
   },
   {
     "driver": "Russell",
     "team": "Mercedes",
-    "probability": 0.1096
+    "probability": 0.1281
   },
   {
     "driver": "Verstappen",
     "team": "Red Bull Racing",
-    "probability": 0.0418
+    "probability": 0.0499
   },
   {
     "driver": "Leclerc",
     "team": "Ferrari",
-    "probability": 0.0197
+    "probability": 0.0241
   },
   {
     "driver": "Hamilton",
     "team": "Ferrari",
-    "probability": 0.018
+    "probability": 0.0223
   },
   {
     "driver": "Sainz",
