@@ -41,13 +41,20 @@
     "prediction_only_driver_priors": {
       "ANT": {
         "recent_dominance_score": 1.0,
-        "market_decimal_odds": 2.0,
         "evidence": [
           "Five consecutive Grand Prix wins before Barcelona-Catalunya",
-          "Monaco 2026 pole, win, fastest lap, led every lap, and Grand Slam",
-          "Quoted Barcelona-Catalunya winner odds: 1/1 (decimal 2.0, American +100)"
+          "Monaco 2026 pole, win, fastest lap, led every lap, and Grand Slam"
         ]
       }
+    },
+    "market_odds": {
+      "market_source": "User-provided Barcelona-Catalunya pre-race market note",
+      "market_as_of": "2026-06-13",
+      "market_odds_file": "market_odds.json",
+      "drivers": [
+        "ANT"
+      ],
+      "book_overround": 0.5
     },
     "selection": {
       "method": "walk_forward_grid_search",

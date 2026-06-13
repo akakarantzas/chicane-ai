@@ -28,7 +28,9 @@ def test_next_race_predictions_preserve_current_barcelona_catalunya_values(clien
 
     postprocess = data["metadata"]["prediction_postprocess"]
     assert postprocess["prediction_only_prior_weights"]["recent_dominance"] == pytest.approx(0.075)
-    assert postprocess["prediction_only_driver_priors"]["ANT"]["market_decimal_odds"] == pytest.approx(2.0)
+    assert postprocess["market_odds"]["market_odds_file"] == "market_odds.json"
+    assert postprocess["market_odds"]["drivers"] == ["ANT"]
+    assert postprocess["market_odds"]["book_overround"] == pytest.approx(0.5)
 
     antonelli = next(
         item for item in data["predictions"] if item["driver"] == "Antonelli"
