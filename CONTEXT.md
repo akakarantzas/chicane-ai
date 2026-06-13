@@ -86,14 +86,17 @@ Navigation is handled in `frontend/src/App.jsx` with local React state. There is
 
 Current prediction data is centered around the 2026 Barcelona-Catalunya Grand Prix.
 
-- P1: Antonelli, Mercedes, 27.0%
-- P2: Norris, McLaren, 24.1%
-- P3: Piastri, McLaren, 22.5%
-- P4: Russell, Mercedes, 14.9%
-- P5: Verstappen, Red Bull Racing, 2.8%
+- Model version: `barcelona-catalunya-hgb-calibrated-1.4`
+- Status: Pre-Qualifying (`projected_grid`)
+- P1: Antonelli, Mercedes, 28.3%
+- P2: Norris, McLaren, 25.1%
+- P3: Piastri, McLaren, 17.2%
+- P4: Russell, Mercedes, 12.8%
+- P5: Verstappen, Red Bull Racing, 5.0%
 
 Frontend prediction views load from `GET /api/predictions/next-race`.
 Backend API prediction data is served from `backend/app/models/barcelona_catalunya_predictions.json` with metadata from `backend/app/models/barcelona_catalunya_metadata.json`.
+Training and export live in the standalone model repo: `f1-2026-barcelona-catalunya-grand-prix-winner-prediction`.
 
 ## Backend API Endpoints
 

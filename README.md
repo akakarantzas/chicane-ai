@@ -81,10 +81,17 @@ Then run:
 
 Train and export the Barcelona-Catalunya model in the standalone ML repo:
 
+- https://github.com/akakarantzas/f1-2026-barcelona-catalunya-grand-prix-winner-prediction
+
 ```powershell
 cd ..\f1-2026-barcelona-catalunya-grand-prix-winner-prediction
 python train_barcelona_catalunya.py
 ```
+
+Optional prediction inputs in the model repo:
+
+- `qualifying_grid.json` after qualifying
+- `market_odds.json` for pre-race sportsbook consensus
 
 Sync the exported app artifacts into `chicane-ai`:
 
