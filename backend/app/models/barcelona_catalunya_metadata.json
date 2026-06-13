@@ -1,7 +1,7 @@
 {
   "race": "Barcelona-Catalunya GP",
   "circuit": "Circuit de Barcelona-Catalunya",
-  "model_version": "barcelona-catalunya-hgb-calibrated-1.3",
+  "model_version": "barcelona-catalunya-hgb-calibrated-1.4",
   "training_samples": 671,
   "training_races_loaded": 33,
   "features": [
@@ -25,7 +25,288 @@
     "top5_accuracy": 1.0,
     "mean_winner_rank": 1.48,
     "log_loss": 0.1013,
-    "brier_score": 0.0307
+    "brier_score": 0.0307,
+    "by_circuit": {
+      "spain": {
+        "races_tested": 1,
+        "top1_accuracy": 1.0,
+        "top3_accuracy": 1.0,
+        "top5_accuracy": 1.0,
+        "mean_winner_rank": 1.0,
+        "log_loss": 0.1037,
+        "brier_score": 0.0313
+      },
+      "non_spain": {
+        "races_tested": 24,
+        "top1_accuracy": 0.5833,
+        "top3_accuracy": 1.0,
+        "top5_accuracy": 1.0,
+        "mean_winner_rank": 1.5,
+        "log_loss": 0.1012,
+        "brier_score": 0.0307
+      },
+      "all": {
+        "races_tested": 25,
+        "top1_accuracy": 0.6,
+        "top3_accuracy": 1.0,
+        "top5_accuracy": 1.0,
+        "mean_winner_rank": 1.48,
+        "log_loss": 0.1013,
+        "brier_score": 0.0307
+      }
+    }
+  },
+  "barcelona_significance": {
+    "method": "walk_forward_ablation",
+    "baseline": {
+      "summary": {
+        "races_tested": 25,
+        "top1_accuracy": 0.6,
+        "top3_accuracy": 1.0,
+        "top5_accuracy": 1.0,
+        "mean_winner_rank": 1.48,
+        "log_loss": 0.1013,
+        "brier_score": 0.0307
+      },
+      "by_circuit": {
+        "spain": {
+          "races_tested": 1,
+          "top1_accuracy": 1.0,
+          "top3_accuracy": 1.0,
+          "top5_accuracy": 1.0,
+          "mean_winner_rank": 1.0,
+          "log_loss": 0.1037,
+          "brier_score": 0.0313
+        },
+        "non_spain": {
+          "races_tested": 24,
+          "top1_accuracy": 0.5833,
+          "top3_accuracy": 1.0,
+          "top5_accuracy": 1.0,
+          "mean_winner_rank": 1.5,
+          "log_loss": 0.1012,
+          "brier_score": 0.0307
+        },
+        "all": {
+          "races_tested": 25,
+          "top1_accuracy": 0.6,
+          "top3_accuracy": 1.0,
+          "top5_accuracy": 1.0,
+          "mean_winner_rank": 1.48,
+          "log_loss": 0.1013,
+          "brier_score": 0.0307
+        }
+      }
+    },
+    "variants": {
+      "no_barcelona_features": {
+        "label": "Drop BarcelonaExperience and BarcelonaWinRate",
+        "summary": {
+          "races_tested": 25,
+          "top1_accuracy": 0.4,
+          "top3_accuracy": 1.0,
+          "top5_accuracy": 1.0,
+          "mean_winner_rank": 1.72,
+          "log_loss": 0.106,
+          "brier_score": 0.0322
+        },
+        "by_circuit": {
+          "spain": {
+            "races_tested": 1,
+            "top1_accuracy": 0.0,
+            "top3_accuracy": 1.0,
+            "top5_accuracy": 1.0,
+            "mean_winner_rank": 2.0,
+            "log_loss": 0.1179,
+            "brier_score": 0.0368
+          },
+          "non_spain": {
+            "races_tested": 24,
+            "top1_accuracy": 0.4167,
+            "top3_accuracy": 1.0,
+            "top5_accuracy": 1.0,
+            "mean_winner_rank": 1.71,
+            "log_loss": 0.1056,
+            "brier_score": 0.032
+          },
+          "all": {
+            "races_tested": 25,
+            "top1_accuracy": 0.4,
+            "top3_accuracy": 1.0,
+            "top5_accuracy": 1.0,
+            "mean_winner_rank": 1.72,
+            "log_loss": 0.106,
+            "brier_score": 0.0322
+          }
+        },
+        "delta_vs_baseline": {
+          "summary": {
+            "top1_accuracy": -0.2,
+            "top3_accuracy": 0.0,
+            "top5_accuracy": 0.0,
+            "mean_winner_rank": -0.24,
+            "log_loss": 0.0047,
+            "brier_score": 0.0015
+          },
+          "spain": {
+            "top1_accuracy": -1.0,
+            "top3_accuracy": 0.0,
+            "top5_accuracy": 0.0,
+            "mean_winner_rank": -1.0,
+            "log_loss": 0.0142,
+            "brier_score": 0.0055
+          },
+          "non_spain": {
+            "top1_accuracy": -0.1666,
+            "top3_accuracy": 0.0,
+            "top5_accuracy": 0.0,
+            "mean_winner_rank": -0.21,
+            "log_loss": 0.0044,
+            "brier_score": 0.0013
+          }
+        }
+      },
+      "no_track_prior": {
+        "label": "Zero Barcelona track prior weight",
+        "summary": {
+          "races_tested": 25,
+          "top1_accuracy": 0.56,
+          "top3_accuracy": 1.0,
+          "top5_accuracy": 1.0,
+          "mean_winner_rank": 1.52,
+          "log_loss": 0.0968,
+          "brier_score": 0.0297
+        },
+        "by_circuit": {
+          "spain": {
+            "races_tested": 1,
+            "top1_accuracy": 1.0,
+            "top3_accuracy": 1.0,
+            "top5_accuracy": 1.0,
+            "mean_winner_rank": 1.0,
+            "log_loss": 0.0956,
+            "brier_score": 0.0287
+          },
+          "non_spain": {
+            "races_tested": 24,
+            "top1_accuracy": 0.5417,
+            "top3_accuracy": 1.0,
+            "top5_accuracy": 1.0,
+            "mean_winner_rank": 1.54,
+            "log_loss": 0.0969,
+            "brier_score": 0.0298
+          },
+          "all": {
+            "races_tested": 25,
+            "top1_accuracy": 0.56,
+            "top3_accuracy": 1.0,
+            "top5_accuracy": 1.0,
+            "mean_winner_rank": 1.52,
+            "log_loss": 0.0968,
+            "brier_score": 0.0297
+          }
+        },
+        "delta_vs_baseline": {
+          "summary": {
+            "top1_accuracy": -0.04,
+            "top3_accuracy": 0.0,
+            "top5_accuracy": 0.0,
+            "mean_winner_rank": -0.04,
+            "log_loss": -0.0045,
+            "brier_score": -0.001
+          },
+          "spain": {
+            "top1_accuracy": 0.0,
+            "top3_accuracy": 0.0,
+            "top5_accuracy": 0.0,
+            "mean_winner_rank": 0.0,
+            "log_loss": -0.0081,
+            "brier_score": -0.0026
+          },
+          "non_spain": {
+            "top1_accuracy": -0.0416,
+            "top3_accuracy": 0.0,
+            "top5_accuracy": 0.0,
+            "mean_winner_rank": -0.04,
+            "log_loss": -0.0043,
+            "brier_score": -0.0009
+          }
+        }
+      },
+      "no_barcelona_signal": {
+        "label": "Drop Barcelona features and track prior",
+        "summary": {
+          "races_tested": 25,
+          "top1_accuracy": 0.48,
+          "top3_accuracy": 1.0,
+          "top5_accuracy": 1.0,
+          "mean_winner_rank": 1.64,
+          "log_loss": 0.1016,
+          "brier_score": 0.0312
+        },
+        "by_circuit": {
+          "spain": {
+            "races_tested": 1,
+            "top1_accuracy": 1.0,
+            "top3_accuracy": 1.0,
+            "top5_accuracy": 1.0,
+            "mean_winner_rank": 1.0,
+            "log_loss": 0.1109,
+            "brier_score": 0.0346
+          },
+          "non_spain": {
+            "races_tested": 24,
+            "top1_accuracy": 0.4583,
+            "top3_accuracy": 1.0,
+            "top5_accuracy": 1.0,
+            "mean_winner_rank": 1.67,
+            "log_loss": 0.1012,
+            "brier_score": 0.0311
+          },
+          "all": {
+            "races_tested": 25,
+            "top1_accuracy": 0.48,
+            "top3_accuracy": 1.0,
+            "top5_accuracy": 1.0,
+            "mean_winner_rank": 1.64,
+            "log_loss": 0.1016,
+            "brier_score": 0.0312
+          }
+        },
+        "delta_vs_baseline": {
+          "summary": {
+            "top1_accuracy": -0.12,
+            "top3_accuracy": 0.0,
+            "top5_accuracy": 0.0,
+            "mean_winner_rank": -0.16,
+            "log_loss": 0.0003,
+            "brier_score": 0.0005
+          },
+          "spain": {
+            "top1_accuracy": 0.0,
+            "top3_accuracy": 0.0,
+            "top5_accuracy": 0.0,
+            "mean_winner_rank": 0.0,
+            "log_loss": 0.0072,
+            "brier_score": 0.0033
+          },
+          "non_spain": {
+            "top1_accuracy": -0.125,
+            "top3_accuracy": 0.0,
+            "top5_accuracy": 0.0,
+            "mean_winner_rank": -0.17,
+            "log_loss": 0.0,
+            "brier_score": 0.0004
+          }
+        }
+      }
+    },
+    "barcelona_significance_score": {
+      "spain_top1_delta": 0.0,
+      "spain_log_loss_delta": 0.0072,
+      "spain_mean_winner_rank_delta": 0.0,
+      "note": "Positive top1/log_loss/mean_winner_rank deltas mean the full model outperforms the no-Barcelona-signal ablation on Spain races."
+    }
   },
   "prediction_postprocess": {
     "model_weight": 0.5,
@@ -238,6 +519,35 @@
       "mean_winner_rank": 1.48,
       "log_loss": 0.1013,
       "brier_score": 0.0307
+    },
+    "by_circuit": {
+      "spain": {
+        "races_tested": 1,
+        "top1_accuracy": 1.0,
+        "top3_accuracy": 1.0,
+        "top5_accuracy": 1.0,
+        "mean_winner_rank": 1.0,
+        "log_loss": 0.1037,
+        "brier_score": 0.0313
+      },
+      "non_spain": {
+        "races_tested": 24,
+        "top1_accuracy": 0.5833,
+        "top3_accuracy": 1.0,
+        "top5_accuracy": 1.0,
+        "mean_winner_rank": 1.5,
+        "log_loss": 0.1012,
+        "brier_score": 0.0307
+      },
+      "all": {
+        "races_tested": 25,
+        "top1_accuracy": 0.6,
+        "top3_accuracy": 1.0,
+        "top5_accuracy": 1.0,
+        "mean_winner_rank": 1.48,
+        "log_loss": 0.1013,
+        "brier_score": 0.0307
+      }
     }
   }
 }

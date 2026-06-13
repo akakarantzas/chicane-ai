@@ -19,7 +19,7 @@ def test_next_race_predictions_preserve_current_barcelona_catalunya_values(clien
     assert {"race", "circuit", "predictions", "model_version", "status"} <= set(data)
     assert data["race"] == "Barcelona-Catalunya GP"
     assert data["circuit"] == "Circuit de Barcelona-Catalunya"
-    assert data["model_version"] == "barcelona-catalunya-hgb-calibrated-1.3"
+    assert data["model_version"] == "barcelona-catalunya-hgb-calibrated-1.4"
     assert data["status"] == "Pre-Qualifying"
     assert data["metadata"]["prediction_input"]["grid_source"] == "projected_grid"
     assert data["metadata"]["backtest_summary"]["top3_accuracy"] == pytest.approx(1.0)
