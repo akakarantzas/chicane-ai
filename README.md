@@ -13,7 +13,7 @@ AI-powered Formula 1 analytics and race prediction web app.
 
 ## Track Record
 
-Accurately predicted Antonelli (Mercedes) as the 2026 Miami GP winner with 70.9% confidence.
+Accurately predicted Antonelli (Mercedes) as the 2026 Miami GP winner.
 
 ## Stack
 
