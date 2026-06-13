@@ -25,6 +25,7 @@ class PredictionMetadata(BaseModel):
     training_samples: int | None = None
     training_races_loaded: int | None = None
     validation: dict = Field(default_factory=dict)
+    prediction_postprocess: dict = Field(default_factory=dict)
     prediction_input: dict = Field(default_factory=dict)
     backtest_summary: dict = Field(default_factory=dict)
 
@@ -132,6 +133,7 @@ def _public_metadata(metadata: dict) -> dict:
         "training_samples": metadata.get("training_samples"),
         "training_races_loaded": metadata.get("training_races_loaded"),
         "validation": metadata.get("validation", {}),
+        "prediction_postprocess": metadata.get("prediction_postprocess", {}),
         "prediction_input": metadata.get("prediction_input", {}),
         "backtest_summary": backtest.get("summary", {}),
     }

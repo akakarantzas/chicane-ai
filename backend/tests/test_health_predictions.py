@@ -19,18 +19,22 @@ def test_next_race_predictions_preserve_current_barcelona_catalunya_values(clien
     assert {"race", "circuit", "predictions", "model_version", "status"} <= set(data)
     assert data["race"] == "Barcelona-Catalunya GP"
     assert data["circuit"] == "Circuit de Barcelona-Catalunya"
-    assert data["model_version"] == "barcelona-catalunya-hgb-calibrated-1.2"
+    assert data["model_version"] == "barcelona-catalunya-hgb-calibrated-1.3"
     assert data["status"] == "Pre-Qualifying"
     assert data["metadata"]["prediction_input"]["grid_source"] == "projected_grid"
     assert data["metadata"]["backtest_summary"]["top3_accuracy"] == pytest.approx(1.0)
     assert isinstance(data["predictions"], list)
     assert data["predictions"]
 
-    norris = next(
-        item for item in data["predictions"] if item["driver"] == "Norris"
+    postprocess = data["metadata"]["prediction_postprocess"]
+    assert postprocess["prediction_only_prior_weights"]["recent_dominance"] == pytest.approx(0.075)
+    assert postprocess["prediction_only_driver_priors"]["ANT"]["market_decimal_odds"] == pytest.approx(2.0)
+
+    antonelli = next(
+        item for item in data["predictions"] if item["driver"] == "Antonelli"
     )
-    assert norris["team"] == "McLaren"
-    assert norris["probability"] == pytest.approx(0.2781)
+    assert antonelli["team"] == "Mercedes"
+    assert antonelli["probability"] == pytest.approx(0.3181)
 
 
 def test_next_race_predictions_use_json_without_model_import(client, monkeypatch):

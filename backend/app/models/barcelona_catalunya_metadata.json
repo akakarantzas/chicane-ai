@@ -1,7 +1,7 @@
 {
   "race": "Barcelona-Catalunya GP",
   "circuit": "Circuit de Barcelona-Catalunya",
-  "model_version": "barcelona-catalunya-hgb-calibrated-1.2",
+  "model_version": "barcelona-catalunya-hgb-calibrated-1.3",
   "training_samples": 671,
   "training_races_loaded": 33,
   "features": [
@@ -33,6 +33,22 @@
     "grid_prior_weight": 0.275,
     "barcelona_track_prior_weight": 0.125,
     "floor_before_normalization": 0.0005,
+    "prediction_only_prior_weights": {
+      "base_probability": 0.85,
+      "recent_dominance": 0.075,
+      "market_odds": 0.075
+    },
+    "prediction_only_driver_priors": {
+      "ANT": {
+        "recent_dominance_score": 1.0,
+        "market_decimal_odds": 2.0,
+        "evidence": [
+          "Five consecutive Grand Prix wins before Barcelona-Catalunya",
+          "Monaco 2026 pole, win, fastest lap, led every lap, and Grand Slam",
+          "Quoted Barcelona-Catalunya winner odds: 1/1 (decimal 2.0, American +100)"
+        ]
+      }
+    },
     "selection": {
       "method": "walk_forward_grid_search",
       "candidates_tested": 144,
