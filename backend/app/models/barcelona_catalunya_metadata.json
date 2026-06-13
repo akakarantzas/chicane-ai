@@ -38,6 +38,16 @@
       "recent_dominance": 0.075,
       "market_odds": 0.075
     },
+    "contender_probability_mass": 0.93,
+    "win_contenders": [
+      "ANT",
+      "HAM",
+      "LEC",
+      "NOR",
+      "PIA",
+      "RUS",
+      "VER"
+    ],
     "prediction_only_driver_priors": {
       "ANT": {
         "recent_dominance_score": 1.0,
