@@ -61,10 +61,11 @@ chicane-ai/
 |           +-- contact.py
 |           +-- h2h.py
 |           +-- predictions.py
-+-- audit.md
-+-- design.md
++-- docs/
+|   +-- CONTEXT.md
+|   +-- design.md
+|   +-- security_audit.md
 +-- README.md
-+-- security_audit.md
 ```
 
 ## Current Navigation
@@ -137,7 +138,7 @@ Contact form:
 - Content width: max 1280px, centered
 - Mobile responsiveness: implemented with shared mobile nav and targeted responsive CSS
 
-See `design.md` for the fuller design reference.
+See `docs/design.md` for the fuller design reference.
 
 ## What's Done
 
@@ -149,7 +150,7 @@ See `design.md` for the fuller design reference.
 - Unused races backend router was removed.
 - Frontend API URL handling is centralized in `frontend/src/lib/api.js`.
 - Mobile responsiveness pass was completed and the frontend build passed.
-- Project documentation filenames are standardized to lowercase except `README.md`.
+- Project documentation is organized under `docs/` except `README.md`.
 
 ## What's Next
 

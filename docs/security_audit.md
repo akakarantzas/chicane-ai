@@ -1,4 +1,4 @@
-# Security Audit — Chicane.ai
+# Security Audit - Chicane.ai
 
 **Audited:** 2026-04-28  
 **Scope:** Full git history (29 commits, both branches) + current working tree  
@@ -16,7 +16,7 @@ The repository is clean of secrets. Three low-severity hardening gaps are docume
 
 ## Findings
 
-### Finding 1 — `cache/fastf1_http_cache.sqlite` is tracked by git
+### Finding 1 - `cache/fastf1_http_cache.sqlite` is tracked by git
 
 | Field | Detail |
 |---|---|
@@ -24,7 +24,7 @@ The repository is clean of secrets. Three low-severity hardening gaps are docume
 | **Status** | Present in current repo (modified, unclean working tree) |
 | **File** | `cache/fastf1_http_cache.sqlite` |
 | **Introduced** | Early history (tracked from initial commits) |
-| **Commit** | Multiple — file is continuously modified as cache grows |
+| **Commit** | Multiple - file is continuously modified as cache grows |
 
 **Issue:** This binary SQLite file stores FastF1 HTTP response cache. It is tracked by git and included in every push. While it contains no credentials today, HTTP caches can theoretically store response headers (including any `Authorization` headers from proxied requests). More practically, it bloats the repository and makes diffs noisy.
 
@@ -35,12 +35,12 @@ git rm --cached cache/fastf1_http_cache.sqlite
 
 ---
 
-### Finding 2 — `.claude/settings.local.json` is tracked by git
+### Finding 2 - `.claude/settings.local.json` is tracked by git
 
 | Field | Detail |
 |---|---|
 | **Severity** | Low |
-| **Status** | Present in current repo — currently contains only permission rules, no secrets |
+| **Status** | Present in current repo - currently contains only permission rules, no secrets |
 | **File** | `.claude/settings.local.json` |
 | **Introduced** | Present in current working tree |
 
@@ -54,7 +54,7 @@ If shared Claude Code permissions are desired, use `.claude/settings.json` (alre
 
 ---
 
-### Finding 3 — `.gitignore` gaps
+### Finding 3 - `.gitignore` gaps
 
 | Field | Detail |
 |---|---|
@@ -83,13 +83,13 @@ cache/
 
 | Area | Result |
 |---|---|
-| All 29 commits (full `git log -p`) | Clean — no secrets |
-| Current working tree (all tracked files) | Clean — no secrets |
-| `.env` files ever committed | None — only `.env.example` (placeholders only) |
+| All 29 commits (full `git log -p`) | Clean - no secrets |
+| Current working tree (all tracked files) | Clean - no secrets |
+| `.env` files ever committed | None - only `.env.example` (placeholders only) |
 | `.env.example` contents | All placeholder/template values, no real credentials |
-| `backend/app/main.py` | `allow_credentials=True` (CORS config) — not a secret |
-| `package-lock.json` | SHA-512 integrity hashes — not secrets |
-| Provider-specific patterns checked | AWS (`AKIA…`), OpenAI (`sk-…`), GitHub (`ghp_`, `gho_`, `github_pat_`), Stripe, Twilio, Firebase, Anthropic, Slack (`xoxb-`) |
+| `backend/app/main.py` | `allow_credentials=True` (CORS config) - not a secret |
+| `package-lock.json` | SHA-512 integrity hashes - not secrets |
+| Provider-specific patterns checked | AWS (`AKIA...`), OpenAI (`sk-...`), GitHub (`ghp_`, `gho_`, `github_pat_`), Stripe, Twilio, Firebase, Anthropic, Slack (`xoxb-`) |
 | High-entropy base64 strings | None matching secret patterns |
 | Files with secret-like names ever in history | None |
 | Git stash | Empty |
@@ -100,7 +100,7 @@ cache/
 
 | Priority | Action |
 |---|---|
-| Rotate immediately | None — no leaked credentials found |
+| Rotate immediately | None - no leaked credentials found |
 | Rotate when convenient | None |
 | Hygiene (do before next push) | Untrack `cache/fastf1_http_cache.sqlite` and `.claude/settings.local.json`; update `.gitignore` |
 

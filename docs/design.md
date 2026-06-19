@@ -1,4 +1,4 @@
-# Chicane.ai — Design System
+# Chicane.ai - Design System
 
 ## Brand
 - Name: ChicaneAI
@@ -87,12 +87,12 @@ Prediction bars:
 
 ## How to Use This File
 When building anything new, ask:
-1. What does design.md say about this component?
+1. What does `docs/design.md` say about this component?
 2. Am I following the color system?
 3. Am I following the spacing system?
 4. Am I following the typography scale?
 
-If something doesn't match → fix the code OR update design.md.
+If something doesn't match, fix the code or update `docs/design.md`.
 This file evolves as the product evolves.
 
 ## Issues / TODO

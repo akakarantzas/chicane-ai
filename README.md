@@ -27,6 +27,12 @@ Accurately predicted Antonelli (Mercedes) as the 2026 Miami GP winner.
 - scikit-learn (Gradient Boosting + Random Forest)
 - FastF1 (real F1 timing and results data)
 
+## Documentation
+
+- `docs/CONTEXT.md` - project context and current architecture notes
+- `docs/design.md` - design system reference
+- `docs/security_audit.md` - latest security audit notes
+
 ## Setup
 
 ### Frontend
