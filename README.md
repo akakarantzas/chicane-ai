@@ -51,8 +51,10 @@ Recommended: Python 3.12.
 
 ```powershell
 cd backend
+Remove-Item -Recurse -Force .\venv -ErrorAction SilentlyContinue
 python -m venv venv
 .\venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 python -m uvicorn app.main:app --reload
 ```
@@ -65,8 +67,9 @@ Run backend tests:
 
 ```powershell
 cd backend
+.\venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
-python -m pytest
+python -m pytest tests
 ```
 
 For the contact form, copy `backend/.env.example` to `backend/.env` and fill in the Resend/contact values. The H2H cache TTL can be adjusted with `H2H_CACHE_TTL_SECONDS`.
