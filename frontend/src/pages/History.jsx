@@ -2,12 +2,20 @@ import { useEffect, useState } from 'react'
 
 import AppNav from '../components/AppNav'
 import useIsMobile from '../hooks/useIsMobile'
+import barcelonaPredictions from '../data/barcelona_catalunya_predictions.json'
+
+const BARCELONA_GP_2026 = {
+  race: 'Barcelona-Catalunya Grand Prix',
+  circuit: 'Circuit de Barcelona-Catalunya',
+  date: 'June 14, 2026',
+  actualWinner: 'Hamilton',
+  predictions: barcelonaPredictions,
+}
 
 const MIAMI_GP_2026 = {
   race: 'Miami Grand Prix',
   circuit: 'Miami International Autodrome',
   date: 'May 3, 2026',
-  status: 'Winner predicted',
   actualWinner: 'Antonelli',
   predictions: [
     { driver: 'Antonelli', team: 'Mercedes', probability: 0.7091 },
@@ -136,6 +144,8 @@ function PredictionArchiveRow({ prediction, index, actualWinner, isMobile }) {
 function VerifiedRaceCard({ race, isMobile }) {
   const [showFullGrid, setShowFullGrid] = useState(false)
   const displayedPredictions = showFullGrid ? race.predictions : race.predictions.slice(0, 5)
+  const winnerPredicted = race.predictions[0].driver === race.actualWinner
+  const accentColor = winnerPredicted ? '#22C55E' : '#F59E0B'
 
   return (
     <section
@@ -144,7 +154,9 @@ function VerifiedRaceCard({ race, isMobile }) {
         overflow: 'hidden',
         borderRadius: '8px',
         background:
-          'radial-gradient(circle at top right, rgba(34,197,94,0.16) 0%, rgba(34,197,94,0.06) 23%, rgba(34,197,94,0) 48%), linear-gradient(145deg, rgba(244,244,245,0.05), rgba(244,244,245,0.018) 42%, rgba(12,12,14,0.5)), rgba(18,18,22,0.9)',
+          winnerPredicted
+            ? 'radial-gradient(circle at top right, rgba(34,197,94,0.16) 0%, rgba(34,197,94,0.06) 23%, rgba(34,197,94,0) 48%), linear-gradient(145deg, rgba(244,244,245,0.05), rgba(244,244,245,0.018) 42%, rgba(12,12,14,0.5)), rgba(18,18,22,0.9)'
+            : 'radial-gradient(circle at top right, rgba(245,158,11,0.16) 0%, rgba(245,158,11,0.06) 23%, rgba(245,158,11,0) 48%), linear-gradient(145deg, rgba(244,244,245,0.05), rgba(244,244,245,0.018) 42%, rgba(12,12,14,0.5)), rgba(18,18,22,0.9)',
         border: '1px solid rgba(244,244,245,0.09)',
         boxShadow: '0 22px 48px rgba(0,0,0,0.38), inset 0 1px 0 rgba(244,244,245,0.08)',
         padding: isMobile ? '20px' : '24px',
@@ -152,18 +164,18 @@ function VerifiedRaceCard({ race, isMobile }) {
     >
       <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'center', justifyContent: 'space-between', gap: '16px' }}>
         <div>
-          <span style={{ display: 'inline-flex', color: '#22C55E', fontSize: '11px', fontWeight: 800, lineHeight: 1, textTransform: 'uppercase', letterSpacing: 0 }}>{race.status}</span>
+          <span style={{ display: 'inline-flex', color: accentColor, fontSize: '11px', fontWeight: 800, lineHeight: 1, textTransform: 'uppercase', letterSpacing: 0 }}>{winnerPredicted ? 'Winner predicted' : 'Model pick missed'}</span>
           <h2 style={{ marginTop: '10px', color: '#F4F4F5', fontSize: isMobile ? '27px' : '34px', fontWeight: 800, lineHeight: 1.05 }}>{race.race}</h2>
           <p style={{ marginTop: '8px', color: '#A1A1AA', fontSize: '14px' }}>{race.circuit} / {race.date}</p>
         </div>
-        <div style={{ padding: '10px 14px', borderRadius: '8px', backgroundColor: 'rgba(34,197,94,0.11)', border: '1px solid rgba(34,197,94,0.28)', color: '#22C55E', fontSize: '13px', fontWeight: 800, whiteSpace: 'nowrap' }}>
+        <div style={{ padding: '10px 14px', borderRadius: '8px', backgroundColor: winnerPredicted ? 'rgba(34,197,94,0.11)' : 'rgba(245,158,11,0.11)', border: winnerPredicted ? '1px solid rgba(34,197,94,0.28)' : '1px solid rgba(245,158,11,0.28)', color: accentColor, fontSize: '13px', fontWeight: 800, whiteSpace: 'nowrap' }}>
           Verified
         </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '10px', marginTop: '24px' }}>
-        <StatBlock label="Model pick" value={race.predictions[0].driver} accent />
-        <StatBlock label="Actual winner" value={race.actualWinner} accent />
+        <StatBlock label="Model pick" value={race.predictions[0].driver} accent={winnerPredicted} />
+        <StatBlock label="Actual winner" value={race.actualWinner} accent={winnerPredicted} />
         <StatBlock label="Win probability" value={formatPercent(race.predictions[0].probability)} />
       </div>
 
@@ -233,7 +245,10 @@ export default function History({ onNavigate }) {
             <p className="text-[#A1A1AA] mt-2" style={{ fontSize: '15px' }}>Track record of AI predictions vs actual race results</p>
           </div>
 
-          <VerifiedRaceCard race={MIAMI_GP_2026} isMobile={isMobile} />
+          <div style={{ display: 'grid', gap: '24px' }}>
+            <VerifiedRaceCard race={BARCELONA_GP_2026} isMobile={isMobile} />
+            <VerifiedRaceCard race={MIAMI_GP_2026} isMobile={isMobile} />
+          </div>
         </div>
       </main>
 
