@@ -11,8 +11,8 @@ from app.data.drivers import PREDICTION_DRIVER_GRID_2026
 router = APIRouter(prefix="/api/predictions")
 
 _MODELS_DIR = Path(__file__).resolve().parent.parent / "models"
-_PREDICTIONS_PATH = _MODELS_DIR / "barcelona_catalunya_predictions.json"
-_METADATA_PATH = _MODELS_DIR / "barcelona_catalunya_metadata.json"
+_PREDICTIONS_PATH = _MODELS_DIR / "azerbaijan_predictions.json"
+_METADATA_PATH = _MODELS_DIR / "azerbaijan_metadata.json"
 
 
 class PredictionItem(BaseModel):
@@ -165,8 +165,8 @@ def get_next_race_prediction():
     predictions = _complete_2026_grid(_load_predictions())
     metadata = _load_metadata()
     return {
-        "race": metadata.get("race", "Barcelona-Catalunya GP"),
-        "circuit": metadata.get("circuit", "Circuit de Barcelona-Catalunya"),
+        "race": metadata.get("race", "Azerbaijan GP"),
+        "circuit": metadata.get("circuit", "Baku City Circuit"),
         "predictions": predictions,
         "model_version": metadata.get("model_version"),
         "status": _prediction_status(metadata),

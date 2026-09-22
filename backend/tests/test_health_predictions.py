@@ -11,42 +11,31 @@ def test_health_check(client):
     assert response.json() == {"status": "ok"}
 
 
-def test_next_race_predictions_preserve_current_barcelona_catalunya_values(client):
+def test_next_race_predictions_preserve_current_azerbaijan_values(client):
     response = client.get("/api/predictions/next-race")
 
     assert response.status_code == 200
     data = response.json()
     assert {"race", "circuit", "predictions", "model_version", "status"} <= set(data)
-    assert data["race"] == "Barcelona-Catalunya GP"
-    assert data["circuit"] == "Circuit de Barcelona-Catalunya"
-    assert data["model_version"] == "barcelona-catalunya-hgb-calibrated-1.4"
+    assert data["race"] == "Azerbaijan GP"
+    assert data["circuit"] == "Baku City Circuit"
+    assert data["model_version"] == "azerbaijan-hgb-calibrated-1.1"
     assert data["status"] == "Pre-Qualifying"
     assert data["metadata"]["prediction_input"]["grid_source"] == "projected_grid"
-    assert data["metadata"]["backtest_summary"]["top3_accuracy"] == pytest.approx(1.0)
+    assert data["metadata"]["backtest_summary"]["top3_accuracy"] == pytest.approx(0.8571)
     assert isinstance(data["predictions"], list)
     assert data["predictions"]
 
     postprocess = data["metadata"]["prediction_postprocess"]
-    assert postprocess["prediction_only_prior_weights"]["recent_dominance"] == pytest.approx(0.075)
-    assert postprocess["contender_probability_mass"] == pytest.approx(0.93)
-    assert postprocess["win_contenders"] == ["ANT", "HAM", "LEC", "NOR", "PIA", "RUS", "VER"]
-    assert postprocess["market_odds"]["market_odds_file"] == "market_odds.json"
-    assert postprocess["market_odds"]["drivers"] == [
-        "ANT",
-        "HAM",
-        "LEC",
-        "NOR",
-        "PIA",
-        "RUS",
-        "VER",
-    ]
-    assert postprocess["market_odds"]["book_overround"] == pytest.approx(1.1972)
+    assert postprocess["model_weight"] == pytest.approx(0.8)
+    assert postprocess["form_prior_weight"] == pytest.approx(0.2)
+    assert postprocess["selection"]["tuning_period"] == "through 2025"
 
     antonelli = next(
         item for item in data["predictions"] if item["driver"] == "Antonelli"
     )
     assert antonelli["team"] == "Mercedes"
-    assert antonelli["probability"] == pytest.approx(0.2825)
+    assert antonelli["probability"] == pytest.approx(0.1766)
 
 
 def test_next_race_predictions_use_json_without_model_import(client, monkeypatch):
@@ -99,7 +88,7 @@ def test_missing_prediction_json_returns_clear_server_error(client, monkeypatch,
 
 
 def test_invalid_prediction_json_returns_clear_server_error(client, monkeypatch, tmp_path):
-    invalid_file = tmp_path / "barcelona_catalunya_predictions.json"
+    invalid_file = tmp_path / "azerbaijan_predictions.json"
     invalid_file.write_text("{not valid json", encoding="utf-8")
     monkeypatch.setattr(predictions, "_PREDICTIONS_PATH", str(invalid_file))
 
@@ -111,7 +100,7 @@ def test_invalid_prediction_json_returns_clear_server_error(client, monkeypatch,
 
 
 def test_invalid_prediction_json_structure_returns_clear_server_error(client, monkeypatch, tmp_path):
-    invalid_file = tmp_path / "barcelona_catalunya_predictions.json"
+    invalid_file = tmp_path / "azerbaijan_predictions.json"
     invalid_file.write_text('[{"driver": "Antonelli", "probability": 0.27}]', encoding="utf-8")
     monkeypatch.setattr(predictions, "_PREDICTIONS_PATH", str(invalid_file))
 
@@ -126,7 +115,7 @@ def test_invalid_prediction_json_structure_returns_clear_server_error(client, mo
 def test_invalid_prediction_probability_returns_clear_server_error(
     client, monkeypatch, tmp_path, probability
 ):
-    invalid_file = tmp_path / "barcelona_catalunya_predictions.json"
+    invalid_file = tmp_path / "azerbaijan_predictions.json"
     payload = (
         '[{"driver": "Antonelli", '
         '"team": "Mercedes", '
@@ -154,7 +143,7 @@ def test_missing_prediction_metadata_returns_clear_server_error(client, monkeypa
 
 
 def test_invalid_prediction_metadata_returns_clear_server_error(client, monkeypatch, tmp_path):
-    invalid_file = tmp_path / "barcelona_catalunya_metadata.json"
+    invalid_file = tmp_path / "azerbaijan_metadata.json"
     invalid_file.write_text("{not valid json", encoding="utf-8")
     monkeypatch.setattr(predictions, "_METADATA_PATH", str(invalid_file))
 
@@ -166,8 +155,8 @@ def test_invalid_prediction_metadata_returns_clear_server_error(client, monkeypa
 
 
 def test_invalid_prediction_metadata_structure_returns_clear_server_error(client, monkeypatch, tmp_path):
-    invalid_file = tmp_path / "barcelona_catalunya_metadata.json"
-    invalid_file.write_text('{"race": "Barcelona-Catalunya GP"}', encoding="utf-8")
+    invalid_file = tmp_path / "azerbaijan_metadata.json"
+    invalid_file.write_text('{"race": "Azerbaijan GP"}', encoding="utf-8")
     monkeypatch.setattr(predictions, "_METADATA_PATH", str(invalid_file))
 
     response = client.get("/api/predictions/next-race")

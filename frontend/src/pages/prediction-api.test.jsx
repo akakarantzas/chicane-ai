@@ -5,9 +5,9 @@ import Home from './Home'
 import Predictions from './Predictions'
 
 const predictionPayload = {
-  race: 'Barcelona-Catalunya GP',
-  circuit: 'Circuit de Barcelona-Catalunya',
-  model_version: 'barcelona-catalunya-hgb-calibrated-1.0',
+  race: 'Azerbaijan GP',
+  circuit: 'Baku City Circuit',
+  model_version: 'azerbaijan-hgb-calibrated-1.1',
   status: 'Pre-Qualifying',
   predictions: [
     { driver: 'Antonelli', team: 'Mercedes', probability: 0.2704 },
@@ -44,8 +44,8 @@ describe('prediction api rendering', () => {
   test('predictions page renders fetched race predictions', async () => {
     render(<Predictions onNavigate={vi.fn()} />)
 
-    expect(await screen.findByText('Barcelona-Catalunya Grand Prix Predictions')).toBeInTheDocument()
-    expect(screen.getByText('Circuit de Barcelona-Catalunya')).toBeInTheDocument()
+    expect(await screen.findByText('Azerbaijan Grand Prix Predictions')).toBeInTheDocument()
+    expect(screen.getByText('Baku City Circuit')).toBeInTheDocument()
     expect(screen.getByText('Antonelli')).toBeInTheDocument()
     expect(screen.getAllByText('Mercedes').length).toBeGreaterThan(0)
     expect(screen.getByText('Norris')).toBeInTheDocument()
