@@ -11,6 +11,7 @@ export default function AnimatedCircuit({
   pathVariant = 'glow',
   preserveAspectRatio = 'none',
   className = '',
+  ariaLabel = 'Animated circuit marker',
 }) {
   const pathRef = useRef(null)
   const [marker, setMarker] = useState({ x: 0, y: 0 })
@@ -46,7 +47,7 @@ export default function AnimatedCircuit({
       preserveAspectRatio={preserveAspectRatio}
       fill="none"
       role="img"
-      aria-label="Animated Miami GP circuit marker"
+      aria-label={ariaLabel}
     >
       {showPath && (
         pathVariant === 'plain' ? (
@@ -117,7 +118,7 @@ export default function AnimatedCircuit({
         strokeLinejoin="round"
         fill="none"
       />
-      <g transform={`translate(${marker.x} ${marker.y})`}>
+      <g transform={`translate(${marker.x} ${marker.y}) scale(1.7)`}>
         <circle r="14" fill="rgba(232, 0, 45, 0.14)" />
         <circle r="9" fill="rgba(232, 0, 45, 0.32)" />
         <circle

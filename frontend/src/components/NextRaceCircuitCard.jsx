@@ -17,7 +17,22 @@ export default function NextRaceCircuitCard({
   showDebugPath = false,
   pathVariant = 'glow',
   alignOverlayWithTrackImage = false,
+  imageVerticalTrim,
 }) {
+  const [, , viewBoxWidth, viewBoxHeight] = (viewBox ?? '').split(/\s+/).map(Number)
+  const imageAspectRatio = alignOverlayWithTrackImage && viewBoxWidth > 0 && viewBoxHeight > 0
+    ? `${viewBoxWidth} / ${viewBoxHeight}`
+    : undefined
+  // Percentage vertical margins resolve against the panel's content width,
+  // just like the image scale. Both image and marker retain their full canvas.
+  const viewportStyle = imageAspectRatio ? {
+    aspectRatio: imageAspectRatio,
+    ...(imageVerticalTrim && {
+      marginTop: `${-100 * imageVerticalTrim.top / viewBoxWidth}%`,
+      marginBottom: `${-100 * imageVerticalTrim.bottom / viewBoxWidth}%`,
+    }),
+  } : undefined
+
   return (
     <article className="next-race-card relative overflow-hidden p-6 md:p-8">
       <div className="pointer-events-none absolute left-0 top-0 h-0.5 w-full bg-[#E8002D]" />
@@ -50,7 +65,10 @@ export default function NextRaceCircuitCard({
         </div>
 
         <div className="circuit-panel relative rounded-lg p-4 md:p-5">
-          <div className={`circuit-viewport relative w-full ${alignOverlayWithTrackImage ? 'circuit-viewport-image-ratio' : ''}`}>
+          <div
+            className={`circuit-viewport relative w-full ${alignOverlayWithTrackImage ? 'circuit-viewport-image-ratio' : ''}`}
+            style={viewportStyle}
+          >
             {trackImage && (
               <img
                 src={trackImage}
@@ -60,6 +78,7 @@ export default function NextRaceCircuitCard({
             )}
             {circuitPath && viewBox && (
               <AnimatedCircuit
+                ariaLabel={`Animated ${raceName} circuit marker`}
                 path={circuitPath}
                 viewBox={viewBox}
                 duration={animationDuration}

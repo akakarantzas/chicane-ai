@@ -8,6 +8,7 @@ import useIsMobile from '../hooks/useIsMobile'
 import { fetchNextRacePrediction } from '../lib/predictions'
 import canadaTrack from '../assets/circuits/canada-track-white.png'
 import monacoTrack from '../assets/circuits/monaco-track-white.png'
+import azerbaijanTrack from '../assets/circuits/azerbaijan-track-white.png'
 
 function RaceCard({ name, country, date, status, cardRef }) {
   const isCurrent   = status === 'current'
@@ -349,8 +350,9 @@ export default function Home({ onNavigate }) {
   const currentRaceName = currentRace.name.replace(/\bGP\b/g, 'Grand Prix')
   const currentRaceDate = `${currentRace.date}, 2026`
   const currentRaceCountryLabel = `${currentRace.city ?? currentRace.country} · ${currentRace.code}`
-  const currentRaceCircuit = currentRace.code === 'MC' ? circuits.monaco : currentRace.code === 'CA' ? circuits.canada : null
-  const currentRaceTrackImage = currentRace.code === 'MC' ? monacoTrack : currentRace.code === 'CA' ? canadaTrack : null
+  const currentRaceCircuit = currentRace.code === 'AZ' ? circuits.azerbaijan : currentRace.code === 'MC' ? circuits.monaco : currentRace.code === 'CA' ? circuits.canada : null
+  const currentRaceTrackImage = currentRace.code === 'AZ' ? azerbaijanTrack : currentRace.code === 'MC' ? monacoTrack : currentRace.code === 'CA' ? canadaTrack : null
+  const useTrackImageOverlay = currentRace.code === 'AZ' || currentRace.code === 'MC'
   const latestPredictions = predictionPreview.predictions
   const topPredictions = latestPredictions.slice(0, 3)
   const ghostPrediction = latestPredictions[3]
@@ -487,14 +489,15 @@ export default function Home({ onNavigate }) {
               countryLabel={currentRaceCountryLabel}
               trackImage={currentRaceTrackImage}
               trackAlt={`${currentRaceName} Circuit`}
-              showTrackImage={currentRace.code === 'MC'}
+              showTrackImage={useTrackImageOverlay}
               circuitPath={currentRaceCircuit?.path}
               viewBox={currentRaceCircuit?.viewBox}
+              imageVerticalTrim={currentRaceCircuit?.imageVerticalTrim}
               animationDuration={4300}
-              showAnimatedPath={currentRace.code !== 'MC'}
+              showAnimatedPath={!useTrackImageOverlay}
               showDebugPath={false}
               pathVariant="glow"
-              alignOverlayWithTrackImage={currentRace.code === 'MC'}
+              alignOverlayWithTrackImage={useTrackImageOverlay}
             />
           </div>
             <div style={{ marginTop: isMobile ? '24px' : '32px' }}>

@@ -121,7 +121,52 @@ L 87 695
 L 83 679
 `
 
+// Centerline traced from azerbaijan-track-white.png in its native 1448 x 1086 coordinates.
+export const AZERBAIJAN_CENTERLINE_PATH = `
+M 710 569
+C 920 526 1200 466 1408 417
+C 1425 413 1432 401 1428 383
+C 1415 330 1399 262 1386 219
+C 1381 200 1368 191 1349 196
+C 1210 228 1060 263 944 290
+C 925 294 919 302 924 321
+C 929 339 938 368 942 383
+C 947 401 931 410 909 416
+C 836 436 762 457 695 484
+C 678 490 674 496 674 511
+C 674 532 660 544 641 553
+C 579 582 518 609 469 630
+C 445 641 437 625 436 602
+C 435 592 435 579 434 569
+C 433 552 426 546 412 544
+C 392 541 373 538 365 527
+C 355 515 364 502 351 490
+C 345 485 339 484 329 486
+C 289 495 230 508 192 519
+C 124 538 93 576 67 633
+C 47 678 38 731 34 779
+C 31 804 36 819 53 832
+C 93 864 150 906 190 936
+C 207 949 218 945 233 932
+C 253 914 268 886 287 868
+C 316 839 355 819 392 797
+C 420 780 438 765 445 742
+C 454 709 472 689 498 674
+C 550 644 625 608 685 580
+C 694 576 702 572 710 569
+Z
+`
+
 export const circuits = {
+  azerbaijan: {
+    id: 'azerbaijan',
+    name: 'Baku City Circuit',
+    viewBox: '0 0 1448 1086',
+    // Hide transparent vertical margins without changing the track's scale.
+    imageVerticalTrim: { top: 150, bottom: 100 },
+    path: AZERBAIJAN_CENTERLINE_PATH,
+    start: { x: 710, y: 569 },
+  },
   miami: {
     id: 'miami',
     name: 'Miami International Autodrome',

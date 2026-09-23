@@ -17,7 +17,7 @@ const RACE_SCHEDULE = [
   { round: 14, code: 'NL', name: 'Dutch GP',         country: 'Netherlands',    date: 'Aug 23', raceAt: '2026-08-23T23:59:59Z' },
   { round: 15, code: 'IT', name: 'Italian GP',       country: 'Italy',          date: 'Sep 6',  raceAt: '2026-09-06T23:59:59Z' },
   { round: 16, code: 'ES', name: 'Spanish GP',       country: 'Spain',          date: 'Sep 13', raceAt: '2026-09-13T23:59:59Z' },
-  { round: 17, code: 'AZ', name: 'Azerbaijan GP',    country: 'Azerbaijan',     date: 'Sep 26', raceAt: '2026-09-26T23:59:59Z' },
+  { round: 17, code: 'AZ', name: 'Azerbaijan GP',    country: 'Azerbaijan',     date: 'Sep 26', raceAt: '2026-09-26T23:59:59Z', venue: 'Baku City Circuit', city: 'Baku' },
   { round: 18, code: 'SG', name: 'Singapore GP',     country: 'Singapore',      date: 'Oct 11', raceAt: '2026-10-11T23:59:59Z' },
   { round: 19, code: 'US', name: 'United States GP', country: 'United States',  date: 'Oct 25', raceAt: '2026-10-25T23:59:59Z' },
   { round: 20, code: 'MX', name: 'Mexico City GP',   country: 'Mexico',         date: 'Nov 1',  raceAt: '2026-11-01T23:59:59Z' },
