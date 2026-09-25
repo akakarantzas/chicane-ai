@@ -6,7 +6,7 @@ results; no target accuracy or probability calibration is assumed in advance.
 
 | Step | Scope | Lowercase commit message |
 | --- | --- | --- |
-| 1 | Define and enforce the prediction target | `fix: define h2h finish ahead rules` |
+| 1 | Define and enforce the prediction target | `fix: enforce h2h finish-ahead scoring rules` |
 | 2 | Discover completed events and the next race | `fix: discover h2h races dynamically` |
 | 3 | Normalize event identities and reconcile sources | `fix: deduplicate h2h results across sources` |
 | 4 | Correct statistics and championship standings | `fix: reconcile h2h season statistics` |
@@ -62,6 +62,57 @@ standings, or historical evaluation; those are the subsequent milestones.
 Provider references:
 - [Jolpica results fields](https://github.com/jolpica/jolpica-f1/blob/main/docs/endpoints/results.md)
 - [OpenF1 session results](https://openf1.org/docs/#session-result)
+
+## Step 2: dynamic race discovery
+
+Implemented `h2h_schedule.py` to fetch the supported season calendars from
+FastF1, with Jolpica as a fallback. Race names and next-race selection are no
+longer hardcoded. The supported seasons remain 2024–2026 because this app's
+roster and season overview are explicitly for 2026; calendar discovery does
+not automatically migrate the driver roster to a new year.
+
+- Select the Grand Prix race session, including on sprint weekends, and ignore
+  testing and explicitly cancelled entries. The provider calendar supplies
+  the event dates and round numbering.
+- Use UTC start times. Missing times remain unconfirmed: on a date-only race
+  day, do not invent a start time or skip directly to a later race.
+- Consider a timed event due for result lookup four hours after its start;
+  for date-only events, wait until the following UTC day. This conservative
+  delay is a publication buffer, not evidence that the race finished.
+- Require a published winner with a finishing status from FastF1/Jolpica.
+  OpenF1 must also supply an ended session and a winner not marked DNF/DNS/DSQ.
+  Future races, running sessions, and grid-only timing tables are excluded.
+- Match external results to unambiguous calendar dates and retain round/date
+  metadata. Verify FastF1's selected session date too, because calendar
+  providers can differ in numbering after schedule changes. General source
+  identity reconciliation and deduplication remain step 3.
+- Follow all Jolpica result pages using `offset`; its maximum page size is
+  100 driver results. Reassemble races split between pages before validating
+  their winner. Reject empty intermediate pages or repeated offsets.
+- Cache calendars for 30 minutes, retry failures, and return a clear 502 when
+  both calendars fail. A known calendar with no future starts returns
+  `no_upcoming_race`, with no predicted winner.
+- Return expected/loaded/missing rounds in the API. The season overview warns
+  about missing races. `all_due_rounds_present` means every due round has
+  result rows, not that every driver, points total, or source is reconciled.
+- Continue trying fallback result sources for partial historical seasons too.
+
+The existing six-hour results cache is unchanged. Coverage is computed against
+the calendar and the actual returned cached rows, so newly due rounds can be
+reported missing until results refresh. More timely shared snapshots and
+freshness handling remain step 6. An outdated upstream calendar cannot be
+proven current simply because its HTTP request succeeded.
+
+Validation on September 25, 2026: 113 backend tests, 8 frontend tests, and the
+frontend production build passed. A live source check discovered Azerbaijan
+as the next Grand Prix on September 26 at 11:00 UTC. The paginated Jolpica
+loader returned 308 results across 14 completed races, through the Spanish
+Grand Prix, with no due rounds missing. Previously, requesting `limit=1000`
+still returned only 100 results and truncated the season during Canada.
+
+Additional references:
+- [Jolpica pagination and user-agent requirements](https://github.com/jolpica/jolpica-f1/blob/main/docs/README.md)
+- [Jolpica race calendar fields](https://github.com/jolpica/jolpica-f1/blob/main/docs/endpoints/races.md)
 
 ## Validation gates
 

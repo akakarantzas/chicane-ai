@@ -339,12 +339,18 @@ function PredictionCard({ prediction, d1Abbrev, d2Abbrev, loading }) {
   const historyYears = prediction.history_scope?.years ?? []
   const historyLabel = historyYears.length ? historyYears.join(', ') : 'Available seasons'
   const predictionTitle = `${prediction.next_race ?? 'Next Grand Prix'} · Finish-ahead prediction`
-  if (prediction.prediction_status === 'insufficient_data' || prediction.prediction_status === 'no_clear_favorite') {
+  const unavailableLabels = {
+    insufficient_data: 'Insufficient data',
+    no_clear_favorite: 'No clear favorite',
+    no_upcoming_race: 'No upcoming Grand Prix',
+    schedule_time_unknown: 'Race start time unconfirmed',
+  }
+  if (unavailableLabels[prediction.prediction_status]) {
     return (
       <div className="mt-4 rounded-xl border border-white/10 bg-[#1A1A1F] p-6 text-center">
         <p className="text-xs text-[#A1A1AA]">{predictionTitle}</p>
         <p className="mt-3 text-lg font-semibold text-[#E5E7EB]">
-          {prediction.prediction_status === 'insufficient_data' ? 'Insufficient data' : 'No clear favorite'}
+          {unavailableLabels[prediction.prediction_status]}
         </p>
         <p className="mt-2 text-sm text-[#A1A1AA]">{prediction.reasoning}</p>
       </div>
@@ -738,6 +744,12 @@ export default function H2H({ onNavigate }) {
               }}>
                 {result.year} Season Overview
               </div>
+
+              {result.coverage?.missing_rounds?.length > 0 && (
+                <p role="status" className="mb-6 text-sm text-[#A1A1AA]">
+                  Results are incomplete. Missing races: {result.coverage.missing_races?.map((race) => race.race).join(', ') || result.coverage.missing_rounds.join(', ')}.
+                </p>
+              )}
 
               {STAT_DEFS.map((def) => (
                 <StatBar

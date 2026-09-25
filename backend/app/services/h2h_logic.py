@@ -199,7 +199,7 @@ def score_prediction(
     }
 
 
-def build_h2h_prediction(rows: list[dict], abbrev1: str, abbrev2: str, next_race: str) -> dict:
+def build_h2h_prediction(rows: list[dict], abbrev1: str, abbrev2: str, next_race: str | None) -> dict:
     rows1 = eligible_prediction_rows(rows_for_driver(rows, abbrev1))
     rows2 = eligible_prediction_rows(rows_for_driver(rows, abbrev2))
     meta1 = get_driver_meta(rows, abbrev1)

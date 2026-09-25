@@ -2,10 +2,10 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import { expect, test, vi } from 'vitest'
 import H2H from './H2H'
 
-async function compareWith(prediction) {
+async function compareWith(prediction, coverage) {
   vi.spyOn(globalThis, 'fetch').mockImplementation(async (url) => ({
     ok: true,
-    json: async () => url.includes('/predict?') ? prediction : { year: 2026, driver1: {}, driver2: {} },
+    json: async () => url.includes('/predict?') ? prediction : { year: 2026, driver1: {}, driver2: {}, coverage },
   }))
   render(<H2H onNavigate={vi.fn()} />)
   fireEvent.click(screen.getByRole('button', { name: 'Compare' }))
@@ -28,9 +28,16 @@ test('finish-ahead card separates historical record from season overview', async
 test.each([
   ['insufficient_data', 'Insufficient data'],
   ['no_clear_favorite', 'No clear favorite'],
+  ['no_upcoming_race', 'No upcoming Grand Prix'],
+  ['schedule_time_unknown', 'Race start time unconfirmed'],
 ])('%s does not display a winner or confidence percentage', async (prediction_status, label) => {
   await compareWith({ next_race: 'Test Grand Prix', prediction_status, predicted_winner: null, confidence: null })
   expect(await screen.findByText(label)).toBeInTheDocument()
   expect(screen.queryByText('Confidence')).not.toBeInTheDocument()
   expect(screen.queryByText('0%')).not.toBeInTheDocument()
+})
+
+test('missing race results are visible instead of implying a complete season', async () => {
+  await compareWith(null, { missing_rounds: [5], missing_races: [{ race: 'Missing Grand Prix' }] })
+  expect(await screen.findByText(/Results are incomplete. Missing races: Missing Grand Prix/)).toBeInTheDocument()
 })

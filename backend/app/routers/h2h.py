@@ -1,7 +1,7 @@
 import os
 import json
 from urllib.parse import urlencode
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 
 import fastf1
 from fastapi import APIRouter, HTTPException
@@ -9,6 +9,10 @@ from fastapi import APIRouter, HTTPException
 from app.data.drivers import DRIVER_ROSTER_2026
 from app.services.h2h_cache import get_cached_season_results
 from app.services.h2h_contract import final_position
+from app.services.h2h_schedule import (
+    HISTORY_YEARS, SEASON, USER_AGENT, RaceEvent, get_season_schedule,
+    next_race, parse_utc, race_coverage, utc_now,
+)
 from app.services.h2h_logic import (
     build_h2h_prediction,
     build_stats,
@@ -20,27 +24,6 @@ router = APIRouter(prefix="/api/h2h")
 CACHE_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "..", "cache")
 _fastf1_cache_enabled = False
 
-RACES_BY_YEAR = {
-    2024: [
-        "Bahrain", "Saudi Arabia", "Australia", "Japan", "China",
-        "Miami", "Emilia Romagna", "Monaco", "Canada", "Spain",
-        "Austria", "Great Britain", "Hungary", "Belgium",
-        "Netherlands", "Italy", "Azerbaijan", "Singapore",
-        "United States", "Mexico City", "São Paulo", "Las Vegas",
-        "Qatar", "Abu Dhabi",
-    ],
-    2025: [
-        "Australia", "China", "Japan", "Bahrain", "Saudi Arabia",
-        "Miami", "Emilia Romagna", "Monaco", "Canada", "Spain",
-        "Austria", "Great Britain", "Belgium", "Hungary",
-        "Netherlands", "Italy", "Azerbaijan", "Singapore",
-        "United States", "Mexico City", "São Paulo", "Las Vegas",
-        "Qatar", "Abu Dhabi",
-    ],
-    2026: ["Australia", "China", "Japan"],
-}
-
-NEXT_RACE = "Azerbaijan Grand Prix"
 OPENF1_BASE_URL = "https://api.openf1.org/v1"
 JOLPICA_BASE_URL = "https://api.jolpi.ca/ergast/f1"
 
@@ -70,13 +53,13 @@ def _validate_driver_pair(driver1: str, driver2: str) -> tuple[str, str]:
 
 
 def _validate_year(year: int) -> int:
-    if year not in RACES_BY_YEAR:
+    if year not in HISTORY_YEARS:
         raise HTTPException(status_code=400, detail=f"Unsupported year: {year}")
     return year
 
 
 def _fetch_json(url: str, timeout: int = 8):
-    with urlopen(url, timeout=timeout) as response:
+    with urlopen(Request(url, headers={"User-Agent": USER_AGENT}), timeout=timeout) as response:
         return json.loads(response.read().decode("utf-8"))
 
 
@@ -120,17 +103,32 @@ def _ensure_fastf1_cache_enabled() -> None:
     _fastf1_cache_enabled = True
 
 
-def _load_fastf1_results(year: int, race_names: list[str], strict: bool) -> list[dict]:
+def _published_results(rows: list[dict]) -> bool:
+    # A grid or an incomplete live timing table is not a race result. Require a
+    # winner and a published finishing status, not just numeric grid positions.
+    return any(
+        row.get("position") == 1 and str(row.get("status", "")).casefold() == "finished"
+        for row in rows
+    )
+
+
+def _load_fastf1_results(year: int, events: list[RaceEvent], strict: bool) -> list[dict]:
     _ensure_fastf1_cache_enabled()
 
     rows = []
-    for name in race_names:
+    for event in events:
+        if not event.results_due(utc_now()):
+            continue
         try:
-            session = fastf1.get_session(year, name, "R")
+            session = fastf1.get_session(year, event.round, "R")
+            session_date = parse_utc(session.event.get_session_date("R", utc=True))
+            if session_date is None or session_date.date() != event.starts_at.date():
+                continue
             session.load(laps=False, telemetry=False, weather=False, messages=False)
             results = session.results
+            event_rows = []
             for _, row in results.iterrows():
-                rows.append({
+                event_rows.append({
                     "abbreviation": str(row.get("Abbreviation", "")).upper(),
                     "full_name": f"{row.get('FirstName', '')} {row.get('LastName', '')}".strip(),
                     "team": row.get("TeamName", ""),
@@ -140,10 +138,14 @@ def _load_fastf1_results(year: int, race_names: list[str], strict: bool) -> list
                     "classified_position": str(row.get("ClassifiedPosition", "")),
                     "session_type": "Race",
                     "points": _normalise_points(row.get("Points", 0)),
-                    "race": name,
+                    "race": event.name,
+                    "round": event.round,
+                    "race_date": event.starts_at.date().isoformat(),
                     "year": year,
                     "source": "fastf1",
                 })
+            if _published_results(event_rows):
+                rows.extend(event_rows)
         except Exception:
             if strict and not rows:
                 # Keep trying external sources before surfacing a hard failure.
@@ -152,18 +154,31 @@ def _load_fastf1_results(year: int, race_names: list[str], strict: bool) -> list
 
 
 def _load_openf1_results(year: int) -> list[dict]:
+    now = utc_now()
+    events = [event for event in get_season_schedule(year) if event.results_due(now)]
     sessions_url = f"{OPENF1_BASE_URL}/sessions?{urlencode({'year': year, 'session_name': 'Race'})}"
     sessions = _fetch_json(sessions_url)
     rows = []
 
     for session in sessions:
         session_key = session.get("session_key")
-        if not session_key:
+        starts_at = parse_utc(session.get("date_start"))
+        ends_at = parse_utc(session.get("date_end"))
+        # Require an ended race session and an unambiguous calendar date match.
+        if not session_key or starts_at is None or ends_at is None or ends_at > now:
             continue
+        matches = [event for event in events if event.starts_at.date() == starts_at.date()]
+        if len(matches) != 1:
+            continue
+        event = matches[0]
 
         results_url = f"{OPENF1_BASE_URL}/session_result?{urlencode({'session_key': session_key})}"
         drivers_url = f"{OPENF1_BASE_URL}/drivers?{urlencode({'session_key': session_key})}"
         results = _fetch_json(results_url)
+        if not any(final_position(result.get("position")) == 1
+                   and result.get("dnf") is False and result.get("dns") is False
+                   and result.get("dsq") is False for result in results):
+            continue
         drivers = _fetch_json(drivers_url)
         drivers_by_number = {
             str(driver.get("driver_number")): driver
@@ -201,6 +216,8 @@ def _load_openf1_results(year: int) -> list[dict]:
                 "session_type": "Race",
                 "points": 0.0,
                 "race": race_name,
+                "round": event.round,
+                "race_date": event.starts_at.date().isoformat(),
                 "year": year,
                 "source": "openf1",
             })
@@ -208,18 +225,40 @@ def _load_openf1_results(year: int) -> list[dict]:
     return rows
 
 
+def _jolpica_result_races(year: int) -> list[dict]:
+    """Pagination counts driver results, and may split a race across pages."""
+    offset = 0
+    races_by_round = {}
+    while True:
+        data = _fetch_json(f"{JOLPICA_BASE_URL}/{year}/results.json?limit=100&offset={offset}")
+        meta = data.get("MRData", {})
+        races = meta.get("RaceTable", {}).get("Races", [])
+        count = sum(len(race.get("Results", [])) for race in races)
+        total = int(meta.get("total", offset + count))
+        if int(meta.get("offset", offset)) != offset or (not count and offset < total):
+            raise ValueError("Incomplete Jolpica result pagination")
+        for race in races:
+            key = (race.get("round"), race.get("date"))
+            combined = races_by_round.setdefault(key, {**race, "Results": []})
+            combined["Results"].extend(race.get("Results", []))
+        offset += count
+        if offset >= total:
+            return list(races_by_round.values())
+
+
 def _load_jolpica_results(year: int) -> list[dict]:
-    url = f"{JOLPICA_BASE_URL}/{year}/results.json?limit=1000"
-    data = _fetch_json(url)
-    races = (
-        data.get("MRData", {})
-        .get("RaceTable", {})
-        .get("Races", [])
-    )
+    events = [event for event in get_season_schedule(year) if event.results_due(utc_now())]
+    races = _jolpica_result_races(year)
     rows = []
 
     for race in races:
+        result_date = parse_utc(race.get("date"))
+        matches = [event for event in events if result_date is not None and event.starts_at.date() == result_date.date()]
+        if len(matches) != 1:
+            continue
+        event = matches[0]
         race_name = race.get("raceName") or f"Round {race.get('round', '')}".strip()
+        event_rows = []
         for result in race.get("Results", []):
             driver = result.get("Driver", {})
             constructor = result.get("Constructor", {})
@@ -233,7 +272,7 @@ def _load_jolpica_results(year: int) -> list[dict]:
             if not abbreviation:
                 continue
 
-            rows.append({
+            event_rows.append({
                 "abbreviation": abbreviation,
                 "full_name": (
                     f"{driver.get('givenName', '')} {driver.get('familyName', '')}".strip()
@@ -248,31 +287,31 @@ def _load_jolpica_results(year: int) -> list[dict]:
                 "session_type": "Race",
                 "points": _normalise_points(result.get("points")),
                 "race": race_name,
+                "round": event.round,
+                "race_date": event.starts_at.date().isoformat(),
                 "year": year,
                 "source": "jolpica",
             })
+        if _published_results(event_rows):
+            rows.extend(event_rows)
 
     return rows
 
 
 def _load_results(year: int, strict: bool = True) -> list[dict]:
     """Load race results for a season from FastF1, OpenF1 and Jolpica."""
-    race_names = RACES_BY_YEAR.get(year)
-    if not race_names:
-        if strict:
-            raise HTTPException(status_code=404, detail=f"No race list configured for year {year}")
+    _validate_year(year)
+    events = [event for event in get_season_schedule(year) if event.results_due(utc_now())]
+    if not events:
         return []
 
     rows = []
     source_errors = []
 
     try:
-        _append_unique_rows(rows, _load_fastf1_results(year, race_names, strict))
+        _append_unique_rows(rows, _load_fastf1_results(year, events, strict))
     except Exception as exc:
         source_errors.append(str(exc))
-
-    if rows and year < 2026:
-        return rows
 
     for loader in (
         lambda: _load_jolpica_results(year),
@@ -283,6 +322,8 @@ def _load_results(year: int, strict: bool = True) -> list[dict]:
         except Exception as exc:
             source_errors.append(str(exc))
 
+    due_rounds = {event.round for event in events}
+    rows = [row for row in rows if row.get("round") in due_rounds]
     if strict and not rows:
         detail = f"No H2H race results found for {year}"
         if source_errors:
@@ -298,19 +339,42 @@ def predict_h2h(driver1: str, driver2: str):
     # the expensive season loads are additionally guarded by the in-process cache.
     abbrev1, abbrev2 = _validate_driver_pair(driver1, driver2)
 
-    all_rows: list[dict] = []
-    for year in sorted(RACES_BY_YEAR.keys()):
-        all_rows.extend(get_cached_season_results(year, _load_results, strict=False))
+    now = utc_now()
+    event, schedule_status = next_race(get_season_schedule(SEASON), now)
+    if event is None:
+        result = build_h2h_prediction([], abbrev1, abbrev2, None)
+        result.update({
+            "prediction_status": schedule_status,
+            "reasoning": "No upcoming Grand Prix is listed for this season."
+            if schedule_status == "no_upcoming_race" else "The next race start time is not confirmed.",
+            "next_event": None,
+        })
+        return result
 
-    return build_h2h_prediction(all_rows, abbrev1, abbrev2, NEXT_RACE)
+    all_rows: list[dict] = []
+    coverage = {}
+    for year in HISTORY_YEARS:
+        try:
+            events = get_season_schedule(year)
+            rows = get_cached_season_results(year, _load_results, strict=False)
+        except HTTPException:
+            coverage[str(year)] = {"status": "unavailable"}
+            continue
+        all_rows.extend(rows)
+        coverage[str(year)] = race_coverage(events, rows, now)
+
+    result = build_h2h_prediction(all_rows, abbrev1, abbrev2, event.name)
+    result.update({"next_event": event.public(), "coverage": coverage})
+    return result
 
 
 @router.get("/compare")
-def compare_drivers(driver1: str, driver2: str, year: int = 2026):
+def compare_drivers(driver1: str, driver2: str, year: int = SEASON):
     # Keep this handler sync for the same reason as /predict.
     abbrev1, abbrev2 = _validate_driver_pair(driver1, driver2)
     year = _validate_year(year)
 
+    events = get_season_schedule(year)
     rows = get_cached_season_results(year, _load_results)
 
     stats1 = build_stats(rows, abbrev1)
@@ -322,6 +386,7 @@ def compare_drivers(driver1: str, driver2: str, year: int = 2026):
     return {
         "year": year,
         "scope": "season",
+        "coverage": race_coverage(events, rows, utc_now()),
         "driver1": stats1,
         "driver2": stats2,
     }

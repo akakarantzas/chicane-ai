@@ -87,8 +87,8 @@ def test_fastf1_cache_is_enabled_lazily(monkeypatch):
     monkeypatch.setattr(h2h.fastf1.Cache, "enable_cache", lambda path: calls.append(("enable_cache", path)))
     monkeypatch.setattr(h2h.fastf1, "get_session", lambda *args, **kwargs: (_ for _ in ()).throw(RuntimeError("no live fastf1")))
 
-    assert h2h._load_fastf1_results(2026, ["Australia"], strict=False) == []
-    assert h2h._load_fastf1_results(2026, ["China"], strict=False) == []
+    assert h2h._load_fastf1_results(2026, h2h.get_season_schedule(2026)[:1], strict=False) == []
+    assert h2h._load_fastf1_results(2026, h2h.get_season_schedule(2026)[1:2], strict=False) == []
 
     assert calls == [
         ("makedirs", h2h.CACHE_DIR, True),
@@ -249,7 +249,8 @@ def test_h2h_predict_valid_request_uses_mocked_loader(
     assert response.status_code == 200
     assert calls == [(2024, False), (2025, False), (2026, False)]
     data = response.json()
-    assert data["next_race"] == h2h.NEXT_RACE
+    assert data["next_race"] == "Next Test Grand Prix"
+    assert data["next_event"]["round"] == 3
     assert data["predicted_winner"] in {"NOR", "PIA"}
     assert data["h2h_record"]["total_races"] == 2
 

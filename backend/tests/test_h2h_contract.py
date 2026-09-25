@@ -114,8 +114,9 @@ def test_api_distinguishes_season_overview_from_prediction_history(client, monke
 
 def test_jolpica_retains_disqualification_metadata(monkeypatch):
     monkeypatch.setattr(h2h, "_fetch_json", lambda url: {"MRData": {"RaceTable": {"Races": [{
-        "raceName": "Test GP", "Results": [{"Driver": {"code": "NOR"},
-        "position": "20", "positionText": "D", "status": "Disqualified"}],
+        "raceName": "Test GP", "round": "1", "date": "2026-03-08", "Results": [{"Driver": {"code": "NOR"},
+        "position": "20", "positionText": "D", "status": "Disqualified"},
+        {"Driver": {"code": "PIA"}, "position": "1", "status": "Finished"}],
     }]}}})
     assert result_exclusion_reason(h2h._load_jolpica_results(2026)[0]) == "disqualified"
 
@@ -123,20 +124,22 @@ def test_jolpica_retains_disqualification_metadata(monkeypatch):
 def test_openf1_retains_dns_and_dsq_flags(monkeypatch):
     def fetch(url):
         if "/sessions?" in url:
-            return [{"session_key": 1, "location": "Test"}]
+            return [{"session_key": 1, "location": "Test", "date_start": "2026-03-08T05:00:00Z", "date_end": "2026-03-08T07:00:00Z"}]
         if "/session_result?" in url:
             return [{"driver_number": 1, "position": 20, "dns": True},
-                    {"driver_number": 81, "position": 21, "dsq": True}]
+                    {"driver_number": 81, "position": 21, "dsq": True},
+                    {"driver_number": 63, "position": 1, "dnf": False, "dns": False, "dsq": False}]
         return []
     monkeypatch.setattr(h2h, "_fetch_json", fetch)
     rows = h2h._load_openf1_results(2026)
-    assert [result_exclusion_reason(r) for r in rows] == ["did_not_start", "disqualified"]
+    assert [result_exclusion_reason(r) for r in rows] == ["did_not_start", "disqualified", None]
 
 
 def test_fastf1_retains_classification_metadata(monkeypatch):
     session = SimpleNamespace(load=lambda **kwargs: None, results=pd.DataFrame([{
         "Abbreviation": "NOR", "Position": 20, "Status": "Disqualified", "ClassifiedPosition": "D",
-    }]))
+    }, {"Abbreviation": "PIA", "Position": 1, "Status": "Finished"}]))
+    session.event = SimpleNamespace(get_session_date=lambda *args, **kwargs: pd.Timestamp("2026-03-08T05:00:00Z"))
     monkeypatch.setattr(h2h, "_ensure_fastf1_cache_enabled", lambda: None)
     monkeypatch.setattr(h2h.fastf1, "get_session", lambda *args: session)
-    assert result_exclusion_reason(h2h._load_fastf1_results(2026, ["Test"], False)[0]) == "disqualified"
+    assert result_exclusion_reason(h2h._load_fastf1_results(2026, h2h.get_season_schedule(2026)[:1], False)[0]) == "disqualified"
