@@ -8,6 +8,7 @@ from fastapi import APIRouter, HTTPException
 
 from app.data.drivers import DRIVER_ROSTER_2026
 from app.services.h2h_cache import get_cached_season_results
+from app.services.h2h_contract import final_position
 from app.services.h2h_logic import (
     build_h2h_prediction,
     build_stats,
@@ -92,12 +93,7 @@ def _append_unique_rows(target: list[dict], rows: list[dict]) -> None:
 
 
 def _normalise_position(value):
-    if value in (None, "", "\\N"):
-        return None
-    try:
-        return int(float(value))
-    except (TypeError, ValueError):
-        return None
+    return final_position(value)
 
 
 def _normalise_points(value) -> float:
@@ -140,6 +136,9 @@ def _load_fastf1_results(year: int, race_names: list[str], strict: bool) -> list
                     "team": row.get("TeamName", ""),
                     "number": str(row.get("DriverNumber", "")),
                     "position": _normalise_position(row.get("Position")),
+                    "status": str(row.get("Status", "")),
+                    "classified_position": str(row.get("ClassifiedPosition", "")),
+                    "session_type": "Race",
                     "points": _normalise_points(row.get("Points", 0)),
                     "race": name,
                     "year": year,
@@ -196,6 +195,10 @@ def _load_openf1_results(year: int) -> list[dict]:
                 "team": driver.get("team_name") or roster_meta.get("team") or "",
                 "number": driver_number,
                 "position": _normalise_position(result.get("position")),
+                "dns": result.get("dns") is True,
+                "dsq": result.get("dsq") is True,
+                "dnf": result.get("dnf") is True,
+                "session_type": "Race",
                 "points": 0.0,
                 "race": race_name,
                 "year": year,
@@ -240,6 +243,9 @@ def _load_jolpica_results(year: int) -> list[dict]:
                 "team": constructor.get("name") or roster_meta.get("team") or "",
                 "number": number,
                 "position": _normalise_position(result.get("position")),
+                "status": result.get("status"),
+                "classified_position": result.get("positionText"),
+                "session_type": "Race",
                 "points": _normalise_points(result.get("points")),
                 "race": race_name,
                 "year": year,
@@ -315,6 +321,7 @@ def compare_drivers(driver1: str, driver2: str, year: int = 2026):
 
     return {
         "year": year,
+        "scope": "season",
         "driver1": stats1,
         "driver2": stats2,
     }

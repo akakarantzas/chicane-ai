@@ -1,4 +1,12 @@
 from app.data.drivers import DRIVER_ROSTER_2026
+from app.services.h2h_contract import (
+    H2H_RULE_VERSION,
+    H2H_TARGET,
+    H2H_TARGET_DESCRIPTION,
+    eligible_prediction_rows,
+    final_position,
+    result_exclusion_reason,
+)
 
 
 def rows_for_driver(rows: list[dict], abbrev: str) -> list[dict]:
@@ -90,8 +98,13 @@ def recent_form(rows: list[dict], n: int = 3) -> float | None:
 
 
 def head_to_head_record(rows: list[dict], abbrev1: str, abbrev2: str) -> dict:
+    abbrev1, abbrev2 = abbrev1.upper(), abbrev2.upper()
     races_map: dict[tuple, dict] = {}
     for row in rows:
+        if row["abbreviation"].upper() not in {abbrev1, abbrev2}:
+            continue
+        if result_exclusion_reason(row) == "not_grand_prix":
+            continue
         key = (row["year"], row["race"])
         if key not in races_map:
             races_map[key] = {}
@@ -100,14 +113,21 @@ def head_to_head_record(rows: list[dict], abbrev1: str, abbrev2: str) -> dict:
     driver1_wins = 0
     driver2_wins = 0
     races: list[dict] = []
+    tied_races = 0
+    excluded_races = 0
 
     for (year, race), drivers in races_map.items():
         if abbrev1 not in drivers or abbrev2 not in drivers:
+            excluded_races += 1
             continue
 
-        p1 = drivers[abbrev1].get("position")
-        p2 = drivers[abbrev2].get("position")
-        if p1 is None or p2 is None:
+        if any(result_exclusion_reason(drivers[code]) for code in (abbrev1, abbrev2)):
+            excluded_races += 1
+            continue
+        p1 = final_position(drivers[abbrev1].get("position"))
+        p2 = final_position(drivers[abbrev2].get("position"))
+        if p1 == p2:
+            tied_races += 1
             continue
 
         winner_abbrev = abbrev1 if p1 < p2 else abbrev2
@@ -121,6 +141,8 @@ def head_to_head_record(rows: list[dict], abbrev1: str, abbrev2: str) -> dict:
         "driver1_wins": driver1_wins,
         "driver2_wins": driver2_wins,
         "total_races": driver1_wins + driver2_wins,
+        "tied_races": tied_races,
+        "excluded_races": excluded_races,
         "races": races,
     }
 
@@ -178,48 +200,55 @@ def score_prediction(
 
 
 def build_h2h_prediction(rows: list[dict], abbrev1: str, abbrev2: str, next_race: str) -> dict:
-    rows1 = rows_for_driver(rows, abbrev1)
-    rows2 = rows_for_driver(rows, abbrev2)
+    rows1 = eligible_prediction_rows(rows_for_driver(rows, abbrev1))
+    rows2 = eligible_prediction_rows(rows_for_driver(rows, abbrev2))
     meta1 = get_driver_meta(rows, abbrev1)
     meta2 = get_driver_meta(rows, abbrev2)
     h2h = head_to_head_record(rows, abbrev1, abbrev2)
     scores = score_prediction(rows1, rows2, h2h)
 
-    predicted_winner = abbrev1 if scores["driver1_score"] >= scores["driver2_score"] else abbrev2
-    winner_meta = meta1 if predicted_winner == abbrev1 else meta2
-    winner_name = winner_meta.get("full_name", predicted_winner).split()[-1]
+    prediction_status = "available"
+    predicted_winner = None
+    if not rows1 or not rows2:
+        prediction_status = "insufficient_data"
+    elif scores["driver1_score"] == scores["driver2_score"]:
+        prediction_status = "no_clear_favorite"
+    else:
+        predicted_winner = abbrev1 if scores["driver1_score"] > scores["driver2_score"] else abbrev2
+    winner_meta = (meta1 if predicted_winner == abbrev1 else meta2) if predicted_winner else {}
 
-    if h2h["total_races"] > 0:
+    if prediction_status == "insufficient_data":
+        reasoning = "Not enough eligible Grand Prix results for both drivers to make a prediction."
+    elif h2h["total_races"] > 0:
         d1_wins_label = f"{h2h['driver1_wins']}-{h2h['driver2_wins']}"
         h2h_leader = abbrev1 if h2h["driver1_wins"] >= h2h["driver2_wins"] else abbrev2
         leader_name = (meta1 if h2h_leader == abbrev1 else meta2).get("full_name", h2h_leader).split()[-1]
         reasoning = (
-            f"{leader_name} leads the head-to-head {d1_wins_label} across shared races"
-            + (
-                f" and has a stronger average finish ({scores['driver1_avg_finish']} vs {scores['driver2_avg_finish']})"
-                if scores["driver1_avg_finish"]
-                and scores["driver2_avg_finish"]
-                and scores["driver1_avg_finish"] != scores["driver2_avg_finish"]
-                else ""
-            )
-            + "."
+            f"The head-to-head is tied {d1_wins_label}"
+            if h2h["driver1_wins"] == h2h["driver2_wins"]
+            else f"{leader_name} leads the head-to-head {d1_wins_label}"
         )
+        reasoning += " across eligible shared Grands Prix (record shown in selected driver order)."
     else:
-        reasoning = (
-            f"No shared races found \u2014 prediction based on recent form. "
-            f"{winner_name} averages P{scores['driver1_avg_finish'] or '?'} vs P{scores['driver2_avg_finish'] or '?'}."
-        )
+        reasoning = "No eligible shared Grands Prix found; the score uses each driver's average finish and recent form."
 
     return {
         "next_race": next_race,
+        "target": H2H_TARGET,
+        "target_description": H2H_TARGET_DESCRIPTION,
+        "rule_version": H2H_RULE_VERSION,
+        "prediction_status": prediction_status,
+        "history_scope": {"type": "multi_season", "years": sorted({r["year"] for r in rows1 + rows2})},
         "predicted_winner": predicted_winner,
-        "predicted_winner_full_name": winner_meta.get("full_name", predicted_winner),
-        "predicted_winner_team": winner_meta.get("team", "Unknown"),
-        "confidence": scores["confidence"],
+        "predicted_winner_full_name": winner_meta.get("full_name"),
+        "predicted_winner_team": winner_meta.get("team"),
+        "confidence": scores["confidence"] if prediction_status != "insufficient_data" else None,
         "h2h_record": {
             "driver1_wins": h2h["driver1_wins"],
             "driver2_wins": h2h["driver2_wins"],
             "total_races": h2h["total_races"],
+            "tied_races": h2h["tied_races"],
+            "excluded_races": h2h["excluded_races"],
         },
         "reasoning": reasoning,
         "driver1_score": scores["driver1_score"],

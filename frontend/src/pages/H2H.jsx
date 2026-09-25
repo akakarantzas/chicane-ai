@@ -336,6 +336,21 @@ function PredictionCard({ prediction, d1Abbrev, d2Abbrev, loading }) {
 
   if (!prediction) return null
 
+  const historyYears = prediction.history_scope?.years ?? []
+  const historyLabel = historyYears.length ? historyYears.join(', ') : 'Available seasons'
+  const predictionTitle = `${prediction.next_race ?? 'Next Grand Prix'} · Finish-ahead prediction`
+  if (prediction.prediction_status === 'insufficient_data' || prediction.prediction_status === 'no_clear_favorite') {
+    return (
+      <div className="mt-4 rounded-xl border border-white/10 bg-[#1A1A1F] p-6 text-center">
+        <p className="text-xs text-[#A1A1AA]">{predictionTitle}</p>
+        <p className="mt-3 text-lg font-semibold text-[#E5E7EB]">
+          {prediction.prediction_status === 'insufficient_data' ? 'Insufficient data' : 'No clear favorite'}
+        </p>
+        <p className="mt-2 text-sm text-[#A1A1AA]">{prediction.reasoning}</p>
+      </div>
+    )
+  }
+
   const winnerAbbrev = prediction.predicted_winner?.toUpperCase()
   const d2IsWinner = winnerAbbrev === d2Abbrev.toUpperCase()
   const winnerColor  = winnerAbbrev === d1Abbrev.toUpperCase() ? D1_COLOR : D2_SECONDARY
@@ -363,8 +378,10 @@ function PredictionCard({ prediction, d1Abbrev, d2Abbrev, loading }) {
         color: '#A1A1AA',
         marginBottom: '8px',
       }}>
-        Azerbaijan Grand Prix Head to Head Winner Prediction
+        {predictionTitle}
       </div>
+
+      <p className="mb-3 text-sm text-[#A1A1AA]">Which driver finishes ahead, regardless of who wins the race?</p>
 
       {/* Winner name */}
       <div style={{
@@ -400,6 +417,22 @@ function PredictionCard({ prediction, d1Abbrev, d2Abbrev, loading }) {
         }}>{d2Wins}</span>
       </div>
 
+      {/* Historical record scope and scoring rules */}
+      <p className="mb-4 text-xs text-[#A1A1AA]">
+        Historical head-to-head · {historyLabel} · {prediction.h2h_record?.total_races ?? 0} scored Grands Prix
+      </p>
+      <details className="mb-4 text-left text-xs text-[#A1A1AA]">
+        <summary className="cursor-pointer">How this comparison is scored</summary>
+        <p className="mt-2 leading-relaxed">
+          The lower published final position finishes ahead. Retirements count when a valid final position is available.
+          Non-starts, disqualifications, explicitly unclassified results, and missing positions are excluded.
+          Equal positions award neither driver a win. Sprints are not included in this record.
+        </p>
+        <p className="mt-2">
+          Excluded races: {prediction.h2h_record?.excluded_races ?? 0}. Equal-position races: {prediction.h2h_record?.tied_races ?? 0}.
+          The season overview above is separate from this historical record.
+        </p>
+      </details>
       {/* Confidence bar */}
       <div style={{ marginBottom: '12px' }}>
         <div style={{

@@ -89,11 +89,13 @@ def test_head_to_head_driver2_advantage():
     assert 0.5 <= prediction["confidence"] <= 1.0
 
 
-def test_no_data_case_returns_balanced_scores():
+def test_no_data_case_does_not_pick_an_arbitrary_winner():
     prediction = build_h2h_prediction([], "NOR", "PIA", "Miami Grand Prix")
 
-    assert prediction["predicted_winner"] == "NOR"
-    assert prediction["confidence"] == 0.5
+    assert prediction["predicted_winner"] is None
+    assert prediction["predicted_winner_full_name"] is None
+    assert prediction["confidence"] is None
+    assert prediction["prediction_status"] == "insufficient_data"
     assert prediction["driver1_score"] == 0.5
     assert prediction["driver2_score"] == 0.5
     assert prediction["driver1_avg_finish"] is None
@@ -102,4 +104,6 @@ def test_no_data_case_returns_balanced_scores():
         "driver1_wins": 0,
         "driver2_wins": 0,
         "total_races": 0,
+        "tied_races": 0,
+        "excluded_races": 0,
     }
