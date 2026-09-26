@@ -6,6 +6,7 @@ from app.services.h2h_contract import (
     H2H_TARGET_DESCRIPTION,
     eligible_prediction_rows,
     final_position,
+    published_points,
     result_exclusion_reason,
 )
 
@@ -19,56 +20,63 @@ def empty_stats(abbrev: str) -> dict:
     return {
         "abbreviation": abbrev.upper(),
         "full_name": meta["full_name"],
-        "team": meta["team"],
-        "number": meta["number"],
-        "wins": 0,
-        "podiums": 0,
-        "points": 0,
-        "races": 0,
+        "team": "",
+        "number": "",
+        "wins": None,
+        "podiums": None,
+        "points": None,
+        "gp_points": None,
+        "champ_position": None,
+        "championship_status": "unavailable",
+        "races": None,
         "best_finish": None,
         "avg_finish": None,
+        "finish_sample_size": 0,
+        "excluded_results": 0,
+        "stats_status": "unavailable",
     }
 
 
-def build_stats(rows: list[dict], abbrev: str) -> dict:
-    driver_rows = rows_for_driver(rows, abbrev)
-    if not driver_rows:
-        return empty_stats(abbrev)
+def build_stats(rows: list[dict], abbrev: str, *, standings: dict | None = None) -> dict:
+    """GP metrics describe loaded result entries, not a verified full season.
 
-    meta = driver_rows[0]
-    positions = [r["position"] for r in driver_rows if r["position"] is not None]
-    total_points = sum(r["points"] for r in driver_rows)
-
-    wins = sum(1 for p in positions if p == 1)
-    podiums = sum(1 for p in positions if p <= 3)
-    best_finish = int(min(positions)) if positions else None
-    avg_finish = round(sum(positions) / len(positions), 2) if positions else None
-
-    return {
-        "abbreviation": meta["abbreviation"],
-        "full_name": meta["full_name"],
-        "team": meta["team"],
-        "number": meta["number"],
-        "wins": wins,
-        "podiums": podiums,
-        "points": total_points,
-        "races": len(driver_rows),
-        "best_finish": best_finish,
-        "avg_finish": avg_finish,
-    }
-
-
-def championship_position(rows: list[dict], abbrev: str) -> int:
-    totals: dict[str, float] = {}
-    for r in rows:
-        key = r["abbreviation"].upper()
-        totals[key] = totals.get(key, 0) + r["points"]
-
-    ranked = sorted(totals.items(), key=lambda x: x[1], reverse=True)
-    for rank, (key, _) in enumerate(ranked, start=1):
-        if key == abbrev.upper():
-            return rank
-    return len(ranked) + 1 if abbrev.upper() in DRIVER_ROSTER_2026 else -1
+    Championship points/rank come only from a validated published standings
+    snapshot; sprint points never enter GP wins, podiums or average finishes.
+    """
+    driver_rows = [row for row in rows_for_driver(rows, abbrev)
+                   if result_exclusion_reason(row) != "not_grand_prix"]
+    stats = empty_stats(abbrev)
+    if driver_rows:
+        meta = driver_rows[-1]
+        positions = [final_position(row.get("position")) for row in driver_rows
+                     if result_exclusion_reason(row) is None]
+        points = [published_points(row.get("points")) if row.get("points_available", True) else None
+                  for row in driver_rows]
+        missing_finish = any(result_exclusion_reason(row) == "missing_position" for row in driver_rows)
+        stats.update({
+            "full_name": meta.get("full_name") or stats["full_name"],
+            "team": meta.get("team", ""), "number": meta.get("number", ""),
+            "wins": sum(position == 1 for position in positions) if not missing_finish else None,
+            "podiums": sum(position <= 3 for position in positions) if not missing_finish else None,
+            "gp_points": sum(points) if all(value is not None for value in points) else None,
+            "races": len(driver_rows),
+            "best_finish": min(positions) if positions else None,
+            "avg_finish": round(sum(positions) / len(positions), 2) if positions else None,
+            "finish_sample_size": len(positions),
+            "excluded_results": len(driver_rows) - len(positions),
+            "stats_status": "partial" if missing_finish else "loaded_results",
+        })
+    snapshot = standings or {}
+    entry = snapshot.get("drivers", {}).get(abbrev.upper()) if snapshot.get("status") == "available" else None
+    if entry:
+        ids = {row["driver_id"] for row in driver_rows
+               if row.get("driver_id") and not row["driver_id"].startswith("code:")}
+        if ids and ids != {entry["driver_id"]}:
+            stats["championship_status"] = "identity_conflict"
+        else:
+            stats.update({"points": entry["points"], "champ_position": entry["champ_position"],
+                          "championship_status": "available"})
+    return stats
 
 
 def get_driver_meta(rows: list[dict], abbrev: str) -> dict:

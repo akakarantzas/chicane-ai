@@ -1,11 +1,11 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import { expect, test, vi } from 'vitest'
 import H2H from './H2H'
 
-async function compareWith(prediction, coverage) {
+async function compareWith(prediction, coverage, overview = {}) {
   vi.spyOn(globalThis, 'fetch').mockImplementation(async (url) => ({
     ok: true,
-    json: async () => url.includes('/predict?') ? prediction : { year: 2026, driver1: {}, driver2: {}, coverage },
+    json: async () => url.includes('/predict?') ? prediction : { year: 2026, driver1: {}, driver2: {}, coverage, ...overview },
   }))
   render(<H2H onNavigate={vi.fn()} />)
   fireEvent.click(screen.getByRole('button', { name: 'Compare' }))
@@ -40,4 +40,52 @@ test.each([
 test('missing race results are visible instead of implying a complete season', async () => {
   await compareWith(null, { missing_rounds: [5], missing_races: [{ race: 'Missing Grand Prix' }] })
   expect(await screen.findByText(/Results are incomplete. Missing races: Missing Grand Prix/)).toBeInTheDocument()
+})
+
+test('unavailable championship values display dashes, not zero or a fabricated rank', async () => {
+  await compareWith(null, {}, {
+    standings: { status: 'unavailable' },
+    driver1: { points: null, champ_position: null, wins: 0 },
+    driver2: { points: null, champ_position: null, wins: 0 },
+  })
+  const points = within(screen.getByRole('group', { name: 'Championship Points' }))
+  expect(points.getAllByText('—')).toHaveLength(2)
+  expect(points.queryByText('0')).not.toBeInTheDocument()
+  expect(within(screen.getByRole('group', { name: 'GP Wins' })).getAllByText('0')).toHaveLength(2)
+  expect(screen.getByText(/They are not estimated from race-only results/)).toBeInTheDocument()
+  expect(screen.getByRole('group', { name: 'GP Result Entries' })).toBeInTheDocument()
+  expect(screen.queryByText('Races Completed')).not.toBeInTheDocument()
+})
+
+test('championship snapshot and GP sample scopes are explicit', async () => {
+  await compareWith(null, {}, {
+    standings: { status: 'available', through_event: { race: 'Chinese Grand Prix', date: '2026-03-15' } },
+    driver1: { abbreviation: 'ANT', points: 50, champ_position: 2, finish_sample_size: 2, championship_status: 'available' },
+    driver2: { abbreviation: 'VER', points: 50, champ_position: 1, finish_sample_size: 1, championship_status: 'available' },
+  })
+  expect(screen.getByText(/through Chinese Grand Prix/)).toHaveTextContent('2026-03-15')
+  expect(screen.getByText(/including sprint points and published adjustments/)).toBeInTheDocument()
+  expect(screen.getByText(/Finish samples:/)).toHaveTextContent('ANT 2')
+  expect(screen.getByText(/Finish samples:/)).toHaveTextContent('VER 1')
+  expect(within(screen.getByRole('group', { name: 'Championship Points' })).getAllByText('50')).toHaveLength(2)
+})
+
+test('stale standings and incomplete finish samples are explained', async () => {
+  await compareWith(null, {}, {
+    standings: { status: 'stale' }, driver1: { stats_status: 'partial' },
+  })
+  expect(screen.getByText(/standings have not reached the latest due Grand Prix/)).toBeInTheDocument()
+  expect(screen.getByText(/Some GP positions are missing/)).toBeInTheDocument()
+})
+
+test('unverified driver does not inherit another championship entry', async () => {
+  await compareWith(null, {}, {
+    standings: { status: 'available', through_event: { race: 'China' } },
+    driver1: { championship_status: 'identity_conflict', points: null, champ_position: null },
+    driver2: { championship_status: 'available', points: 0, champ_position: 20 },
+  })
+  expect(screen.getByText(/A selected driver could not be verified/)).toBeInTheDocument()
+  const points = within(screen.getByRole('group', { name: 'Championship Points' }))
+  expect(points.getByText('—')).toBeInTheDocument()
+  expect(points.getByText('0')).toBeInTheDocument()
 })

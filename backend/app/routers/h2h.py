@@ -8,8 +8,9 @@ from fastapi import APIRouter, HTTPException
 
 from app.data.drivers import DRIVER_ROSTER_2026
 from app.services.h2h_cache import get_cached_season_results
-from app.services.h2h_contract import final_position
+from app.services.h2h_contract import final_position, published_points
 from app.services.h2h_results import clean_text, reconcile_results
+from app.services.h2h_standings import load_standings
 from app.services.h2h_schedule import (
     HISTORY_YEARS, SEASON, USER_AGENT, RaceEvent, get_season_schedule,
     next_race, parse_utc, race_coverage, utc_now,
@@ -17,7 +18,6 @@ from app.services.h2h_schedule import (
 from app.services.h2h_logic import (
     build_h2h_prediction,
     build_stats,
-    championship_position,
 )
 
 router = APIRouter(prefix="/api/h2h")
@@ -63,13 +63,8 @@ def _normalise_position(value):
     return final_position(value)
 
 
-def _normalise_points(value) -> float:
-    if value in (None, "", "\\N"):
-        return 0.0
-    try:
-        return float(value)
-    except (TypeError, ValueError):
-        return 0.0
+def _normalise_points(value) -> float | None:
+    return published_points(value)
 
 
 def _ensure_fastf1_cache_enabled() -> None:
@@ -117,7 +112,7 @@ def _load_fastf1_results(year: int, events: list[RaceEvent], strict: bool) -> li
                     "status": str(row.get("Status", "")),
                     "classified_position": str(row.get("ClassifiedPosition", "")),
                     "session_type": "Race",
-                    "points": _normalise_points(row.get("Points", 0)),
+                    "points": _normalise_points(row.get("Points")),
                     "race": event.name,
                     "round": event.round,
                     "race_date": event.starts_at.date().isoformat(),
@@ -198,7 +193,7 @@ def _load_openf1_results(year: int) -> list[dict]:
                 "dsq": result.get("dsq") is True,
                 "dnf": result.get("dnf") is True,
                 "session_type": "Race",
-                "points": 0.0,
+                "points": None,
                 "points_available": False,
                 "race": race_name,
                 "round": event.round,
@@ -354,18 +349,27 @@ def compare_drivers(driver1: str, driver2: str, year: int = SEASON):
     year = _validate_year(year)
 
     events = get_season_schedule(year)
-    rows = get_cached_season_results(year, _load_results)
-
-    stats1 = build_stats(rows, abbrev1)
-    stats2 = build_stats(rows, abbrev2)
-
-    stats1["champ_position"] = championship_position(rows, abbrev1)
-    stats2["champ_position"] = championship_position(rows, abbrev2)
+    try:
+        rows = get_cached_season_results(year, _load_results)
+    except HTTPException as exc:
+        if exc.status_code != 502:
+            raise
+        rows = []
+    # Keep requested-season statistics isolated even when a provider mislabels data.
+    rows = [row for row in rows if row.get("year") == year]
+    standings = _load_standings(year, events, utc_now())
+    stats1 = build_stats(rows, abbrev1, standings=standings)
+    stats2 = build_stats(rows, abbrev2, standings=standings)
 
     return {
         "year": year,
         "scope": "season",
         "coverage": race_coverage(events, rows, utc_now()),
+        "standings": {key: value for key, value in standings.items() if key != "drivers"},
         "driver1": stats1,
         "driver2": stats2,
     }
+
+
+def _load_standings(year, events, now):
+    return load_standings(year, events, now, _fetch_json)

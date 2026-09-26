@@ -134,6 +134,7 @@ def test_openf1_retains_dns_and_dsq_flags(monkeypatch):
     monkeypatch.setattr(h2h, "_fetch_json", fetch)
     rows = h2h._load_openf1_results(2026)
     assert [result_exclusion_reason(r) for r in rows] == ["did_not_start", "disqualified", None]
+    assert all(row["points"] is None and row["points_available"] is False for row in rows)
 
 
 def test_fastf1_retains_classification_metadata(monkeypatch):

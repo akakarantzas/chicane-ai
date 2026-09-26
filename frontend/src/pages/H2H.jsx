@@ -12,12 +12,12 @@ import { apiUrl } from '../lib/api'
 // ─── Stats config ────────────────────────────────────────────────────────────
 const STAT_DEFS = [
   { key: 'champ_position', label: 'Championship Position', lowerIsBetter: true  },
-  { key: 'points',         label: 'Points',                lowerIsBetter: false },
-  { key: 'wins',           label: 'Wins',                  lowerIsBetter: false },
-  { key: 'podiums',        label: 'Podiums',               lowerIsBetter: false },
-  { key: 'races',          label: 'Races Completed',       lowerIsBetter: false },
-  { key: 'best_finish',    label: 'Best Finish',           lowerIsBetter: true  },
-  { key: 'avg_finish',     label: 'Avg Finish',            lowerIsBetter: true  },
+  { key: 'points',         label: 'Championship Points',   lowerIsBetter: false },
+  { key: 'wins',           label: 'GP Wins',               lowerIsBetter: false },
+  { key: 'podiums',        label: 'GP Podiums',            lowerIsBetter: false },
+  { key: 'races',          label: 'GP Result Entries',     lowerIsBetter: false },
+  { key: 'best_finish',    label: 'Best GP Finish',        lowerIsBetter: true  },
+  { key: 'avg_finish',     label: 'Avg GP Finish',         lowerIsBetter: true  },
 ]
 
 const D1_COLOR = 'var(--red-driver)'
@@ -237,7 +237,7 @@ function StatBar({ def, d1Val, d2Val }) {
   const isTie  = win === 'tie'
 
   return (
-    <div style={{
+    <div role="group" aria-label={def.label} style={{
       backgroundColor: '#1A1A1F',
       borderRadius: '12px',
       padding: '16px 24px',
@@ -750,6 +750,37 @@ export default function H2H({ onNavigate }) {
                   Results are incomplete. Missing races: {result.coverage.missing_races?.map((race) => race.race).join(', ') || result.coverage.missing_rounds.join(', ')}.
                 </p>
               )}
+
+              <div className="mb-6 space-y-2 text-xs text-[#A1A1AA]">
+                {result.standings?.status === 'available' ? (
+                  <p>
+                    Published championship points and positions through {result.standings.through_event?.race}
+                    {' '}({result.standings.through_event?.date}), including sprint points and published adjustments.
+                  </p>
+                ) : (
+                  <p role="status">
+                    Championship points and positions are unavailable
+                    {result.standings?.status === 'stale' ? ' because the published standings have not reached the latest due Grand Prix' : ''}.
+                    {' '}They are not estimated from race-only results.
+                  </p>
+                )}
+                <p>
+                  GP statistics use loaded Grand Prix results only, not sprints. Result entries include non-starts;
+                  they do not mean races completed. Wins, podiums and finishes exclude non-starts, disqualifications
+                  and explicitly unclassified results. Retirements count when a valid final position is published.
+                </p>
+                <p>
+                  Finish samples: {result.driver1?.abbreviation ?? d1} {result.driver1?.finish_sample_size ?? 0}
+                  {' · '}{result.driver2?.abbreviation ?? d2} {result.driver2?.finish_sample_size ?? 0}.
+                  {' '}Unavailable values are shown as —, not zero.
+                </p>
+                {[result.driver1, result.driver2].some((driver) => driver?.stats_status === 'partial') && (
+                  <p role="status">Some GP positions are missing. Finish averages use only the available eligible results.</p>
+                )}
+                {result.standings?.status === 'available' && [result.driver1, result.driver2].some((driver) => driver?.championship_status !== 'available') && (
+                  <p role="status">A selected driver could not be verified in the published standings; their championship values are unavailable.</p>
+                )}
+              </div>
 
               {STAT_DEFS.map((def) => (
                 <StatBar

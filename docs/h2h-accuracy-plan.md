@@ -156,6 +156,56 @@ input-order independence, source fallback, identity ambiguity, historical
 number reuse, disqualification preservation and both API integration paths.
 All 8 frontend tests also passed; no frontend code changed in this step.
 
+## Step 4: season statistics and championship standings
+
+The season comparison no longer ranks drivers using a sum of Grand Prix-only
+points. `points` and `champ_position` now come exclusively from a validated
+Jolpica driver-standings table. This retains published sprint points, adjustments
+and tie-break positions without mixing sprints into the finish-ahead history.
+The API identifies the source and the calendar event/date the standings cover.
+
+- Resolve the provider's reported round by its race date, including when its
+  numbering differs from the calendar. Require the latest due GP, the requested
+  season, a complete table, valid points/ranks and unambiguous driver identities.
+  Older standings are marked `stale`; future, malformed, truncated or unavailable
+  tables cannot supply current championship values. Excluded championship
+  drivers retain a null rank rather than an invented position.
+- Do not locally recalculate championship tie-breaks or estimate missing totals.
+  Standings are fetched per comparison for now; result-cache synchronization and
+  shared snapshots remain step 6. The displayed scope is through a published GP,
+  not a promise of live standings during the next sprint/race weekend.
+- Keep the loaded GP-only points subtotal separately as `gp_points`. Missing,
+  invalid, nonfinite or OpenF1-unavailable points are null, not zero. A subtotal
+  with any unknown component is null too; genuine published zero remains zero.
+- Apply the finish-ahead eligibility contract to GP wins, podiums, best finish
+  and average finish. Retirements with eligible final positions count; DNS,
+  DSQ and explicitly unclassified results do not. Sprints never enter these
+  metrics. Report the eligible finish sample size and excluded-entry count.
+- Rename the UI count to **GP Result Entries**: it counts loaded result rows,
+  including non-start entries, not races completed or verified starts. GP
+  metrics explicitly describe loaded evidence, not guaranteed complete season
+  totals. Missing positions leave win/podium counts unknown; best/average finish
+  use the available eligible sample and a partial-data warning.
+- No rows for a driver means unknown GP metrics, not zero achievements. Valid
+  standings can still supply points/rank when GP results fail. A standings/GP
+  driver-ID conflict withholds that driver's championship values. Keep other
+  seasons out of the season comparison, and do not invent historical team/number
+  metadata for missing results.
+- UI labels distinguish championship points from GP-only metrics and show
+  unavailable values as dashes, with source-scope and failure explanations.
+
+Read-only live checks on September 26, 2026 successfully loaded the complete
+2025 table (21 drivers, through Abu Dhabi) and the current 2026 table (23 drivers,
+through Azerbaijan). This verifies provider compatibility, not model accuracy
+or independent auditing of every upstream result.
+
+Validation: 185 backend tests, 12 frontend tests and the frontend production
+build passed. Tests cover published totals/tie-breaks, sprint separation,
+missing/zero values, stale and malformed standings, eligibility rules, identity
+conflicts, source failures, season isolation and UI unavailable states.
+
+Reference: [Jolpica driver standings fields and round scope](https://github.com/jolpica/jolpica-f1/blob/main/docs/endpoints/driverStandings.md).
+
 ## Validation gates
 
 - Step 1: edge-case rule tests, adapter flag tests, API metadata tests, UI empty/tied state tests, and frontend build.

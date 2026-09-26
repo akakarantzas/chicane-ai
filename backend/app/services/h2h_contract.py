@@ -12,6 +12,17 @@ H2H_TARGET = "finish_ahead"
 H2H_TARGET_DESCRIPTION = "Which driver finishes ahead in the next Grand Prix?"
 
 
+def published_points(value) -> float | None:
+    """Unknown points are not zero; accept finite nonnegative published values."""
+    if isinstance(value, bool):
+        return None
+    try:
+        number = float(value)
+    except (TypeError, ValueError, OverflowError):
+        return None
+    return number if math.isfinite(number) and number >= 0 else None
+
+
 def final_position(value) -> int | None:
     """Accept a positive integral result position, never a sentinel or a boolean."""
     if isinstance(value, bool):

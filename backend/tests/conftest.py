@@ -12,6 +12,8 @@ from app.services.h2h_schedule import RaceEvent, clear_schedule_cache
 def fixed_h2h_calendar(monkeypatch):
     """API/unit tests never depend on a live schedule or the wall-clock date."""
     from app.routers import h2h
+    from app.services.h2h_standings import unavailable_standings
+    monkeypatch.setattr(h2h, "_load_standings", lambda *args: unavailable_standings())
     monkeypatch.setattr(h2h, "utc_now", lambda: datetime(2026, 9, 25, tzinfo=timezone.utc))
     monkeypatch.setattr(h2h, "get_season_schedule", lambda year: [
         RaceEvent(year, 1, "Australia", datetime(year, 3, 8, 5, tzinfo=timezone.utc)),

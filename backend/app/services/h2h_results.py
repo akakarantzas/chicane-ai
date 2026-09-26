@@ -34,6 +34,7 @@ def _outcome(row: dict) -> tuple:
 def _disagrees(first: dict, second: dict) -> bool:
     return (_outcome(first)[:2] != _outcome(second)[:2]
             or (first.get("points_available", True) and second.get("points_available", True)
+                and first.get("points") is not None and second.get("points") is not None
                 and first.get("points") != second.get("points")))
 
 

@@ -2,7 +2,6 @@ from app.services.h2h_logic import (
     average_finish,
     build_h2h_prediction,
     build_stats,
-    championship_position,
     head_to_head_record,
     recent_form,
 )
@@ -35,7 +34,7 @@ def test_average_finish_and_recent_form_calculation():
     assert recent_form(rows, n=2) == 2.0
 
 
-def test_build_stats_and_championship_position():
+def test_build_stats_keeps_race_points_separate_from_unavailable_championship_totals():
     rows = [
         result("NOR", 1, 25, "Race 1", full_name="Lando Norris", team="McLaren", number="1"),
         result("NOR", 2, 18, "Race 2", full_name="Lando Norris", team="McLaren", number="1"),
@@ -47,11 +46,12 @@ def test_build_stats_and_championship_position():
     assert stats["abbreviation"] == "NOR"
     assert stats["wins"] == 1
     assert stats["podiums"] == 2
-    assert stats["points"] == 43
+    assert stats["gp_points"] == 43
+    assert stats["points"] is None
     assert stats["best_finish"] == 1
     assert stats["avg_finish"] == 1.5
-    assert championship_position(rows, "NOR") == 1
-    assert championship_position(rows, "PIA") == 2
+    assert stats["champ_position"] is None
+    assert build_stats(rows, "PIA")["champ_position"] is None
 
 
 def test_head_to_head_driver1_advantage():

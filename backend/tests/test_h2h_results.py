@@ -35,7 +35,8 @@ def test_aliases_casing_and_duplicate_pages_are_one_result_without_mutating_inpu
     assert merged[0]["sources"] == ["jolpica", "fastf1", "openf1"]
     assert merged[0]["conflicting_sources"] == []
     stats = build_stats(merged, "NOR")
-    assert (stats["races"], stats["wins"], stats["points"]) == (1, 1, 25)
+    assert (stats["races"], stats["wins"], stats["gp_points"]) == (1, 1, 25)
+    assert stats["points"] is None
 
 
 def test_precedence_and_output_are_independent_of_input_order():
@@ -173,7 +174,8 @@ def test_compare_and_predict_share_deduplicated_results(client, monkeypatch):
         {**row, "driver_id": "", "race": "Melbourne"} for row in rows(year, "openf1")])
     comparison = client.get("/api/h2h/compare?driver1=NOR&driver2=PIA").json()
     assert comparison["driver1"]["races"] == 1
-    assert comparison["driver1"]["points"] == 25
+    assert comparison["driver1"]["gp_points"] == 25
+    assert comparison["driver1"]["points"] is None
     prediction = client.get("/api/h2h/predict?driver1=NOR&driver2=PIA").json()
     assert prediction["h2h_record"]["total_races"] == 3
     assert prediction["h2h_record"]["driver1_wins"] == 3
