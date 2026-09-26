@@ -337,7 +337,7 @@ def predict_h2h(driver1: str, driver2: str):
         all_rows.extend(rows)
         coverage[str(year)] = race_coverage(events, rows, now)
 
-    result = build_h2h_prediction(all_rows, abbrev1, abbrev2, event.name)
+    result = build_h2h_prediction(all_rows, abbrev1, abbrev2, event.name, target_event=event)
     result.update({"next_event": event.public(), "coverage": coverage})
     return result
 

@@ -206,6 +206,53 @@ conflicts, source failures, season isolation and UI unavailable states.
 
 Reference: [Jolpica driver standings fields and round scope](https://github.com/jolpica/jolpica-f1/blob/main/docs/endpoints/driverStandings.md).
 
+## Step 5: chronological history and recent form
+
+Recent form now means each driver's last three **available eligible Grand Prix
+results**, ordered oldest to newest before taking the window, rather than the
+last three rows returned by a source. The window still uses a simple average;
+this step does not tune weights or claim measured predictive improvement.
+
+- Prefer calendar race dates. When dates are missing, use numeric calendar
+  rounds for the entire affected season, only if every round is known and no
+  supplied date is invalid or contradicts its year. Different seasons may use
+  different known bases, but dates and round numbers are never mixed as sorting
+  values within one season. No name-based or insertion-order chronology guesses.
+- Apply the finish-ahead eligibility rules before selecting the recent window.
+  Retirements with eligible final positions count; DNS, DSQ, explicitly
+  unclassified results, missing/invalid positions and sprints do not.
+- Windows are per driver, not restricted to shared races. They may cross season
+  and team boundaries. Keep each contributing race's year, round, date, position
+  and historical team; report the sample size, ordering basis and cross-season
+  flag. Fewer than three eligible results stay a smaller sample, without padding.
+  Missing source races can still leave an incomplete window; shared freshness
+  and per-driver coverage diagnostics remain step 6.
+- The prediction endpoint passes its target event into the history builder.
+  Exclude target-event rows, same-date/later results and rows that cannot be
+  established as earlier. Legacy rows without dates require known season/round
+  ordering. This boundary applies to averages, H2H, form and selected metadata,
+  not just the form window. Report the target and excluded-row count.
+- Select latest driver/team metadata chronologically, including valid GP entry
+  metadata from excluded finishes, rather than selecting the last loaded row.
+  Unknown chronology does not pick an arbitrary historical team. H2H record
+  details also follow chronological order where it can be established.
+- If an eligible history cannot be ordered reliably, recent form is null. When
+  either driver lacks form, omit that component and renormalize the existing
+  remaining heuristic contributions; do not substitute a guessed or neutral
+  result. Otherwise retain the existing weights. API evidence and the prediction
+  card explain which windows were used and whether form contributed to the score.
+
+This is an event-time boundary, not a full point-in-time backtest: later provider
+corrections to older results are still possible. No decay, team/circuit weighting,
+minimum-sample confidence rule or new model is introduced without the evaluation
+and uncertainty work planned in steps 7-9.
+
+Validation: 211 backend tests, 14 frontend tests and the frontend production
+build passed. Added checks cover shuffled loading order, rescheduled-date order,
+numeric-round fallback, mixed date availability, cross-season and sparse windows,
+eligibility, latest-team metadata, driver-swap symmetry, target/future exclusion,
+unknown chronology, API window evidence and the UI's sample explanations.
+
 ## Validation gates
 
 - Step 1: edge-case rule tests, adapter flag tests, API metadata tests, UI empty/tied state tests, and frontend build.

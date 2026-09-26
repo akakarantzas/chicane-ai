@@ -100,7 +100,7 @@ def test_ineligible_history_does_not_influence_prediction_scores():
 
 def test_api_distinguishes_season_overview_from_prediction_history(client, monkeypatch):
     monkeypatch.setattr(h2h, "_load_results", lambda year, strict=True: [
-        row("NOR", 1, year=year), row("PIA", 2, year=year),
+        row("NOR", 1, year=year, round=1), row("PIA", 2, year=year, round=1),
     ])
     comparison = client.get("/api/h2h/compare?driver1=NOR&driver2=PIA&year=2026").json()
     prediction = client.get("/api/h2h/predict?driver1=NOR&driver2=PIA").json()

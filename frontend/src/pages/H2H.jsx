@@ -427,6 +427,28 @@ function PredictionCard({ prediction, d1Abbrev, d2Abbrev, loading }) {
       <p className="mb-4 text-xs text-[#A1A1AA]">
         Historical head-to-head · {historyLabel} · {prediction.h2h_record?.total_races ?? 0} scored Grands Prix
       </p>
+      {prediction.recent_form && (
+        <details className="mb-4 text-left text-xs text-[#A1A1AA]">
+          <summary className="cursor-pointer">Recent form: last {prediction.recent_form.window_size} eligible Grands Prix per driver</summary>
+          <p className="mt-2 leading-relaxed">
+            Oldest to newest, using available eligible results before the target race. Windows may include prior seasons
+            and different races for each driver. Missing races are not filled in; fewer results mean a smaller sample.
+          </p>
+          {[[d1Abbrev, prediction.recent_form.driver1], [d2Abbrev, prediction.recent_form.driver2]].map(([code, form]) => (
+            <div key={code} className="mt-2">
+              <p>{code}: {form?.sample_size ?? 0}/{prediction.recent_form.window_size} results · Average finish {form?.average_finish ?? '—'}</p>
+              {form?.status === 'chronology_unavailable' ? (
+                <p>Recent form unavailable: race chronology could not be verified.</p>
+              ) : (
+                <p>{form?.races?.map((race) => `${race.year} ${race.race} (${race.date ?? `round ${race.round}`}) P${race.position}`).join(' → ') || 'No eligible results.'}</p>
+              )}
+            </div>
+          ))}
+          {!prediction.recent_form.used_in_score && (
+            <p className="mt-2">Recent form is not used in this score because it is unavailable for one or both drivers.</p>
+          )}
+        </details>
+      )}
       <details className="mb-4 text-left text-xs text-[#A1A1AA]">
         <summary className="cursor-pointer">How this comparison is scored</summary>
         <p className="mt-2 leading-relaxed">

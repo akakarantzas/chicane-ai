@@ -89,3 +89,41 @@ test('unverified driver does not inherit another championship entry', async () =
   expect(points.getByText('—')).toBeInTheDocument()
   expect(points.getByText('0')).toBeInTheDocument()
 })
+
+test('recent form shows the actual chronological windows and smaller samples', async () => {
+  await compareWith({
+    prediction_status: 'available', predicted_winner: 'ANT', predicted_winner_full_name: 'Kimi Antonelli',
+    recent_form: {
+      window_size: 3, used_in_score: true,
+      driver1: { status: 'available', sample_size: 2, average_finish: 3, races: [
+        { year: 2025, race: 'Abu Dhabi Grand Prix', date: '2025-12-07', position: 2 },
+        { year: 2026, race: 'Australian Grand Prix', date: '2026-03-08', position: 4 },
+      ] },
+      driver2: { status: 'available', sample_size: 1, average_finish: 5, races: [
+        { year: 2026, race: 'Australian Grand Prix', date: null, round: 1, position: 5 },
+      ] },
+    },
+  })
+  expect(screen.getByText('Recent form: last 3 eligible Grands Prix per driver')).toBeInTheDocument()
+  expect(screen.getByText(/ANT: 2\/3 results/)).toHaveTextContent('Average finish 3')
+  expect(screen.getByText(/VER: 1\/3 results/)).toHaveTextContent('Average finish 5')
+  expect(screen.getByText(/2025 Abu Dhabi Grand Prix/)).toHaveTextContent(
+    '2025 Abu Dhabi Grand Prix (2025-12-07) P2 → 2026 Australian Grand Prix (2026-03-08) P4',
+  )
+  expect(screen.getByText(/2026 Australian Grand Prix \(round 1\) P5/)).toBeInTheDocument()
+  expect(screen.getByText(/Windows may include prior seasons/)).toBeInTheDocument()
+})
+
+test('unknown chronology is not displayed as an invented recent average', async () => {
+  await compareWith({
+    prediction_status: 'available', predicted_winner: 'ANT', predicted_winner_full_name: 'Kimi Antonelli',
+    recent_form: {
+      window_size: 3, used_in_score: false,
+      driver1: { status: 'chronology_unavailable', sample_size: 0, average_finish: null, races: [] },
+      driver2: { status: 'available', sample_size: 1, average_finish: 5, races: [] },
+    },
+  })
+  expect(screen.getByText(/ANT: 0\/3 results/)).toHaveTextContent('Average finish —')
+  expect(screen.getByText(/Recent form unavailable: race chronology could not be verified/)).toBeInTheDocument()
+  expect(screen.getByText(/Recent form is not used in this score/)).toBeInTheDocument()
+})

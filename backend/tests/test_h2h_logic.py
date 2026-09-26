@@ -28,6 +28,7 @@ def test_average_finish_and_recent_form_calculation():
         result("NOR", None, 0, "Race 3"),
         result("NOR", 3, 15, "Race 4"),
     ]
+    rows = [{**row, "round": index} for index, row in enumerate(rows, start=1)]
 
     assert average_finish(rows) == 3.0
     assert recent_form(rows) == 3.0
