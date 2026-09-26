@@ -47,3 +47,5 @@ cache/
 
 # Claude Code local settings
 .claude/settings.local.json
+# Local frozen H2H evaluation datasets and reports
+/backend/evaluation/

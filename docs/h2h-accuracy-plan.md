@@ -313,6 +313,31 @@ new due rounds, calendar changes, snapshot pinning/eviction, source failures,
 API reuse across both endpoints, per-driver coverage semantics, stale-data UI,
 409 recovery and out-of-order frontend responses.
 
+## Step 7: race-grouped chronological backtesting
+
+Added an offline CLI and pure evaluator for frozen, reconciled race-result JSON.
+Explicit date boundaries keep each race entirely in warmup, validation or test.
+Walk-forward features and H2H records use strictly earlier dates, including when
+multiple events share a date. The live heuristic's feature/scoring functions are
+shared with evaluation without changing its weights or serving behavior.
+
+Compare average-finish, last-three form, historical H2H and constant-0.5 baselines.
+Report exclusions, abstentions, score/decision coverage, pair-micro and race-macro
+metrics, plus common-score and common-decision baseline comparisons. Reports
+include deterministic input hashes, split configuration and race/history manifests;
+optional pair records support leakage audits. The CLI has no provider/network
+access and refuses to overwrite an existing report.
+
+Validation: 252 backend tests passed, including serving-score parity, chronological
+splits, target/future/same-day leakage, shuffled input, historical entrants,
+eligibility, cold starts, hand-computed metrics, common support, malformed inputs
+and offline CLI behavior. Two pre-existing dependency deprecation warnings remain.
+No frontend code changed. These synthetic tests establish evaluator behavior,
+not real-world predictive accuracy; no historical benchmark or new model is
+claimed. Dataset provenance and candidate evaluation remain step 8. See
+[the backtesting guide](h2h-backtesting.md) for input requirements, commands and
+limitations, including corrected-result versus true point-in-time evidence.
+
 ## Validation gates
 
 - Step 1: edge-case rule tests, adapter flag tests, API metadata tests, UI empty/tied state tests, and frontend build.

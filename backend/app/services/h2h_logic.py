@@ -161,12 +161,20 @@ def score_prediction(
     rows2: list[dict],
     h2h_record: dict,
 ) -> dict:
-    avg1 = average_finish(rows1)
-    avg2 = average_finish(rows2)
-    form1 = recent_form(rows1)
-    form2 = recent_form(rows2)
-    wr1 = win_rate(rows1)
-    wr2 = win_rate(rows2)
+    return score_features(driver_features(rows1), driver_features(rows2), h2h_record)
+
+
+def driver_features(rows: list[dict]) -> dict:
+    """Summarize eligible history; callers enforce the event-time cutoff."""
+    return {"average_finish": average_finish(rows), "recent_form": recent_form(rows),
+            "win_rate": win_rate(rows), "sample_size": len(rows)}
+
+
+def score_features(features1: dict, features2: dict, h2h_record: dict) -> dict:
+    """Shared fixed heuristic for serving and offline evaluation (not calibrated)."""
+    avg1, avg2 = features1["average_finish"], features2["average_finish"]
+    form1, form2 = features1["recent_form"], features2["recent_form"]
+    wr1, wr2 = features1["win_rate"], features2["win_rate"]
     total_h2h = h2h_record["total_races"]
 
     if total_h2h > 0:
