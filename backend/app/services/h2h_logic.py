@@ -1,4 +1,5 @@
 from app.data.drivers import DRIVER_ROSTER_2026
+from app.services.h2h_results import event_key
 from app.services.h2h_contract import (
     H2H_RULE_VERSION,
     H2H_TARGET,
@@ -105,7 +106,7 @@ def head_to_head_record(rows: list[dict], abbrev1: str, abbrev2: str) -> dict:
             continue
         if result_exclusion_reason(row) == "not_grand_prix":
             continue
-        key = (row["year"], row["race"])
+        key = event_key(row)
         if key not in races_map:
             races_map[key] = {}
         races_map[key][row["abbreviation"].upper()] = row
@@ -116,7 +117,7 @@ def head_to_head_record(rows: list[dict], abbrev1: str, abbrev2: str) -> dict:
     tied_races = 0
     excluded_races = 0
 
-    for (year, race), drivers in races_map.items():
+    for (year, _, _), drivers in races_map.items():
         if abbrev1 not in drivers or abbrev2 not in drivers:
             excluded_races += 1
             continue
@@ -131,6 +132,7 @@ def head_to_head_record(rows: list[dict], abbrev1: str, abbrev2: str) -> dict:
             continue
 
         winner_abbrev = abbrev1 if p1 < p2 else abbrev2
+        race = drivers[abbrev1]["race"]
         races.append({"year": year, "race": race, "p1": p1, "p2": p2, "winner": winner_abbrev})
         if winner_abbrev == abbrev1:
             driver1_wins += 1

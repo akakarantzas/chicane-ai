@@ -9,6 +9,7 @@ from fastapi import APIRouter, HTTPException
 from app.data.drivers import DRIVER_ROSTER_2026
 from app.services.h2h_cache import get_cached_season_results
 from app.services.h2h_contract import final_position
+from app.services.h2h_results import clean_text, reconcile_results
 from app.services.h2h_schedule import (
     HISTORY_YEARS, SEASON, USER_AGENT, RaceEvent, get_season_schedule,
     next_race, parse_utc, race_coverage, utc_now,
@@ -26,11 +27,6 @@ _fastf1_cache_enabled = False
 
 OPENF1_BASE_URL = "https://api.openf1.org/v1"
 JOLPICA_BASE_URL = "https://api.jolpi.ca/ergast/f1"
-
-DRIVER_NUMBER_TO_ABBREV = {
-    meta["number"]: abbrev
-    for abbrev, meta in DRIVER_ROSTER_2026.items()
-}
 
 
 def _normalise_driver_code(value: str) -> str:
@@ -63,18 +59,6 @@ def _fetch_json(url: str, timeout: int = 8):
         return json.loads(response.read().decode("utf-8"))
 
 
-def _append_unique_rows(target: list[dict], rows: list[dict]) -> None:
-    seen = {
-        (r["year"], r["race"], r["abbreviation"].upper())
-        for r in target
-    }
-    for row in rows:
-        key = (row["year"], row["race"], row["abbreviation"].upper())
-        if key not in seen:
-            target.append(row)
-            seen.add(key)
-
-
 def _normalise_position(value):
     return final_position(value)
 
@@ -86,11 +70,6 @@ def _normalise_points(value) -> float:
         return float(value)
     except (TypeError, ValueError):
         return 0.0
-
-
-def _roster_meta_by_number(driver_number) -> dict | None:
-    abbrev = DRIVER_NUMBER_TO_ABBREV.get(str(driver_number))
-    return DRIVER_ROSTER_2026.get(abbrev) if abbrev else None
 
 
 def _ensure_fastf1_cache_enabled() -> None:
@@ -130,6 +109,7 @@ def _load_fastf1_results(year: int, events: list[RaceEvent], strict: bool) -> li
             for _, row in results.iterrows():
                 event_rows.append({
                     "abbreviation": str(row.get("Abbreviation", "")).upper(),
+                    "driver_id": clean_text(row.get("DriverId")),
                     "full_name": f"{row.get('FirstName', '')} {row.get('LastName', '')}".strip(),
                     "team": row.get("TeamName", ""),
                     "number": str(row.get("DriverNumber", "")),
@@ -180,10 +160,17 @@ def _load_openf1_results(year: int) -> list[dict]:
                    and result.get("dsq") is False for result in results):
             continue
         drivers = _fetch_json(drivers_url)
-        drivers_by_number = {
-            str(driver.get("driver_number")): driver
-            for driver in drivers
-        }
+        drivers_by_number = {}
+        ambiguous_numbers = set()
+        for driver in drivers:
+            number = str(driver.get("driver_number"))
+            previous = drivers_by_number.get(number)
+            if previous and (
+                clean_text(previous.get("name_acronym")).upper()
+                != clean_text(driver.get("name_acronym")).upper()
+            ):
+                ambiguous_numbers.add(number)
+            drivers_by_number[number] = driver
 
         race_name = (
             session.get("meeting_name")
@@ -194,20 +181,17 @@ def _load_openf1_results(year: int) -> list[dict]:
 
         for result in results:
             driver_number = str(result.get("driver_number", ""))
+            if driver_number in ambiguous_numbers:
+                continue
             driver = drivers_by_number.get(driver_number, {})
-            roster_meta = _roster_meta_by_number(driver_number) or {}
-            abbreviation = (
-                driver.get("name_acronym")
-                or DRIVER_NUMBER_TO_ABBREV.get(driver_number)
-                or ""
-            ).upper()
+            abbreviation = clean_text(driver.get("name_acronym")).upper()
             if not abbreviation:
                 continue
 
             rows.append({
                 "abbreviation": abbreviation,
-                "full_name": driver.get("full_name") or roster_meta.get("full_name") or abbreviation,
-                "team": driver.get("team_name") or roster_meta.get("team") or "",
+                "full_name": driver.get("full_name") or abbreviation,
+                "team": driver.get("team_name") or "",
                 "number": driver_number,
                 "position": _normalise_position(result.get("position")),
                 "dns": result.get("dns") is True,
@@ -215,6 +199,7 @@ def _load_openf1_results(year: int) -> list[dict]:
                 "dnf": result.get("dnf") is True,
                 "session_type": "Race",
                 "points": 0.0,
+                "points_available": False,
                 "race": race_name,
                 "round": event.round,
                 "race_date": event.starts_at.date().isoformat(),
@@ -262,24 +247,19 @@ def _load_jolpica_results(year: int) -> list[dict]:
         for result in race.get("Results", []):
             driver = result.get("Driver", {})
             constructor = result.get("Constructor", {})
-            number = str(driver.get("permanentNumber") or result.get("number") or "")
-            roster_meta = _roster_meta_by_number(number) or {}
-            abbreviation = (
-                driver.get("code")
-                or DRIVER_NUMBER_TO_ABBREV.get(number)
-                or ""
-            ).upper()
+            number = str(result.get("number") or driver.get("permanentNumber") or "")
+            abbreviation = clean_text(driver.get("code")).upper()
             if not abbreviation:
                 continue
 
             event_rows.append({
                 "abbreviation": abbreviation,
+                "driver_id": clean_text(driver.get("driverId")),
                 "full_name": (
                     f"{driver.get('givenName', '')} {driver.get('familyName', '')}".strip()
-                    or roster_meta.get("full_name")
                     or abbreviation
                 ),
-                "team": constructor.get("name") or roster_meta.get("team") or "",
+                "team": constructor.get("name") or "",
                 "number": number,
                 "position": _normalise_position(result.get("position")),
                 "status": result.get("status"),
@@ -309,7 +289,7 @@ def _load_results(year: int, strict: bool = True) -> list[dict]:
     source_errors = []
 
     try:
-        _append_unique_rows(rows, _load_fastf1_results(year, events, strict))
+        rows.extend(_load_fastf1_results(year, events, strict))
     except Exception as exc:
         source_errors.append(str(exc))
 
@@ -318,12 +298,11 @@ def _load_results(year: int, strict: bool = True) -> list[dict]:
         lambda: _load_openf1_results(year),
     ):
         try:
-            _append_unique_rows(rows, loader())
+            rows.extend(loader())
         except Exception as exc:
             source_errors.append(str(exc))
 
-    due_rounds = {event.round for event in events}
-    rows = [row for row in rows if row.get("round") in due_rounds]
+    rows = reconcile_results(rows, events)
     if strict and not rows:
         detail = f"No H2H race results found for {year}"
         if source_errors:

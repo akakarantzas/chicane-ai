@@ -105,7 +105,7 @@ def test_load_results_falls_back_when_fastf1_fails(monkeypatch, sample_h2h_rows)
 
     def load_jolpica(year):
         calls.append("jolpica")
-        return sample_h2h_rows
+        return [{**row, "source": "jolpica"} for row in sample_h2h_rows]
 
     def load_openf1(year):
         calls.append("openf1")
@@ -115,7 +115,12 @@ def test_load_results_falls_back_when_fastf1_fails(monkeypatch, sample_h2h_rows)
     monkeypatch.setattr(h2h, "_load_jolpica_results", load_jolpica)
     monkeypatch.setattr(h2h, "_load_openf1_results", load_openf1)
 
-    assert h2h._load_results(2026) == sample_h2h_rows
+    rows = h2h._load_results(2026)
+    assert {(r["round"], r["abbreviation"], r["position"], r["points"]) for r in rows} == {
+        (r["round"], r["abbreviation"], r["position"], r["points"]) for r in sample_h2h_rows}
+    assert len(rows) == len(sample_h2h_rows)
+    assert all(r["sources"] == ["jolpica"] for r in rows)
+    assert len({r["result_id"] for r in rows}) == len(rows)
     assert calls == ["fastf1", "jolpica", "openf1"]
 
 
@@ -132,13 +137,18 @@ def test_load_results_uses_openf1_if_jolpica_fails(monkeypatch, sample_h2h_rows)
 
     def load_openf1(year):
         calls.append("openf1")
-        return sample_h2h_rows
+        return [{**row, "source": "openf1"} for row in sample_h2h_rows]
 
     monkeypatch.setattr(h2h, "_load_fastf1_results", load_fastf1)
     monkeypatch.setattr(h2h, "_load_jolpica_results", fail_jolpica)
     monkeypatch.setattr(h2h, "_load_openf1_results", load_openf1)
 
-    assert h2h._load_results(2026) == sample_h2h_rows
+    rows = h2h._load_results(2026)
+    assert {(r["round"], r["abbreviation"], r["position"], r["points"]) for r in rows} == {
+        (r["round"], r["abbreviation"], r["position"], r["points"]) for r in sample_h2h_rows}
+    assert len(rows) == len(sample_h2h_rows)
+    assert all(r["sources"] == ["openf1"] for r in rows)
+    assert len({r["result_id"] for r in rows}) == len(rows)
     assert calls == ["fastf1", "jolpica", "openf1"]
 
 

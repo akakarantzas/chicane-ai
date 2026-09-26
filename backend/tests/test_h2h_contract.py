@@ -129,7 +129,8 @@ def test_openf1_retains_dns_and_dsq_flags(monkeypatch):
             return [{"driver_number": 1, "position": 20, "dns": True},
                     {"driver_number": 81, "position": 21, "dsq": True},
                     {"driver_number": 63, "position": 1, "dnf": False, "dns": False, "dsq": False}]
-        return []
+        return [{"driver_number": number, "name_acronym": code}
+                for number, code in [(1, "NOR"), (81, "PIA"), (63, "RUS")]]
     monkeypatch.setattr(h2h, "_fetch_json", fetch)
     rows = h2h._load_openf1_results(2026)
     assert [result_exclusion_reason(r) for r in rows] == ["did_not_start", "disqualified", None]

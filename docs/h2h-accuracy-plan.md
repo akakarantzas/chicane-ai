@@ -114,6 +114,48 @@ Additional references:
 - [Jolpica pagination and user-agent requirements](https://github.com/jolpica/jolpica-f1/blob/main/docs/README.md)
 - [Jolpica race calendar fields](https://github.com/jolpica/jolpica-f1/blob/main/docs/endpoints/races.md)
 
+## Step 3: canonical identities and source reconciliation
+
+Both H2H endpoints now consume reconciled results before caching or calculating
+statistics. A result is identified by calendar season, round, Grand Prix session,
+and driver identity, not the provider's race display name. Calendar names/dates
+are retained alongside the selected provider's original race label.
+
+- Prefer Jolpica's published classifications/points, then FastF1, then OpenF1.
+  This is a deterministic application policy, not a guarantee that the preferred
+  provider is always the freshest. Lower-priority providers fill absent driver
+  rows, not individual classification fields. Status, position and points stay
+  together so a fallback cannot resurrect a disqualified or missing result.
+- Preserve Jolpica/FastF1 driver IDs. Link code-only rows only through an
+  unambiguous source-supplied driver code. When no provider ID exists, explicitly
+  label the fallback identity `code:XXX` and its basis `driver_code`; do not
+  pretend it is a verified provider identity. This relies on driver codes being
+  stable within the supported seasons; future code changes need explicit aliases.
+- Remove current-roster car-number matching from historical results. OpenF1
+  numbers resolve only through its session's driver list; missing or ambiguous
+  identities are skipped. Jolpica retains the actual race number before the
+  permanent number, and neither adapter fabricates historical teams from 2026.
+- Reject out-of-calendar, mismatched-date, invalid-code and non-race rows.
+  Collapse repeated pages/results. Output order and source choice do not depend
+  on loading order. Pairwise records use calendar rounds rather than race labels.
+- Keep selected source, contributing sources, conflict sources, canonical IDs
+  and identity basis in cached rows. Quarantine ambiguous identities and
+  conflicting outcomes within the highest-priority source, with server warnings,
+  instead of choosing an arbitrary duplicate or reviving a lower-source result.
+- OpenF1's unavailable points are marked `points_available: false` and do not
+  create false points-conflict reports. The existing zero-valued fallback in
+  displayed totals is deliberately not fixed here: missing-point presentation,
+  sprint points, standings and broader statistical correctness remain step 4.
+
+Coverage still measures rounds with any returned rows, not full driver coverage.
+Row-level provenance is internal for now; shared freshness and API diagnostics
+remain step 6. Model accuracy and calibration remain unmeasured until steps 7-9.
+
+Validation: 139 backend tests passed, including cross-source duplicates,
+input-order independence, source fallback, identity ambiguity, historical
+number reuse, disqualification preservation and both API integration paths.
+All 8 frontend tests also passed; no frontend code changed in this step.
+
 ## Validation gates
 
 - Step 1: edge-case rule tests, adapter flag tests, API metadata tests, UI empty/tied state tests, and frontend build.

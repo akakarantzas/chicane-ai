@@ -202,8 +202,8 @@ def test_openf1_does_not_request_results_for_future_or_unfinished_sessions(monke
 
 def test_historical_partial_fastf1_results_do_not_skip_fallback_sources(monkeypatch):
     calls = []
-    monkeypatch.setattr(h2h, "_load_fastf1_results", lambda *args: [published_row(1)])
-    monkeypatch.setattr(h2h, "_load_jolpica_results", lambda year: (calls.append("jolpica") or [published_row(2)]))
+    monkeypatch.setattr(h2h, "_load_fastf1_results", lambda *args: [{**published_row(1), "year": 2024, "source": "fastf1"}])
+    monkeypatch.setattr(h2h, "_load_jolpica_results", lambda year: (calls.append("jolpica") or [{**published_row(2), "year": year, "source": "jolpica"}]))
     monkeypatch.setattr(h2h, "_load_openf1_results", lambda year: (calls.append("openf1") or []))
     assert len(h2h._load_results(2024)) == 2
     assert calls == ["jolpica", "openf1"]
