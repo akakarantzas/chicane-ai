@@ -257,7 +257,7 @@ def test_h2h_predict_valid_request_uses_mocked_loader(
     )
 
     assert response.status_code == 200
-    assert calls == [(2024, False), (2025, False), (2026, False)]
+    assert calls == [(2024, True), (2025, True), (2026, True)]
     data = response.json()
     assert data["next_race"] == "Next Test Grand Prix"
     assert data["next_event"]["round"] == 3
@@ -286,7 +286,7 @@ def test_h2h_predict_reuses_cached_data_across_seasons(
         )
         assert response.status_code == 200
 
-    assert calls == [(2024, False), (2025, False), (2026, False)]
+    assert calls == [(2024, True), (2025, True), (2026, True)]
 
 
 def test_h2h_predict_normalizes_driver_codes(

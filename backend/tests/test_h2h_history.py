@@ -185,7 +185,7 @@ def test_api_passes_target_boundary_and_exposes_the_actual_windows(client, monke
     monkeypatch.setattr(h2h, "_load_results", load)
     data = client.get("/api/h2h/predict?driver1=NOR&driver2=PIA").json()
     assert data["history_cutoff"]["target_event"]["round"] == 3
-    assert data["history_cutoff"]["excluded_rows"] == 1
+    assert data["history_cutoff"]["excluded_rows"] == 0  # Snapshot already excludes not-yet-due rounds.
     assert data["recent_form"]["driver1"]["races"][-1]["date"] == "2026-03-08"
     assert data["recent_form"]["driver1"]["sample_size"] == 3
     assert data["recent_form"]["driver1"]["spans_seasons"] is True

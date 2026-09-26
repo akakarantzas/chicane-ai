@@ -7,13 +7,14 @@ import fastf1
 from fastapi import APIRouter, HTTPException
 
 from app.data.drivers import DRIVER_ROSTER_2026
-from app.services.h2h_cache import get_cached_season_results
+from app.services.h2h_cache import get_season_snapshot
+from app.services.h2h_quality import snapshot_quality
 from app.services.h2h_contract import final_position, published_points
 from app.services.h2h_results import clean_text, reconcile_results
 from app.services.h2h_standings import load_standings
 from app.services.h2h_schedule import (
     HISTORY_YEARS, SEASON, USER_AGENT, RaceEvent, get_season_schedule,
-    next_race, parse_utc, race_coverage, utc_now,
+    next_race, parse_utc, utc_now,
 )
 from app.services.h2h_logic import (
     build_h2h_prediction,
@@ -308,13 +309,14 @@ def _load_results(year: int, strict: bool = True) -> list[dict]:
 
 
 @router.get("/predict")
-def predict_h2h(driver1: str, driver2: str):
+def predict_h2h(driver1: str, driver2: str, snapshot_id: str | None = None):
     # Keep this handler sync: FastAPI runs sync endpoints in a threadpool, and
     # the expensive season loads are additionally guarded by the in-process cache.
     abbrev1, abbrev2 = _validate_driver_pair(driver1, driver2)
 
     now = utc_now()
-    event, schedule_status = next_race(get_season_schedule(SEASON), now)
+    current_events = get_season_schedule(SEASON)
+    event, schedule_status = next_race(current_events, now)
     if event is None:
         result = build_h2h_prediction([], abbrev1, abbrev2, None)
         result.update({
@@ -327,18 +329,26 @@ def predict_h2h(driver1: str, driver2: str):
 
     all_rows: list[dict] = []
     coverage = {}
+    snapshots = {}
+    pinned = get_season_snapshot(SEASON, current_events, now, _load_snapshot,
+                                 snapshot_id=snapshot_id) if snapshot_id else None
     for year in HISTORY_YEARS:
         try:
             events = get_season_schedule(year)
-            rows = get_cached_season_results(year, _load_results, strict=False)
-        except HTTPException:
+            snapshot = pinned if year == SEASON and pinned else get_season_snapshot(year, events, now, _load_snapshot)
+        except HTTPException as exc:
+            if exc.status_code == 409:
+                raise
             coverage[str(year)] = {"status": "unavailable"}
+            snapshots[str(year)] = {"freshness": {"status": "unavailable"}}
             continue
-        all_rows.extend(rows)
-        coverage[str(year)] = race_coverage(events, rows, now)
+        all_rows.extend(snapshot["rows"])
+        coverage[str(year)] = snapshot["coverage"]
+        snapshots[str(year)] = {"freshness": snapshot["freshness"],
+                                "quality": snapshot_quality(snapshot, (abbrev1, abbrev2))}
 
     result = build_h2h_prediction(all_rows, abbrev1, abbrev2, event.name, target_event=event)
-    result.update({"next_event": event.public(), "coverage": coverage})
+    result.update({"next_event": event.public(), "coverage": coverage, "snapshots": snapshots})
     return result
 
 
@@ -349,22 +359,17 @@ def compare_drivers(driver1: str, driver2: str, year: int = SEASON):
     year = _validate_year(year)
 
     events = get_season_schedule(year)
-    try:
-        rows = get_cached_season_results(year, _load_results)
-    except HTTPException as exc:
-        if exc.status_code != 502:
-            raise
-        rows = []
-    # Keep requested-season statistics isolated even when a provider mislabels data.
-    rows = [row for row in rows if row.get("year") == year]
-    standings = _load_standings(year, events, utc_now())
+    snapshot = get_season_snapshot(year, events, utc_now(), _load_snapshot)
+    rows, standings = snapshot["rows"], snapshot["standings"]
     stats1 = build_stats(rows, abbrev1, standings=standings)
     stats2 = build_stats(rows, abbrev2, standings=standings)
 
     return {
         "year": year,
         "scope": "season",
-        "coverage": race_coverage(events, rows, utc_now()),
+        "coverage": snapshot["coverage"],
+        "freshness": snapshot["freshness"],
+        "quality": snapshot_quality(snapshot, (abbrev1, abbrev2)),
         "standings": {key: value for key, value in standings.items() if key != "drivers"},
         "driver1": stats1,
         "driver2": stats2,
@@ -373,3 +378,13 @@ def compare_drivers(driver1: str, driver2: str, year: int = SEASON):
 
 def _load_standings(year, events, now):
     return load_standings(year, events, now, _fetch_json)
+
+
+def _load_snapshot(year, events, now):
+    try:
+        rows = _load_results(year, strict=True)
+    except HTTPException as exc:
+        if exc.status_code != 502:
+            raise
+        rows = []
+    return {"rows": rows, "standings": _load_standings(year, events, now)}

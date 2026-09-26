@@ -223,8 +223,10 @@ def test_result_failure_does_not_hide_valid_standings(client, monkeypatch, paylo
     assert response.json()["coverage"]["missing_rounds"] == [1, 2]
 
 
-def test_prediction_does_not_fetch_standings_or_include_sprint_points(client, monkeypatch, sample_h2h_rows):
+def test_prediction_uses_shared_snapshot_without_using_standings_points_in_score(client, monkeypatch, sample_h2h_rows):
     monkeypatch.setattr(h2h, "_load_results", lambda year, **kwargs: [
         {**row, "year": year} for row in sample_h2h_rows])
-    monkeypatch.setattr(h2h, "_load_standings", lambda *args: pytest.fail("Prediction does not use standings"))
-    assert client.get("/api/h2h/predict?driver1=NOR&driver2=PIA").status_code == 200
+    monkeypatch.setattr(h2h, "_load_standings", lambda *args: unavailable_standings())
+    response = client.get("/api/h2h/predict?driver1=NOR&driver2=PIA")
+    assert response.status_code == 200
+    assert response.json()["h2h_record"]["total_races"] == 6

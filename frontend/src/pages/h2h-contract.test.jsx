@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { expect, test, vi } from 'vitest'
 import H2H from './H2H'
 
@@ -126,4 +126,76 @@ test('unknown chronology is not displayed as an invented recent average', async 
   expect(screen.getByText(/ANT: 0\/3 results/)).toHaveTextContent('Average finish —')
   expect(screen.getByText(/Recent form unavailable: race chronology could not be verified/)).toBeInTheDocument()
   expect(screen.getByText(/Recent form is not used in this score/)).toBeInTheDocument()
+})
+
+test('prediction request pins the exact comparison snapshot', async () => {
+  await compareWith(null, {}, { freshness: { snapshot_id: 'snapshot-one', status: 'fresh' } })
+  await waitFor(() => expect(globalThis.fetch).toHaveBeenCalledWith(
+    'http://localhost:8000/api/h2h/predict?driver1=ANT&driver2=VER&snapshot_id=snapshot-one',
+  ))
+})
+
+test('stale snapshots show age, missing records and source disagreement warnings', async () => {
+  await compareWith(null, { expected_rounds: [1, 2], loaded_rounds: [1], missing_rounds: [2] }, {
+    freshness: { status: 'stale', partial: true, retrieved_at: '2026-09-25T00:00:00+00:00', age_seconds: 120,
+      refresh_error: 'refresh_failed', retry_after_seconds: 30 },
+    quality: { drivers: { ANT: { observed_rounds: [1], eligible_rounds: [1], no_result_rounds: [2] } },
+      selected_source_counts: { jolpica: 1 }, conflicting_result_count: 1, code_only_identity_count: 0 },
+  })
+  expect(screen.getByText(/2026 comparison: Stale data/)).toHaveTextContent('Partial data')
+  expect(screen.getByText(/Using an older snapshot/)).toBeInTheDocument()
+  expect(screen.getByText(/Retrieved: 2026-09-25/)).toHaveTextContent('Age at lookup: 2 minutes')
+  expect(screen.getByText(/ANT: 1 recorded rounds/)).toHaveTextContent('No recorded result in rounds: 2')
+  expect(screen.getByText(/participation is not assumed/)).toBeInTheDocument()
+  expect(screen.getByText(/Source disagreements: 1/)).toBeInTheDocument()
+})
+
+test('fresh retrieval does not claim complete or live source data', async () => {
+  await compareWith(null, {}, { freshness: { status: 'fresh', partial: true } })
+  expect(screen.getByText(/2026 comparison: Recently retrieved/)).toHaveTextContent('Partial data')
+  expect(screen.getByText(/does not guarantee complete or live results/)).toBeInTheDocument()
+})
+
+test('historical snapshot failures are visible alongside an available prediction', async () => {
+  await compareWith({ prediction_status: 'available', predicted_winner: 'ANT',
+    predicted_winner_full_name: 'Kimi Antonelli', snapshots: {
+      2024: { freshness: { status: 'unavailable' } },
+      2025: { freshness: { status: 'stale', retrieved_at: '2026-09-24T00:00:00Z', age_seconds: 1000 } },
+    },
+  })
+  expect(await screen.findByText('2024 history: Data unavailable')).toBeInTheDocument()
+  expect(screen.getByText('2025 history: Stale data')).toBeInTheDocument()
+})
+
+test('expired snapshot prompts a new comparison without discarding season stats', async () => {
+  vi.spyOn(globalThis, 'fetch').mockImplementation(async (url) => url.includes('/predict?')
+    ? { ok: false, status: 409 }
+    : { ok: true, json: async () => ({ year: 2026, driver1: {}, driver2: {}, freshness: { snapshot_id: 'expired' } }) })
+  render(<H2H onNavigate={vi.fn()} />)
+  fireEvent.click(screen.getByRole('button', { name: 'Compare' }))
+  expect(await screen.findByRole('alert')).toHaveTextContent('The data snapshot changed. Compare again')
+  expect(screen.getByText('2026 Season Overview')).toBeInTheDocument()
+  expect(screen.queryByText('Confidence')).not.toBeInTheDocument()
+})
+
+test('an older prediction response cannot overwrite a newer comparison', async () => {
+  let finishOld
+  let comparisons = 0
+  vi.spyOn(globalThis, 'fetch').mockImplementation(async (url) => {
+    if (url.includes('/compare?')) {
+      comparisons += 1
+      return { ok: true, json: async () => ({ year: 2026, driver1: {}, driver2: {},
+        freshness: { snapshot_id: `pin-${comparisons}` } }) }
+    }
+    if (url.includes('pin-1')) return new Promise((resolve) => { finishOld = resolve })
+    return { ok: true, json: async () => ({ prediction_status: 'available', predicted_winner: 'ANT', predicted_winner_full_name: 'Newer prediction' }) }
+  })
+  render(<H2H onNavigate={vi.fn()} />)
+  fireEvent.click(screen.getByRole('button', { name: 'Compare' }))
+  await waitFor(() => expect(finishOld).toBeTypeOf('function'))
+  fireEvent.click(screen.getByRole('button', { name: 'Compare' }))
+  expect(await screen.findByText('Newer prediction')).toBeInTheDocument()
+  await act(async () => finishOld({ ok: true, json: async () => ({ prediction_status: 'available', predicted_winner: 'VER', predicted_winner_full_name: 'Older prediction' }) }))
+  expect(screen.queryByText('Older prediction')).not.toBeInTheDocument()
+  expect(screen.getByText('Newer prediction')).toBeInTheDocument()
 })

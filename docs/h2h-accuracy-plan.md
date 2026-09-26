@@ -253,6 +253,66 @@ numeric-round fallback, mixed date availability, cross-season and sparse windows
 eligibility, latest-team metadata, driver-swap symmetry, target/future exclusion,
 unknown chronology, API window evidence and the UI's sample explanations.
 
+## Step 6: shared snapshots, freshness and coverage
+
+Comparison and prediction now share one season snapshot containing reconciled
+GP rows and published standings. Strict/non-strict cache entries no longer
+split the same season. A per-season lock allows only one loader at a time, and
+deep copies prevent callers from modifying cached rows or nested metadata.
+
+- Default cache lifetimes are 15 minutes for the current season and six hours
+  for historical seasons. A positive `H2H_CACHE_TTL_SECONDS` overrides both,
+  capped at 24 hours. Refreshes happen on demand, not in a background task.
+- A change to the due calendar forces a refresh before normal expiry. Empty
+  preseason snapshots do not fetch nonexistent results. Partial/failed loads
+  use a short retry cooldown (up to 60 seconds, or the shorter configured TTL
+  for a newly stored partial snapshot) to avoid duplicate retries on every call.
+- Failed or regressed result refreshes retain a compatible last-good bundle,
+  labeled stale with its original retrieval timestamp and increasing age. Do
+  not merge old GP rows with newly fetched standings. After 24 hours no stale
+  fallback is served. A failure without usable cached data is unavailable,
+  not a successful empty season. A newly fetched standings-only bundle remains
+  usable as partial data when no previous GP snapshot exists.
+- New snapshots filter rows against the requested season, due rounds and known
+  calendar dates. Missing-round coverage is recomputed at lookup, so retaining
+  older results cannot hide a newly due race. Older standings are withheld when
+  they no longer cover the latest due GP. Calendar caching itself remains the
+  separate 30-minute policy from step 2; source publication age is not known.
+- The comparison returns a snapshot ID, retrieval time, age at lookup, last
+  attempt, freshness status, partial flag and retry information. Prediction
+  reports equivalent metadata for each history season, including unavailable
+  calendars. Recently retrieved means an application fetch, not proof of live,
+  complete or independently verified upstream data; provider caches may exist.
+- Per-driver diagnostics distinguish observed rounds, eligible rounds, excluded
+  results and rounds with no recorded result. The latter may mean missing data
+  or non-participation; the app does not assume every driver entered every race.
+  Report selected source counts, retained-row source conflicts and code-only
+  identities. These do not claim all providers succeeded or count quarantined
+  source rows, which remain in server diagnostics.
+- The UI first obtains the comparison, then pins the prediction's current
+  season to that exact data version. Keep at most three versions per season for
+  at most 24 hours. A compatible newly due round marks the pinned data stale and
+  reveals the gap; changed existing calendar entries, eviction, restart or an
+  invalid ID return 409 rather than substituting another snapshot. Historical
+  seasons have their own disclosed snapshot IDs, not a global atomic cutoff.
+- Show visible stale/partial/unavailable states, expandable freshness and
+  coverage details, and a clear retry message for expired pins. Ignore late
+  responses from older comparisons or driver selections.
+
+Deployment boundary: this is a process-local cache for the repository's
+single-worker setup. Multi-worker/multi-replica deployment needs sticky routing
+or a shared snapshot store; in-memory pins are not distributed or persistent.
+Changes to source outcomes remain possible, and regression detection conservatively
+withholds a refresh that drops previously observed driver entries. Snapshot
+freshness does not calibrate prediction confidence or validate model accuracy.
+
+Validation: 230 backend tests, 20 frontend tests and the frontend production
+build passed. Tests cover single-flight concurrency, TTL and retry boundaries,
+24-hour stale expiry (including a slow failed refresh), nested-copy isolation,
+new due rounds, calendar changes, snapshot pinning/eviction, source failures,
+API reuse across both endpoints, per-driver coverage semantics, stale-data UI,
+409 recovery and out-of-order frontend responses.
+
 ## Validation gates
 
 - Step 1: edge-case rule tests, adapter flag tests, API metadata tests, UI empty/tied state tests, and frontend build.

@@ -315,6 +315,33 @@ function StatBar({ def, d1Val, d2Val }) {
 }
 
 // ─── Prediction card ─────────────────────────────────────────────────────────
+function SnapshotDetails({ label, freshness, coverage, quality }) {
+  if (!freshness) return null
+  const status = { fresh: 'Recently retrieved', stale: 'Stale data', unavailable: 'Data unavailable' }[freshness.status] ?? 'Data unavailable'
+  return (
+    <div className="mb-4 text-xs text-[#A1A1AA]">
+      <p role="status">{label}: {status}{freshness.partial ? ' · Partial data' : ''}</p>
+      {freshness.status === 'stale' && <p>Using an older snapshot. Results may have changed; compare again to retry when the refresh cooldown ends.</p>}
+      <details className="mt-2">
+        <summary className="cursor-pointer">Data freshness and coverage · {label}</summary>
+        <p className="mt-2">{freshness.retrieved_at ? `Retrieved: ${freshness.retrieved_at}. Age at lookup: ${Math.floor((freshness.age_seconds ?? 0) / 60)} minutes.` : 'No successful retrieval.'}</p>
+        <p>Retrieval time is not the provider's publication time. Recently retrieved does not guarantee complete or live results.</p>
+        {freshness.refresh_error && <p>Latest refresh could not provide all results. Retry cooldown: {freshness.retry_after_seconds ?? 0} seconds.</p>}
+        {coverage?.expected_rounds && <p>GP rounds with records: {coverage.loaded_rounds?.length ?? 0}/{coverage.expected_rounds.length}. Missing rounds: {coverage.missing_rounds?.join(', ') || 'none'}.</p>}
+        {Object.entries(quality?.drivers ?? {}).map(([code, driver]) => (
+          <p key={code}>{code}: {driver.observed_rounds.length} recorded rounds, {driver.eligible_rounds.length} eligible.
+            {' '}No recorded result in rounds: {driver.no_result_rounds.join(', ') || 'none'}.
+          </p>
+        ))}
+        <p>No recorded result can mean missing data or that the driver did not enter; participation is not assumed.</p>
+        {quality && <p>Selected result sources: {Object.entries(quality.selected_source_counts).map(([source, count]) => `${source} ${count}`).join(', ') || 'none'}.
+          {' '}Source disagreements: {quality.conflicting_result_count}. Code-only identities: {quality.code_only_identity_count}.
+        </p>}
+      </details>
+    </div>
+  )
+}
+
 function PredictionCard({ prediction, d1Abbrev, d2Abbrev, loading }) {
   if (loading) {
     return (
@@ -522,41 +549,58 @@ export default function H2H({ onNavigate }) {
   const [result, setResult]             = useState(null)
   const [prediction, setPrediction]     = useState(null)
   const [predLoading, setPredLoading]   = useState(false)
+  const [predError, setPredError] = useState(null)
+  const requestVersion = useRef(0)
+
+  function resetSelection() {
+    requestVersion.current += 1
+    setResult(null)
+    setPrediction(null)
+    setPredError(null)
+    setError(null)
+    setLoading(false)
+    setPredLoading(false)
+  }
 
   async function handleCompare() {
+    const version = ++requestVersion.current
     setLoading(true)
     setPredLoading(true)
     setError(null)
     setPrediction(null)
-
-    // Fire both fetches in parallel
-    const [compareRes, predictRes] = await Promise.allSettled([
-      fetch(apiUrl(`/api/h2h/compare?driver1=${d1}&driver2=${d2}&year=2026`)),
-      fetch(apiUrl(`/api/h2h/predict?driver1=${d1}&driver2=${d2}`)),
-    ])
-
-    // Handle compare
+    setPredError(null)
+    let comparison
     try {
-      if (compareRes.status === 'rejected') throw new Error(compareRes.reason?.message ?? 'Network error')
-      const res = compareRes.value
+      const res = await fetch(apiUrl(`/api/h2h/compare?driver1=${d1}&driver2=${d2}&year=2026`))
       if (!res.ok) {
         const body = await res.json().catch(() => ({}))
         throw new Error(body.detail ?? `Server error ${res.status}`)
       }
-      setResult(await res.json())
+      comparison = await res.json()
+      if (version !== requestVersion.current) return
+      setResult(comparison)
     } catch (err) {
-      setError(err.message)
-    } finally {
-      setLoading(false)
-    }
-
-    // Handle predict (non-blocking — failure doesn't affect compare results)
-    try {
-      if (predictRes.status === 'fulfilled' && predictRes.value.ok) {
-        setPrediction(await predictRes.value.json())
+      if (version === requestVersion.current) {
+        setError(err.message)
+        setLoading(false)
+        setPredLoading(false)
       }
+      return
+    }
+    setLoading(false)
+    // Pin the prediction to the exact current-season comparison snapshot.
+    try {
+      const pin = comparison.freshness?.snapshot_id
+      const res = await fetch(apiUrl(`/api/h2h/predict?driver1=${d1}&driver2=${d2}${pin ? `&snapshot_id=${encodeURIComponent(pin)}` : ''}`))
+      if (!res.ok) {
+        throw new Error(res.status === 409 ? 'The data snapshot changed. Compare again to use matching data.' : 'Prediction unavailable. You can compare again to retry.')
+      }
+      const data = await res.json()
+      if (version === requestVersion.current) setPrediction(data)
+    } catch (err) {
+      if (version === requestVersion.current) setPredError(err.message)
     } finally {
-      setPredLoading(false)
+      if (version === requestVersion.current) setPredLoading(false)
     }
   }
 
@@ -607,7 +651,7 @@ export default function H2H({ onNavigate }) {
                 value={d1}
                 label="Select first driver"
                 options={DRIVERS}
-                onChange={(nextDriver) => { setD1(nextDriver); setResult(null); setPrediction(null) }}
+                onChange={(nextDriver) => { setD1(nextDriver); resetSelection() }}
               />
             </div>
 
@@ -617,7 +661,7 @@ export default function H2H({ onNavigate }) {
                 value={d2}
                 label="Select second driver"
                 options={DRIVERS}
-                onChange={(nextDriver) => { setD2(nextDriver); setResult(null); setPrediction(null) }}
+                onChange={(nextDriver) => { setD2(nextDriver); resetSelection() }}
               />
             </div>
 
@@ -773,6 +817,8 @@ export default function H2H({ onNavigate }) {
                 </p>
               )}
 
+              <SnapshotDetails label={`${result.year} comparison`} freshness={result.freshness} coverage={result.coverage} quality={result.quality} />
+
               <div className="mb-6 space-y-2 text-xs text-[#A1A1AA]">
                 {result.standings?.status === 'available' ? (
                   <p>
@@ -813,6 +859,18 @@ export default function H2H({ onNavigate }) {
                 />
               ))}
 
+              {prediction?.snapshots && (
+                <details className="mt-6 text-xs text-[#A1A1AA]">
+                  <summary className="mb-3 cursor-pointer">Prediction history data status</summary>
+                  {Object.entries(prediction.snapshots).map(([year, snapshot]) => (
+                    <SnapshotDetails key={year} label={`${year} history`} freshness={snapshot.freshness} coverage={prediction.coverage?.[year]} quality={snapshot.quality} />
+                  ))}
+                </details>
+              )}
+              {prediction?.snapshots && Object.values(prediction.snapshots).some((snapshot) => snapshot.freshness?.status !== 'fresh' || snapshot.freshness?.partial) && (
+                <p role="status" className="mt-3 text-xs text-[#A1A1AA]">Some prediction-history snapshots are stale, partial or unavailable. Review the data status above.</p>
+              )}
+              {predError && <p role="alert" className="mt-4 text-sm text-[#A1A1AA]">{predError}</p>}
               <PredictionCard
                 prediction={prediction}
                 d1Abbrev={d1}
