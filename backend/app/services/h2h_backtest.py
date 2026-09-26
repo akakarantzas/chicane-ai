@@ -104,7 +104,7 @@ def summarize(pairs: list[dict], model: str) -> dict:
 
 
 def evaluate(rows: list[dict], *, validation_start: str, test_start: str,
-             include_pairs: bool = False, learning_records: bool = False) -> dict:
+             include_pairs: bool = False, learning_records: bool = False, require_all_splits: bool = True) -> dict:
     validation, test = date.fromisoformat(validation_start), date.fromisoformat(test_start)
     if validation >= test:
         raise ValueError("validation_start must precede test_start")
@@ -112,7 +112,7 @@ def evaluate(rows: list[dict], *, validation_start: str, test_start: str,
     for event in events:
         day = date.fromisoformat(event["date"])
         event["split"] = "train" if day < validation else "validation" if day < test else "test"
-    if {event["split"] for event in events} != {"train", "validation", "test"}:
+    if require_all_splits and {event["split"] for event in events} != {"train", "validation", "test"}:
         raise ValueError("train, validation and test must each contain at least one race")
     canonical_rows = [event["rows"][code] for event in events for code in sorted(event["rows"])]
     digest = hashlib.sha256(json.dumps(canonical_rows, sort_keys=True, allow_nan=False).encode()).hexdigest()

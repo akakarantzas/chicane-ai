@@ -342,6 +342,23 @@ function SnapshotDetails({ label, freshness, coverage, quality }) {
   )
 }
 
+function UncertaintyDetails({ prediction, d1Abbrev, d2Abbrev }) {
+  const evidence = prediction.uncertainty
+  return (
+    <div className="my-3 text-xs text-[#A1A1AA]">
+      <p>Calibrated confidence unavailable. Heuristic scores are not probabilities.</p>
+      {evidence && <>
+        <p className="mt-2">Eligible history: {d1Abbrev} {evidence.driver1_eligible_races ?? '—'} races;
+          {' '}{d2Abbrev} {evidence.driver2_eligible_races ?? '—'} races; {evidence.shared_races ?? '—'} shared.</p>
+        <p className="mt-1">A favorite requires at least {evidence.minimum_eligible_races} eligible races per driver,
+          {' '}known chronology and a score gap of at least {evidence.minimum_score_margin}.
+          These safeguards do not guarantee accuracy.</p>
+        {evidence.data_warnings?.map((warning) => <p role="status" className="mt-2" key={warning}>{warning}</p>)}
+      </>}
+    </div>
+  )
+}
+
 function PredictionCard({ prediction, d1Abbrev, d2Abbrev, loading }) {
   if (loading) {
     return (
@@ -368,26 +385,30 @@ function PredictionCard({ prediction, d1Abbrev, d2Abbrev, loading }) {
   const predictionTitle = `${prediction.next_race ?? 'Next Grand Prix'} · Finish-ahead prediction`
   const unavailableLabels = {
     insufficient_data: 'Insufficient data',
+    insufficient_evidence: 'Insufficient evidence',
+    data_unavailable: 'Prediction withheld: incomplete data',
     no_clear_favorite: 'No clear favorite',
     no_upcoming_race: 'No upcoming Grand Prix',
     schedule_time_unknown: 'Race start time unconfirmed',
   }
-  if (unavailableLabels[prediction.prediction_status]) {
+  const winnerAbbrev = prediction.predicted_winner?.toUpperCase()
+  if (prediction.prediction_status !== 'available' || ![d1Abbrev.toUpperCase(), d2Abbrev.toUpperCase()].includes(winnerAbbrev)) {
     return (
       <div className="mt-4 rounded-xl border border-white/10 bg-[#1A1A1F] p-6 text-center">
         <p className="text-xs text-[#A1A1AA]">{predictionTitle}</p>
         <p className="mt-3 text-lg font-semibold text-[#E5E7EB]">
-          {unavailableLabels[prediction.prediction_status]}
+          {unavailableLabels[prediction.prediction_status] ?? 'Prediction unavailable'}
         </p>
         <p className="mt-2 text-sm text-[#A1A1AA]">{prediction.reasoning}</p>
+        <UncertaintyDetails prediction={prediction} d1Abbrev={d1Abbrev} d2Abbrev={d2Abbrev} />
       </div>
     )
   }
 
-  const winnerAbbrev = prediction.predicted_winner?.toUpperCase()
   const d2IsWinner = winnerAbbrev === d2Abbrev.toUpperCase()
   const winnerColor  = winnerAbbrev === d1Abbrev.toUpperCase() ? D1_COLOR : D2_SECONDARY
-  const confidencePct = Math.round((prediction.confidence ?? 0) * 100)
+  const score = d2IsWinner ? prediction.driver2_score : prediction.driver1_score
+  const hasScore = prediction.score_type === 'uncalibrated_heuristic' && Number.isFinite(score) && score >= 0 && score <= 1
 
   const d1Wins = prediction.h2h_record?.driver1_wins ?? 0
   const d2Wins = prediction.h2h_record?.driver2_wins ?? 0
@@ -488,8 +509,9 @@ function PredictionCard({ prediction, d1Abbrev, d2Abbrev, loading }) {
           The season overview above is separate from this historical record.
         </p>
       </details>
-      {/* Confidence bar */}
-      <div style={{ marginBottom: '12px' }}>
+      <UncertaintyDetails prediction={prediction} d1Abbrev={d1Abbrev} d2Abbrev={d2Abbrev} />
+      {/* Raw heuristic strength, never presented as probability or confidence. */}
+      {hasScore && <div style={{ marginBottom: '12px' }}>
         <div style={{
           fontSize: '11px',
           textTransform: 'uppercase',
@@ -497,7 +519,7 @@ function PredictionCard({ prediction, d1Abbrev, d2Abbrev, loading }) {
           color: '#A1A1AA',
           marginBottom: '6px',
         }}>
-          Confidence
+          Heuristic score (not probability)
         </div>
         <div style={{
           height: '6px',
@@ -507,7 +529,7 @@ function PredictionCard({ prediction, d1Abbrev, d2Abbrev, loading }) {
         }}>
           <div
             className={`h2h-confidence-bar-fill ${d2IsWinner ? 'h2h-confidence-bar-fill-hologram' : ''}`}
-            style={{ '--bar-width': `${confidencePct}%` }}
+            style={{ '--bar-width': `${score * 100}%` }}
           />
         </div>
         <div className="num" style={{
@@ -516,9 +538,9 @@ function PredictionCard({ prediction, d1Abbrev, d2Abbrev, loading }) {
           color: HEADING_TEXT_COLOR,
           marginTop: '6px',
         }}>
-          {confidencePct}%
+          {score.toFixed(2)} / 1
         </div>
-      </div>
+      </div>}
 
       {/* Reasoning */}
       {prediction.reasoning && (

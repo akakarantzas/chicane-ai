@@ -16,6 +16,7 @@ def result(abbrev, position, points, race, year=2026, full_name=None, team="Test
         "position": position,
         "points": points,
         "race": race,
+        "round": int(race.split()[-1]) if race.startswith("Race ") else None,
         "year": year,
         "source": "unit-test",
     }
@@ -61,6 +62,8 @@ def test_head_to_head_driver1_advantage():
         result("PIA", 2, 18, "Race 1", full_name="Oscar Piastri", team="McLaren", number="81"),
         result("NOR", 3, 15, "Race 2", full_name="Lando Norris", team="McLaren", number="1"),
         result("PIA", 5, 10, "Race 2", full_name="Oscar Piastri", team="McLaren", number="81"),
+        result("NOR", 4, 12, "Race 3"),
+        result("PIA", 4, 12, "Race 3"),
     ]
 
     record = head_to_head_record(rows, "NOR", "PIA")
@@ -70,7 +73,8 @@ def test_head_to_head_driver1_advantage():
     assert record["driver2_wins"] == 0
     assert prediction["predicted_winner"] == "NOR"
     assert prediction["driver1_score"] > prediction["driver2_score"]
-    assert 0.5 <= prediction["confidence"] <= 1.0
+    assert prediction["confidence"] is None
+    assert prediction["score_type"] == "uncalibrated_heuristic"
 
 
 def test_head_to_head_driver2_advantage():
@@ -79,6 +83,8 @@ def test_head_to_head_driver2_advantage():
         result("PIA", 1, 25, "Race 1", full_name="Oscar Piastri", team="McLaren", number="81"),
         result("NOR", 6, 8, "Race 2", full_name="Lando Norris", team="McLaren", number="1"),
         result("PIA", 2, 18, "Race 2", full_name="Oscar Piastri", team="McLaren", number="81"),
+        result("NOR", 4, 12, "Race 3"),
+        result("PIA", 4, 12, "Race 3"),
     ]
 
     prediction = build_h2h_prediction(rows, "NOR", "PIA", "Miami Grand Prix")
@@ -87,7 +93,8 @@ def test_head_to_head_driver2_advantage():
     assert prediction["h2h_record"]["driver2_wins"] == 2
     assert prediction["predicted_winner"] == "PIA"
     assert prediction["driver2_score"] > prediction["driver1_score"]
-    assert 0.5 <= prediction["confidence"] <= 1.0
+    assert prediction["confidence"] is None
+    assert prediction["uncertainty"]["probability_available"] is False
 
 
 def test_no_data_case_does_not_pick_an_arbitrary_winner():

@@ -33,6 +33,7 @@ Accurately predicted Antonelli (Mercedes) as the 2026 Miami GP winner.
 - `docs/design.md` - design system reference
 - `docs/security_audit.md` - latest security audit notes
 - [H2H model evaluation](docs/h2h-model-evaluation.md) - offline experiment protocol and measured results
+- [H2H uncertainty](docs/h2h-uncertainty.md) - uncalibrated scores, evidence safeguards and calibration audit
 
 ## Setup
 

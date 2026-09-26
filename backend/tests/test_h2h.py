@@ -261,7 +261,9 @@ def test_h2h_predict_valid_request_uses_mocked_loader(
     data = response.json()
     assert data["next_race"] == "Next Test Grand Prix"
     assert data["next_event"]["round"] == 3
-    assert data["predicted_winner"] in {"NOR", "PIA"}
+    assert data["predicted_winner"] is None
+    assert data["prediction_status"] == "insufficient_evidence"
+    assert data["uncertainty"]["driver1_eligible_races"] == 2
     assert data["h2h_record"]["total_races"] == 2
 
 
@@ -301,7 +303,9 @@ def test_h2h_predict_normalizes_driver_codes(
 
     assert response.status_code == 200
     data = response.json()
-    assert data["predicted_winner"] in {"NOR", "PIA"}
+    assert data["predicted_winner"] is None
+    assert data["uncertainty"]["driver1_eligible_races"] == 2
+    assert data["uncertainty"]["driver2_eligible_races"] == 2
 
 
 def test_h2h_predict_invalid_driver1_returns_400_without_loading_data(

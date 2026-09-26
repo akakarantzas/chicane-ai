@@ -370,6 +370,35 @@ artifact hashes are in [the model evaluation report](h2h-model-evaluation.md).
 The inspected 2026 test period must not be reused as unseen evidence when
 tuning models or calibrating probabilities in later steps.
 
+## Step 9: honest uncertainty and insufficient evidence
+
+Removed heuristic confidence percentages from the API/UI. The compatibility
+`confidence` field is null; raw scores are explicitly uncalibrated, and both
+driver probabilities remain unavailable. Display evidence counts, a versioned
+policy and warnings rather than presenting a heuristic score as certainty.
+
+Withhold a favorite with fewer than three distinct eligible GPs per driver,
+unknown chronology, a score gap below 0.05, or missing/unavailable current-season
+due results. Empty history and exact ties remain explicit states. These fixed
+safeguards are not statistically fitted confidence thresholds or evidence of
+improved accuracy. Historical stale/partial evidence remains disclosed.
+
+Added a development-only, race-balanced rolling calibration audit. Each 2025
+date uses only earlier scored races to fit a positive, symmetry-preserving logit
+slope. All 2026 entries are excluded before feature generation. Reliability bins
+and ECE complement Brier/log loss; no independent-pair confidence intervals or
+live calibration artifacts are produced. The 24-fold development audit improved
+Brier from 0.182847 to 0.181210 and ECE from 0.032507 to 0.017391, but 2025 was
+already inspected and is not blind confirmation. Probabilities remain withheld
+pending independent future evidence; the live heuristic weights are unchanged.
+
+Validation: 294 backend tests, 30 frontend tests and the production build passed.
+Tests cover evidence boundaries, duplicate/excluded entries, missing current
+results, raw-score semantics, temporal calibration leakage, ignored 2026 labels,
+symmetry, race-balanced reliability bins, sparse fitting and safe UI fallbacks.
+In-app browser verification was unavailable. See [the uncertainty contract and
+audit](h2h-uncertainty.md) for behavior changes, limitations and recorded hashes.
+
 ## Validation gates
 
 - Step 1: edge-case rule tests, adapter flag tests, API metadata tests, UI empty/tied state tests, and frontend build.

@@ -82,7 +82,8 @@ def test_one_driver_without_eligible_results_does_not_get_a_prediction():
 
 
 def test_balanced_evidence_does_not_choose_first_driver():
-    rows = [row("NOR", 1), row("PIA", 2), row("NOR", 2, race="China"), row("PIA", 1, race="China")]
+    rows = [row(code, 5, race=f"Race {number}", round=number)
+            for number in (1, 2, 3) for code in ("NOR", "PIA")]
     prediction = build_h2h_prediction(rows, "NOR", "PIA", "Test GP")
     assert prediction["prediction_status"] == "no_clear_favorite"
     assert prediction["predicted_winner"] is None

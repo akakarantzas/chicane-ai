@@ -27,6 +27,8 @@ test('finish-ahead card separates historical record from season overview', async
 
 test.each([
   ['insufficient_data', 'Insufficient data'],
+  ['insufficient_evidence', 'Insufficient evidence'],
+  ['data_unavailable', 'Prediction withheld: incomplete data'],
   ['no_clear_favorite', 'No clear favorite'],
   ['no_upcoming_race', 'No upcoming Grand Prix'],
   ['schedule_time_unknown', 'Race start time unconfirmed'],
@@ -198,4 +200,46 @@ test('an older prediction response cannot overwrite a newer comparison', async (
   await act(async () => finishOld({ ok: true, json: async () => ({ prediction_status: 'available', predicted_winner: 'VER', predicted_winner_full_name: 'Older prediction' }) }))
   expect(screen.queryByText('Older prediction')).not.toBeInTheDocument()
   expect(screen.getByText('Newer prediction')).toBeInTheDocument()
+})
+
+test('uncalibrated heuristic is never rendered as a confidence percentage', async () => {
+  await compareWith({ prediction_status: 'available', predicted_winner: 'ANT',
+    predicted_winner_full_name: 'Kimi Antonelli', confidence: .99,
+    score_type: 'uncalibrated_heuristic', driver1_score: .73, driver2_score: .27,
+    uncertainty: { driver1_eligible_races: 12, driver2_eligible_races: 18, shared_races: 10,
+      minimum_eligible_races: 3, minimum_score_margin: .05, data_warnings: ['2024 history is stale.'] },
+  })
+  expect(await screen.findByText('Heuristic score (not probability)')).toBeInTheDocument()
+  expect(screen.getByText('0.73 / 1')).toBeInTheDocument()
+  expect(screen.queryByText('99%')).not.toBeInTheDocument()
+  expect(screen.queryByText('73%')).not.toBeInTheDocument()
+  expect(screen.getByText(/Calibrated confidence unavailable/)).toBeInTheDocument()
+  expect(screen.getByText(/Eligible history: ANT 12 races/)).toHaveTextContent('VER 18 races; 10 shared')
+  expect(screen.getByText('2024 history is stale.')).toBeInTheDocument()
+})
+
+test('insufficient evidence keeps sample details but hides favorite and score', async () => {
+  await compareWith({ prediction_status: 'insufficient_evidence', predicted_winner: null,
+    predicted_winner_full_name: 'Must not show', driver1_score: .9, score_type: 'uncalibrated_heuristic',
+    uncertainty: { driver1_eligible_races: 2, driver2_eligible_races: 7, shared_races: 2,
+      minimum_eligible_races: 3, minimum_score_margin: .05 },
+  })
+  expect(await screen.findByText('Insufficient evidence')).toBeInTheDocument()
+  expect(screen.getByText(/Eligible history: ANT 2 races/)).toBeInTheDocument()
+  expect(screen.queryByText('Must not show')).not.toBeInTheDocument()
+  expect(screen.queryByText('0.90 / 1')).not.toBeInTheDocument()
+})
+
+test.each([undefined, null, '0.9', -1, 1.2])('invalid score %s never becomes a zero confidence bar', async (score) => {
+  await compareWith({ prediction_status: 'available', predicted_winner: 'ANT',
+    predicted_winner_full_name: 'Kimi Antonelli', score_type: 'uncalibrated_heuristic', driver1_score: score })
+  expect(await screen.findByText(/Calibrated confidence unavailable/)).toBeInTheDocument()
+  expect(screen.queryByText('Heuristic score (not probability)')).not.toBeInTheDocument()
+  expect(screen.queryByText('0%')).not.toBeInTheDocument()
+})
+
+test('unknown prediction state fails closed', async () => {
+  await compareWith({ prediction_status: 'unexpected', predicted_winner: 'ANT', predicted_winner_full_name: 'Must not show' })
+  expect(await screen.findByText('Prediction unavailable')).toBeInTheDocument()
+  expect(screen.queryByText('Must not show')).not.toBeInTheDocument()
 })

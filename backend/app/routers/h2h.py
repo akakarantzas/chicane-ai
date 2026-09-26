@@ -9,6 +9,7 @@ from fastapi import APIRouter, HTTPException
 from app.data.drivers import DRIVER_ROSTER_2026
 from app.services.h2h_cache import get_season_snapshot
 from app.services.h2h_quality import snapshot_quality
+from app.services.h2h_uncertainty import apply_data_uncertainty
 from app.services.h2h_contract import final_position, published_points
 from app.services.h2h_results import clean_text, reconcile_results
 from app.services.h2h_standings import load_standings
@@ -349,7 +350,7 @@ def predict_h2h(driver1: str, driver2: str, snapshot_id: str | None = None):
 
     result = build_h2h_prediction(all_rows, abbrev1, abbrev2, event.name, target_event=event)
     result.update({"next_event": event.public(), "coverage": coverage, "snapshots": snapshots})
-    return result
+    return apply_data_uncertainty(result, snapshots, coverage, SEASON)
 
 
 @router.get("/compare")

@@ -4,6 +4,7 @@ from app.services.h2h_history import (
     RECENT_FORM_WINDOW, before_target, latest_result, ordered_history, recent_form_evidence,
 )
 from app.services.h2h_schedule import RaceEvent
+from app.services.h2h_uncertainty import assess_evidence
 from app.services.h2h_contract import (
     H2H_RULE_VERSION,
     H2H_TARGET,
@@ -233,18 +234,22 @@ def build_h2h_prediction(rows: list[dict], abbrev1: str, abbrev2: str, next_race
     form1, form2 = recent_form_evidence(rows1), recent_form_evidence(rows2)
     form_used = form1["average_finish"] is not None and form2["average_finish"] is not None
 
-    prediction_status = "available"
+    prediction_status, uncertainty = assess_evidence(rows1, rows2, h2h, scores, form1, form2)
     predicted_winner = None
-    if not rows1 or not rows2:
-        prediction_status = "insufficient_data"
-    elif scores["driver1_score"] == scores["driver2_score"]:
-        prediction_status = "no_clear_favorite"
-    else:
+    if prediction_status == "available":
         predicted_winner = abbrev1 if scores["driver1_score"] > scores["driver2_score"] else abbrev2
     winner_meta = (meta1 if predicted_winner == abbrev1 else meta2) if predicted_winner else {}
 
     if prediction_status == "insufficient_data":
         reasoning = "Not enough eligible Grand Prix results for both drivers to make a prediction."
+    elif prediction_status == "insufficient_evidence":
+        reasoning = (f"At least {uncertainty['minimum_eligible_races']} eligible Grands Prix per driver are required to show a favorite."
+                     if "small_sample" in uncertainty["abstention_reasons"] else
+                     "Race chronology could not be verified for both drivers. No favorite is shown.")
+    elif prediction_status == "no_clear_favorite":
+        reasoning = ("The heuristic scores are tied; no clear favorite."
+                     if uncertainty["score_margin"] == 0 else
+                     "The heuristic scores are too close to show a clear favorite. This is not a probability estimate.")
     elif h2h["total_races"] > 0:
         d1_wins_label = f"{h2h['driver1_wins']}-{h2h['driver2_wins']}"
         h2h_leader = abbrev1 if h2h["driver1_wins"] >= h2h["driver2_wins"] else abbrev2
@@ -276,7 +281,9 @@ def build_h2h_prediction(rows: list[dict], abbrev1: str, abbrev2: str, next_race
         "predicted_winner": predicted_winner,
         "predicted_winner_full_name": winner_meta.get("full_name"),
         "predicted_winner_team": winner_meta.get("team"),
-        "confidence": scores["confidence"] if prediction_status != "insufficient_data" else None,
+        "confidence": None,  # Deprecated: a heuristic's larger score is not confidence.
+        "score_type": "uncalibrated_heuristic",
+        "uncertainty": uncertainty,
         "h2h_record": {
             "driver1_wins": h2h["driver1_wins"],
             "driver2_wins": h2h["driver2_wins"],
