@@ -1,0 +1,3 @@
+# Offline model experiments only; not required by the serving API.
+-r requirements.txt
+scikit-learn==1.9.1

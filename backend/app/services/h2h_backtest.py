@@ -18,6 +18,17 @@ from app.services.h2h_logic import driver_features, score_features
 
 
 MODELS = ("heuristic", "average_finish", "recent_form", "historical_h2h", "coin_flip")
+FEATURE_NAMES = ("average_finish_advantage", "recent_form_advantage", "shared_h2h_advantage",
+                 "win_rate_difference", "experience_difference")
+
+
+def pair_features(first: dict, second: dict, wins1: int, wins2: int) -> list[float]:
+    """Antisymmetric differences derived solely from strictly prior results."""
+    return [(second["average_finish"] - first["average_finish"]) / 20,
+            (second["recent_form"] - first["recent_form"]) / 20,
+            (wins1 - wins2) / (wins1 + wins2 + 4),
+            first["win_rate"] - second["win_rate"],
+            (math.log1p(first["sample_size"]) - math.log1p(second["sample_size"])) / 5]
 
 
 def normalized_events(rows: list[dict]) -> list[dict]:
@@ -93,7 +104,7 @@ def summarize(pairs: list[dict], model: str) -> dict:
 
 
 def evaluate(rows: list[dict], *, validation_start: str, test_start: str,
-             include_pairs: bool = False) -> dict:
+             include_pairs: bool = False, learning_records: bool = False) -> dict:
     validation, test = date.fromisoformat(validation_start), date.fromisoformat(test_start)
     if validation >= test:
         raise ValueError("validation_start must precede test_start")
@@ -124,8 +135,9 @@ def evaluate(rows: list[dict], *, validation_start: str, test_start: str,
                     exclusions["equal_positions"] += 1
                     continue
                 eligible_count += 1
-                if event["split"] == "train":
+                if event["split"] == "train" and not learning_records:
                     continue
+                vector = None
                 scores = dict.fromkeys(MODELS)
                 scores["coin_flip"] = 0.5
                 wins1, wins2 = records[(a, b)]
@@ -138,9 +150,13 @@ def evaluate(rows: list[dict], *, validation_start: str, test_start: str,
                     scores["heuristic"] = score_features(f1, f2, record)["driver1_score"]
                     for model in ("average_finish", "recent_form"):
                         scores[model] = f2[model] / (f1[model] + f2[model])
+                    if learning_records:
+                        vector = pair_features(f1, f2, wins1, wins2)
                 pairs.append({"event_id": event["event_id"], "split": event["split"],
                               "drivers": [a, b], "label": int(first["position"] < second["position"]),
                               "scores": scores})
+                if learning_records:
+                    pairs[-1].update(features=vector, date=day)
             manifest.append({key: event[key] for key in ("event_id", "date", "race", "split")} |
                             {"history_events": list(previous_events), "entries": len(event["rows"]),
                              "eligible_pairs": eligible_count, "excluded_pairs": dict(exclusions)})
@@ -179,7 +195,7 @@ def evaluate(rows: list[dict], *, validation_start: str, test_start: str,
                               "Later validation/test races use earlier observed outcomes, never future outcomes.",
                               "No tuning, model promotion, or live accuracy improvement is performed."],
               "races": manifest, "splits": reports}
-    if include_pairs:
+    if include_pairs or learning_records:
         report["pairs"] = pairs
     return report
 

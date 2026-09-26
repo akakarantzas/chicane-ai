@@ -338,6 +338,38 @@ claimed. Dataset provenance and candidate evaluation remain step 8. See
 [the backtesting guide](h2h-backtesting.md) for input requirements, commands and
 limitations, including corrected-result versus true point-in-time evidence.
 
+## Step 8: evaluate candidate prediction models
+
+Implemented an optional offline scikit-learn experiment comparing regularized
+logistic regression and small histogram-gradient-boosted trees with the existing
+heuristic and simple baselines. Five signed historical features use only prior
+race dates. Training races receive equal total weight; mirrored augmentation
+stays inside the same split, and predictions enforce driver-swap symmetry.
+
+Freeze candidates/scalers on 2024 training data for 2025 validation. Select using
+predeclared race-macro Brier, accuracy, log-loss, coverage and minimum-race gates;
+hash that selection independently of test labels. Only a selected candidate can
+be refitted on training plus validation and evaluated on 2026 test races. Disable
+random internal validation/early stopping. Keep all fitting out of the live API.
+
+Added a frozen dataset exporter with provenance, due-calendar coverage checks,
+Jolpica results and a recorded FastF1 fallback for missing races. The benchmark
+used 1,288 entries over 63 races. Both candidates showed small validation gains,
+but neither met the fixed 0.002 race-macro Brier improvement threshold; the tree
+model also reduced decision coverage. Retained the heuristic without promoting
+or testing either learned candidate on the test period. The retained heuristic's
+2026 race-macro finish-ahead accuracy was 70.11% over 15 observed races, not a
+future accuracy promise or calibrated confidence estimate.
+
+Validation: 271 backend tests passed. Added training/scaler cutoff checks,
+test-label independence, same-day feature exclusion, driver-swap symmetry,
+race-balanced weights, deterministic reports, cold starts, coverage/selection
+guards, export failures/fallback provenance and offline/no-overwrite CLI checks.
+No frontend or live-model changes. Full protocol, limitations, metrics and
+artifact hashes are in [the model evaluation report](h2h-model-evaluation.md).
+The inspected 2026 test period must not be reused as unseen evidence when
+tuning models or calibrating probabilities in later steps.
+
 ## Validation gates
 
 - Step 1: edge-case rule tests, adapter flag tests, API metadata tests, UI empty/tied state tests, and frontend build.

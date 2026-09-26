@@ -66,6 +66,6 @@ backtest, not a fully point-in-time dataset. Freeze preprocessing/model choices
 using validation only before inspecting a held-out test; repeated test-driven
 selection invalidates its status as unseen evidence.
 
-Step 7 is verified with deterministic synthetic fixtures and serving-score parity
-tests, not a measured real-world accuracy claim. A provenance-checked historical
-dataset and actual candidate comparisons remain work for step 8.
+Step 7 was verified with deterministic synthetic fixtures and serving-score parity
+tests, not a measured real-world accuracy claim. Step 8 adds a frozen dataset
+export and actual candidate comparisons; see [model evaluation](h2h-model-evaluation.md).

@@ -7,7 +7,7 @@ AI-powered Formula 1 analytics and race prediction web app.
 ## Features
 
 - **Race predictions** - win probability for each driver using a Gradient Boosting model trained on FastF1 data
-- **H2H comparisons** - head-to-head driver stats pulled live from FastF1 with an ML prediction card
+- **H2H comparisons** - reconciled driver statistics with freshness reporting and a historical finish-ahead heuristic
 - **History** - past predictions verified against real results
 - **Season calendar** - 2026 F1 race schedule
 
@@ -32,6 +32,7 @@ Accurately predicted Antonelli (Mercedes) as the 2026 Miami GP winner.
 - `docs/CONTEXT.md` - project context and current architecture notes
 - `docs/design.md` - design system reference
 - `docs/security_audit.md` - latest security audit notes
+- [H2H model evaluation](docs/h2h-model-evaluation.md) - offline experiment protocol and measured results
 
 ## Setup
 
