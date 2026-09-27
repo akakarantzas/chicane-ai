@@ -399,6 +399,42 @@ symmetry, race-balanced reliability bins, sparse fitting and safe UI fallbacks.
 In-app browser verification was unavailable. See [the uncertainty contract and
 audit](h2h-uncertainty.md) for behavior changes, limitations and recorded hashes.
 
+## Step 10: explain and monitor predictions
+
+Added exact weighted-component explanations in selected-driver order, using the
+same arithmetic as the existing heuristic. The API/UI expose inputs, effective
+weights, missing components and raw-score contributions without causal or
+probability claims. The model and evidence thresholds remain unchanged.
+
+Added a local SQLite journal of the first pre-race forecast for each event,
+unordered driver pair and model/rule/policy version. Save abstentions, server
+timestamps, complete prediction evidence, data snapshot metadata, relevant input
+rows and hashes. Repeated/reversed/concurrent requests cannot overwrite records;
+late or unconfirmed-start requests cannot create retrospective forecasts. The UI
+distinguishes newly saved, previously saved, changed, disabled and failed tracking.
+
+Fresh loaded snapshots or an explicit offline operator import reconcile published
+outcomes. Keep unresolved, excluded and scored pairs separate; later source
+corrections append revisions without altering forecasts. Observation watermarks
+prevent older imports/snapshots from reverting newer evidence. No scheduled job
+or external storage service is silently installed.
+
+A read-only monitoring endpoint/UI reports per-version coverage, abstentions,
+pair accuracy, race-average accuracy, per-race results and descriptive five-race
+trends after ten scored races. Empty/pending evidence has no invented accuracy.
+Historical backtests are not passed off as prospective results. Monitoring covers
+self-selected requests on this installation, not the whole field or calibrated
+probabilities. Future races are still needed to measure actual prospective quality.
+
+See [monitoring operations and limitations](h2h-monitoring.md) for database paths,
+persistence, snapshot refresh/import behavior and deployment requirements. Durable
+deployment needs a database outside OneDrive/cloud-sync storage and a backup plan.
+
+Validation: 327 backend tests, 38 frontend tests and the production build passed.
+The in-app browser was unavailable, so visual verification is not claimed. All
+ten implementation steps are now complete; ongoing prospective evaluation and
+independent calibration confirmation still require future evidence.
+
 ## Validation gates
 
 - Step 1: edge-case rule tests, adapter flag tests, API metadata tests, UI empty/tied state tests, and frontend build.

@@ -5,6 +5,7 @@ import { Check, ChevronDown } from 'lucide-react'
 import { useId, useRef } from 'react'
 
 import AppNav from '../components/AppNav'
+import MonitoringPanel, { ScoreExplanation, RecordingStatus } from '../components/H2HMonitoring'
 import { DRIVERS, DRIVER_MAP, getTeamColor } from '../data/drivers'
 import useIsMobile from '../hooks/useIsMobile'
 import { apiUrl } from '../lib/api'
@@ -401,6 +402,8 @@ function PredictionCard({ prediction, d1Abbrev, d2Abbrev, loading }) {
         </p>
         <p className="mt-2 text-sm text-[#A1A1AA]">{prediction.reasoning}</p>
         <UncertaintyDetails prediction={prediction} d1Abbrev={d1Abbrev} d2Abbrev={d2Abbrev} />
+        <ScoreExplanation prediction={prediction} />
+        <RecordingStatus monitoring={prediction.monitoring} />
       </div>
     )
   }
@@ -510,6 +513,8 @@ function PredictionCard({ prediction, d1Abbrev, d2Abbrev, loading }) {
         </p>
       </details>
       <UncertaintyDetails prediction={prediction} d1Abbrev={d1Abbrev} d2Abbrev={d2Abbrev} />
+      <ScoreExplanation prediction={prediction} />
+      <RecordingStatus monitoring={prediction.monitoring} />
       {/* Raw heuristic strength, never presented as probability or confidence. */}
       {hasScore && <div style={{ marginBottom: '12px' }}>
         <div style={{
@@ -902,6 +907,7 @@ export default function H2H({ onNavigate }) {
             </div>
           )}
 
+          <MonitoringPanel />
         </section>
       </div>
 

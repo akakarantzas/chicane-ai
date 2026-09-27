@@ -15,6 +15,8 @@ from app.services.h2h_contract import (
     result_exclusion_reason,
 )
 
+MODEL_VERSION = "h2h-heuristic-v1"
+
 
 def rows_for_driver(rows: list[dict], abbrev: str) -> list[dict]:
     return [r for r in rows if r["abbreviation"].upper() == abbrev.upper()]
@@ -206,6 +208,20 @@ def score_features(features1: dict, features2: dict, h2h_record: dict) -> dict:
     score1 = round(raw1 / total_score, 4)
     score2 = round(raw2 / total_score, 4)
 
+    components = []
+    for name, label, weight, s1, s2, values, basis in (
+        ("h2h", "Shared head-to-head", w_h2h, h2h_score1, h2h_score2,
+         [h2h_record["driver1_wins"], h2h_record["driver2_wins"]], "available" if total_h2h else "no_shared_races"),
+        ("average_finish", "Average finish", w_avg, avg_score1, avg_score2, [avg1, avg2],
+         "available" if avg1 is not None and avg2 is not None else "neutral_fallback"),
+        ("recent_form", "Recent form", w_form, form_score1, form_score2, [form1, form2],
+         "available" if form1 is not None and form2 is not None else "unavailable"),
+    ):
+        components.append({"feature": name, "label": label, "basis": basis,
+                           "weight": weight / total_score, "driver1_input": values[0], "driver2_input": values[1],
+                           "driver1_contribution": s1 * weight / total_score,
+                           "driver2_contribution": s2 * weight / total_score})
+
     return {
         "driver1_score": score1,
         "driver2_score": score2,
@@ -216,6 +232,7 @@ def score_features(features1: dict, features2: dict, h2h_record: dict) -> dict:
         "driver2_recent_form": form2,
         "driver1_win_rate": wr1,
         "driver2_win_rate": wr2,
+        "components": components,
     }
 
 
@@ -283,6 +300,9 @@ def build_h2h_prediction(rows: list[dict], abbrev1: str, abbrev2: str, next_race
         "predicted_winner_team": winner_meta.get("team"),
         "confidence": None,  # Deprecated: a heuristic's larger score is not confidence.
         "score_type": "uncalibrated_heuristic",
+        "model_version": MODEL_VERSION,
+        "explanation": {"driver_order": [abbrev1, abbrev2], "components": scores["components"],
+                        "description": "Weighted arithmetic contributions to the raw score, not causal effects or probabilities."},
         "uncertainty": uncertainty,
         "h2h_record": {
             "driver1_wins": h2h["driver1_wins"],

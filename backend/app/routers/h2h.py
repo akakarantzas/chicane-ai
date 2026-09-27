@@ -10,6 +10,7 @@ from app.data.drivers import DRIVER_ROSTER_2026
 from app.services.h2h_cache import get_season_snapshot
 from app.services.h2h_quality import snapshot_quality
 from app.services.h2h_uncertainty import apply_data_uncertainty
+from app.services.h2h_monitor import capture_prediction, monitoring_summary
 from app.services.h2h_contract import final_position, published_points
 from app.services.h2h_results import clean_text, reconcile_results
 from app.services.h2h_standings import load_standings
@@ -325,6 +326,7 @@ def predict_h2h(driver1: str, driver2: str, snapshot_id: str | None = None):
             "reasoning": "No upcoming Grand Prix is listed for this season."
             if schedule_status == "no_upcoming_race" else "The next race start time is not confirmed.",
             "next_event": None,
+            "monitoring": {"status": "not_recorded", "reason": "no_confirmed_target"},
         })
         return result
 
@@ -350,7 +352,15 @@ def predict_h2h(driver1: str, driver2: str, snapshot_id: str | None = None):
 
     result = build_h2h_prediction(all_rows, abbrev1, abbrev2, event.name, target_event=event)
     result.update({"next_event": event.public(), "coverage": coverage, "snapshots": snapshots})
-    return apply_data_uncertainty(result, snapshots, coverage, SEASON)
+    result = apply_data_uncertainty(result, snapshots, coverage, SEASON)
+    result["monitoring"] = capture_prediction(result, all_rows, event, abbrev1, abbrev2, utc_now())
+    return result
+
+
+@router.get("/monitoring")
+def h2h_monitoring():
+    # Read-only summary: viewing monitoring never fetches results or logs forecasts.
+    return monitoring_summary()
 
 
 @router.get("/compare")
