@@ -2,7 +2,17 @@ import { useEffect, useState } from 'react'
 
 import AppNav from '../components/AppNav'
 import useIsMobile from '../hooks/useIsMobile'
+import azerbaijanPredictions from '../data/azerbaijan_predictions.json'
 import barcelonaPredictions from '../data/barcelona_catalunya_predictions.json'
+
+const AZERBAIJAN_GP_2026 = {
+  race: 'Azerbaijan Grand Prix',
+  circuit: 'Baku City Circuit',
+  date: 'September 26, 2026',
+  actualWinner: 'Russell',
+  resultSource: 'https://www.formula1.com/en/results/2026/races/1295/azerbaijann/race-result',
+  predictions: azerbaijanPredictions,
+}
 
 const BARCELONA_GP_2026 = {
   race: 'Barcelona-Catalunya Grand Prix',
@@ -167,6 +177,16 @@ function VerifiedRaceCard({ race, isMobile }) {
           <span style={{ display: 'inline-flex', color: accentColor, fontSize: '11px', fontWeight: 800, lineHeight: 1, textTransform: 'uppercase', letterSpacing: 0 }}>{winnerPredicted ? 'Winner predicted' : 'Model pick missed'}</span>
           <h2 style={{ marginTop: '10px', color: '#F4F4F5', fontSize: isMobile ? '27px' : '34px', fontWeight: 800, lineHeight: 1.05 }}>{race.race}</h2>
           <p style={{ marginTop: '8px', color: '#A1A1AA', fontSize: '14px' }}>{race.circuit} / {race.date}</p>
+          {race.resultSource && (
+            <a
+              href={race.resultSource}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ display: 'inline-block', marginTop: '8px', color: '#A1A1AA', fontSize: '12px', textDecoration: 'underline' }}
+            >
+              Official race result
+            </a>
+          )}
         </div>
         <div style={{ padding: '10px 14px', borderRadius: '8px', backgroundColor: winnerPredicted ? 'rgba(34,197,94,0.11)' : 'rgba(245,158,11,0.11)', border: winnerPredicted ? '1px solid rgba(34,197,94,0.28)' : '1px solid rgba(245,158,11,0.28)', color: accentColor, fontSize: '13px', fontWeight: 800, whiteSpace: 'nowrap' }}>
           Verified
@@ -246,6 +266,7 @@ export default function History({ onNavigate }) {
           </div>
 
           <div style={{ display: 'grid', gap: '24px' }}>
+            <VerifiedRaceCard race={AZERBAIJAN_GP_2026} isMobile={isMobile} />
             <VerifiedRaceCard race={BARCELONA_GP_2026} isMobile={isMobile} />
             <VerifiedRaceCard race={MIAMI_GP_2026} isMobile={isMobile} />
           </div>
