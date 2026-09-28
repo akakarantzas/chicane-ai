@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 
 from app.data.drivers import PREDICTION_DRIVER_GRID_2026
 from app.services.prediction_history import capture_forecast, history_response
+from app.services import post_qualifying
 
 router = APIRouter(prefix="/api/predictions")
 
@@ -36,6 +37,8 @@ class NextRacePredictionResponse(BaseModel):
     circuit: str
     predictions: list[PredictionItem]
     model_version: str | None = None
+    generated_at: str | None = None
+    automatic_update_enabled: bool = False
     status: str
     metadata: PredictionMetadata
 
@@ -162,16 +165,22 @@ def _complete_2026_grid(predictions: list[dict]) -> list[dict]:
     return sorted(completed, key=lambda item: item.get("probability", 0), reverse=True)
 
 @router.get("/next-race", response_model=NextRacePredictionResponse)
-def get_next_race_prediction():
+def get_next_race_prediction(response: Response):
+    response.headers["Cache-Control"] = "no-store"
     original_predictions = _load_predictions()
-    predictions = _complete_2026_grid(original_predictions)
     metadata = _load_metadata()
     capture_forecast(original_predictions, metadata)
+    update = post_qualifying.read_update(original_predictions, metadata)
+    if update:
+        original_predictions, metadata = update["predictions"], update["metadata"]
+    predictions = _complete_2026_grid(original_predictions)
     return {
         "race": metadata["race"],
         "circuit": metadata["circuit"],
         "predictions": predictions,
         "model_version": metadata.get("model_version"),
+        "generated_at": metadata.get("generated_at"),
+        "automatic_update_enabled": post_qualifying.enabled() and post_qualifying.history.enabled(),
         "status": _prediction_status(metadata),
         "metadata": _public_metadata(metadata),
     }

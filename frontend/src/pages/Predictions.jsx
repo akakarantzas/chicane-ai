@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import AppNav from '../components/AppNav'
 import useIsMobile from '../hooks/useIsMobile'
-import { fetchNextRacePrediction } from '../lib/predictions'
+import usePredictionFeed from '../hooks/usePredictionFeed'
 
 const POSITION_COLORS = ['#E8002D', '#f97316', '#eab308']
 
@@ -231,23 +231,9 @@ function GhostPredictionRow({ prediction, onExpand }) {
 
 export default function Predictions({ onNavigate, animationKey = 0 }) {
   const isMobile = useIsMobile()
-  const [data, setData] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const { data, loading, error } = usePredictionFeed()
   const [playAnimations, setPlayAnimations] = useState(false)
   const [showAllPredictions, setShowAllPredictions] = useState(false)
-
-  useEffect(() => {
-    fetchNextRacePrediction()
-      .then((json) => {
-        setData(json)
-        setLoading(false)
-      })
-      .catch((err) => {
-        setError(err.message)
-        setLoading(false)
-      })
-  }, [])
 
   useEffect(() => {
     if (!data) return undefined
@@ -274,7 +260,7 @@ export default function Predictions({ onNavigate, animationKey = 0 }) {
     )
   }
 
-  if (error) {
+  if (error && !data) {
     return (
       <div className="min-h-screen bg-[#0C0C0E] text-[#F4F4F5] flex items-center justify-center">
         <div className="text-center space-y-2">
@@ -325,6 +311,16 @@ export default function Predictions({ onNavigate, animationKey = 0 }) {
               </span>
             </div>
           )}
+          {status === 'Post-Qualifying' ? (
+            <p className="text-[#A1A1AA] mt-3 text-sm">
+              Based on published qualifying positions. Grid penalties may change the starting order.
+            </p>
+          ) : data.automatic_update_enabled && (
+            <p className="text-[#A1A1AA] mt-3 text-sm">
+              Automatically updates after qualifying finishes and the full results are published.
+            </p>
+          )}
+          {error && <p role="status" className="text-[#A1A1AA] mt-2 text-sm">Refresh unavailable. Showing the last forecast; retrying automatically.</p>}
         </div>
 
         {/* Prediction rows */}
@@ -332,7 +328,7 @@ export default function Predictions({ onNavigate, animationKey = 0 }) {
           <div className="predictions-card-header">
             <div>
               <span className="predictions-card-eyebrow">Latest Predictions</span>
-              <p>AI powered F1 predictions updated before every race session.</p>
+              <p>Race winner forecasts before and after qualifying.</p>
             </div>
           </div>
 

@@ -9,12 +9,14 @@ from app.services.h2h_schedule import RaceEvent, clear_schedule_cache
 
 
 @pytest.fixture(autouse=True)
-def fixed_h2h_calendar(monkeypatch):
+def fixed_h2h_calendar(monkeypatch, tmp_path):
     """API/unit tests never depend on a live schedule or the wall-clock date."""
     from app.routers import h2h
     from app.services.h2h_standings import unavailable_standings
     monkeypatch.setenv("H2H_MONITOR_ENABLED", "false")  # Tests never write the installation's real journal.
     monkeypatch.setenv("PREDICTION_HISTORY_ENABLED", "false")
+    monkeypatch.setenv("POST_QUALIFYING_ENABLED", "false")
+    monkeypatch.setenv("PREDICTION_UPDATES_DIR", str(tmp_path / "updates"))
     monkeypatch.setattr(h2h, "_load_standings", lambda *args: unavailable_standings())
     monkeypatch.setattr(h2h, "utc_now", lambda: datetime(2026, 9, 25, tzinfo=timezone.utc))
     monkeypatch.setattr(h2h, "get_season_schedule", lambda year: [

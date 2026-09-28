@@ -51,3 +51,4 @@ cache/
 /backend/evaluation/
 /backend/data/h2h-monitor.sqlite*
 /backend/data/prediction-history.sqlite*
+/backend/data/prediction-updates/

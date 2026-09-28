@@ -5,7 +5,7 @@ import ButtonHeartbeatEffectDemo from '../components/ui/heartbeat-effect-button'
 import { circuits } from '../data/circuits'
 import { getNextRace, useRaceCalendar } from '../data/races'
 import useIsMobile from '../hooks/useIsMobile'
-import { fetchNextRacePrediction } from '../lib/predictions'
+import usePredictionFeed from '../hooks/usePredictionFeed'
 import canadaTrack from '../assets/circuits/canada-track-white.png'
 import monacoTrack from '../assets/circuits/monaco-track-white.png'
 import azerbaijanTrack from '../assets/circuits/azerbaijan-track-white.png'
@@ -342,12 +342,13 @@ export default function Home({ onNavigate }) {
   const currentRaceRound = currentRace?.round
   const statsRef = useRef(null)
   const [statsVisible, setStatsVisible] = useState(false)
-  const [predictionPreview, setPredictionPreview] = useState({
+  const { data: predictionData, loading: predictionLoading } = usePredictionFeed()
+  const predictionPreview = predictionData ? { ...predictionData, loading: false } : {
     race: 'Singapore GP',
-    status: 'Pre-Qualifying',
+    status: predictionLoading ? 'Pre-Qualifying' : 'Unavailable',
     predictions: [],
-    loading: true,
-  })
+    loading: predictionLoading,
+  }
   const currentRaceName = currentRace.name.replace(/\bGP\b/g, 'Grand Prix')
   const currentRaceDate = `${currentRace.date}, 2026`
   const currentRaceCountryLabel = `${currentRace.city ?? currentRace.country} · ${currentRace.code}`
@@ -366,34 +367,6 @@ export default function Home({ onNavigate }) {
     )
     if (statsRef.current) observer.observe(statsRef.current)
     return () => observer.disconnect()
-  }, [])
-
-  useEffect(() => {
-    let isMounted = true
-
-    fetchNextRacePrediction()
-      .then((json) => {
-        if (!isMounted || !Array.isArray(json.predictions) || json.predictions.length === 0) return
-        setPredictionPreview({
-          race: json.race ?? 'Singapore GP',
-          status: json.status ?? 'Pre-Qualifying',
-          predictions: json.predictions,
-          loading: false,
-        })
-      })
-      .catch(() => {
-        if (!isMounted) return
-        setPredictionPreview({
-          race: 'Singapore GP',
-          status: 'Unavailable',
-          predictions: [],
-          loading: false,
-        })
-      })
-
-    return () => {
-      isMounted = false
-    }
   }, [])
 
   useEffect(() => {

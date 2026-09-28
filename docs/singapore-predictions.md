@@ -27,6 +27,11 @@ are historical multi-circuit measurements, not Singapore forecast accuracy.
 
 ## Updating
 
+Post-qualifying updates are now automatic while the backend runs. The worker
+checks official session completion and the full qualifying classification, then
+uses the saved model and frozen inputs to update the forecast. Both stages are
+preserved in History. See [post-qualifying operation and validation](post-qualifying-predictions.md).
+
 Train the standalone project, validate its outputs, and publish them in its root.
 Then run this command from the app root:
 

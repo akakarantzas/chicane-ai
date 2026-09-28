@@ -29,6 +29,10 @@ foreach ($artifact in $jsonArtifacts) {
 
 if ($IncludeModel) {
     $artifacts.Add("${PredictionName}_model.pkl")
+    $inferenceArtifact = "${PredictionName}_inference.json"
+    if (Test-Path -LiteralPath (Join-Path $sourceRoot $inferenceArtifact)) {
+        $artifacts.Add($inferenceArtifact)
+    }
 }
 
 foreach ($artifact in $artifacts) {

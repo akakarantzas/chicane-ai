@@ -39,7 +39,7 @@ describe('prediction api rendering', () => {
     expect(screen.getByText('Leclerc')).toBeInTheDocument()
     expect(screen.getByText('Antonelli')).toBeInTheDocument()
     expect(screen.getByText('Singapore predictions now live!')).toBeInTheDocument()
-    expect(globalThis.fetch).toHaveBeenCalledWith('http://localhost:8000/api/predictions/next-race')
+    expect(globalThis.fetch).toHaveBeenCalledWith('http://localhost:8000/api/predictions/next-race', expect.objectContaining({ cache: 'no-store' }))
   })
 
   test('predictions page renders fetched race predictions', async () => {
@@ -51,6 +51,6 @@ describe('prediction api rendering', () => {
     expect(screen.getByText('Antonelli')).toBeInTheDocument()
     expect(screen.getAllByText('Mercedes').length).toBeGreaterThan(0)
     expect(screen.getByText('Norris')).toBeInTheDocument()
-    expect(globalThis.fetch).toHaveBeenCalledWith('http://localhost:8000/api/predictions/next-race')
+    expect(globalThis.fetch).toHaveBeenCalledWith('http://localhost:8000/api/predictions/next-race', expect.objectContaining({ cache: 'no-store' }))
   })
 })
