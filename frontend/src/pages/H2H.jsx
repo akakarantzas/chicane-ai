@@ -5,7 +5,7 @@ import { Check, ChevronDown } from 'lucide-react'
 import { useId, useRef } from 'react'
 
 import AppNav from '../components/AppNav'
-import MonitoringPanel, { ScoreExplanation, RecordingStatus } from '../components/H2HMonitoring'
+import { ScoreExplanation, RecordingStatus } from '../components/H2HMonitoring'
 import { DRIVERS, DRIVER_MAP, getTeamColor } from '../data/drivers'
 import useIsMobile from '../hooks/useIsMobile'
 import { apiUrl } from '../lib/api'
@@ -907,7 +907,6 @@ export default function H2H({ onNavigate }) {
             </div>
           )}
 
-          <MonitoringPanel />
         </section>
       </div>
 
