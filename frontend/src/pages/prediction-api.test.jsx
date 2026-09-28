@@ -5,17 +5,17 @@ import Home from './Home'
 import Predictions from './Predictions'
 
 const predictionPayload = {
-  race: 'Azerbaijan GP',
-  circuit: 'Baku City Circuit',
-  model_version: 'azerbaijan-hgb-calibrated-1.1',
+  race: 'Singapore GP',
+  circuit: 'Marina Bay Street Circuit',
+  model_version: 'singapore-hgb-calibrated-1.0',
   status: 'Pre-Qualifying',
   predictions: [
-    { driver: 'Antonelli', team: 'Mercedes', probability: 0.2704 },
-    { driver: 'Norris', team: 'McLaren', probability: 0.2412 },
-    { driver: 'Piastri', team: 'McLaren', probability: 0.225 },
-    { driver: 'Russell', team: 'Mercedes', probability: 0.1489 },
-    { driver: 'Verstappen', team: 'Red Bull Racing', probability: 0.0276 },
-    { driver: 'Leclerc', team: 'Ferrari', probability: 0.0177 },
+    { driver: 'Russell', team: 'Mercedes', probability: 0.3704 },
+    { driver: 'Norris', team: 'McLaren', probability: 0.1313 },
+    { driver: 'Leclerc', team: 'Ferrari', probability: 0.125 },
+    { driver: 'Antonelli', team: 'Mercedes', probability: 0.0872 },
+    { driver: 'Hamilton', team: 'Ferrari', probability: 0.0557 },
+    { driver: 'Verstappen', team: 'Red Bull Racing', probability: 0.0381 },
   ],
 }
 
@@ -34,18 +34,20 @@ describe('prediction api rendering', () => {
   test('home renders latest predictions from the api', async () => {
     render(<Home onNavigate={vi.fn()} />)
 
-    expect(await screen.findByText('Antonelli')).toBeInTheDocument()
+    expect(await screen.findByText('Russell')).toBeInTheDocument()
     expect(screen.getByText('Norris')).toBeInTheDocument()
-    expect(screen.getByText('Piastri')).toBeInTheDocument()
-    expect(screen.getByText('Russell')).toBeInTheDocument()
+    expect(screen.getByText('Leclerc')).toBeInTheDocument()
+    expect(screen.getByText('Antonelli')).toBeInTheDocument()
+    expect(screen.getByText('Singapore predictions now live!')).toBeInTheDocument()
     expect(globalThis.fetch).toHaveBeenCalledWith('http://localhost:8000/api/predictions/next-race')
   })
 
   test('predictions page renders fetched race predictions', async () => {
     render(<Predictions onNavigate={vi.fn()} />)
 
-    expect(await screen.findByText('Azerbaijan Grand Prix Predictions')).toBeInTheDocument()
-    expect(screen.getByText('Baku City Circuit')).toBeInTheDocument()
+    expect(await screen.findByText('Singapore Grand Prix Predictions')).toBeInTheDocument()
+    expect(screen.getByText('Marina Bay Street Circuit')).toBeInTheDocument()
+    expect(screen.queryByText('Azerbaijan Grand Prix Predictions')).not.toBeInTheDocument()
     expect(screen.getByText('Antonelli')).toBeInTheDocument()
     expect(screen.getAllByText('Mercedes').length).toBeGreaterThan(0)
     expect(screen.getByText('Norris')).toBeInTheDocument()

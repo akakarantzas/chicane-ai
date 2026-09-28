@@ -10,7 +10,7 @@ Miami, Barcelona-Catalunya and Azerbaijan cards remain as historical imports.
 
 The prediction generator still needs to produce predictions and metadata. This
 feature does not train models or automatically select a different artifact for
-the Predictions endpoint, which currently serves the Azerbaijan pair.
+the Predictions endpoint, which currently serves the Singapore pair.
 
 Metadata requires `race`, `circuit` and `model_version`. Use a timezone-bearing
 `generated_at`, such as `2026-10-02T10:00:00Z`, and an explicit `year` if generating
@@ -21,7 +21,7 @@ a post-qualifying forecast. Race names must identify a unique calendar event.
 Use the existing sync script, which now supports other artifact names:
 
 ```powershell
-.\scripts\sync_azerbaijan_model.ps1 -SourceRepo .tmp-bahrain-model-repo -PredictionName bahrain
+.\scripts\sync_azerbaijan_model.ps1 -SourceRepo .tmp-singapore-model-repo -PredictionName singapore
 ```
 
 The source must contain `bahrain_predictions.json` and `bahrain_metadata.json`.

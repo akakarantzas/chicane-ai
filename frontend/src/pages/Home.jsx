@@ -343,7 +343,7 @@ export default function Home({ onNavigate }) {
   const statsRef = useRef(null)
   const [statsVisible, setStatsVisible] = useState(false)
   const [predictionPreview, setPredictionPreview] = useState({
-    race: 'Azerbaijan GP',
+    race: 'Singapore GP',
     status: 'Pre-Qualifying',
     predictions: [],
     loading: true,
@@ -375,7 +375,7 @@ export default function Home({ onNavigate }) {
       .then((json) => {
         if (!isMounted || !Array.isArray(json.predictions) || json.predictions.length === 0) return
         setPredictionPreview({
-          race: json.race ?? 'Azerbaijan GP',
+          race: json.race ?? 'Singapore GP',
           status: json.status ?? 'Pre-Qualifying',
           predictions: json.predictions,
           loading: false,
@@ -384,7 +384,7 @@ export default function Home({ onNavigate }) {
       .catch(() => {
         if (!isMounted) return
         setPredictionPreview({
-          race: 'Azerbaijan GP',
+          race: 'Singapore GP',
           status: 'Unavailable',
           predictions: [],
           loading: false,
@@ -457,7 +457,7 @@ export default function Home({ onNavigate }) {
         <div className="hero-content relative max-w-2xl mx-auto space-y-6" style={{ zIndex: 2, textAlign: 'center' }}>
           {/* Badge */}
           <span className="hero-badge inline-flex items-center font-medium rounded-full" style={{ fontSize: '0.9rem', padding: '6px 14px' }}>
-            Azerbaijan predictions now live!
+            Singapore predictions now live!
           </span>
 
           <h1 className="hero-title tracking-tight" style={{ fontSize: isMobile ? '42px' : '72px' }}>

@@ -11,20 +11,24 @@ def test_health_check(client):
     assert response.json() == {"status": "ok"}
 
 
-def test_next_race_predictions_preserve_current_azerbaijan_values(client):
+def test_next_race_predictions_preserve_current_singapore_values(client):
     response = client.get("/api/predictions/next-race")
 
     assert response.status_code == 200
     data = response.json()
     assert {"race", "circuit", "predictions", "model_version", "status"} <= set(data)
-    assert data["race"] == "Azerbaijan GP"
-    assert data["circuit"] == "Baku City Circuit"
-    assert data["model_version"] == "azerbaijan-hgb-calibrated-1.1"
+    assert data["race"] == "Singapore GP"
+    assert data["circuit"] == "Marina Bay Street Circuit"
+    assert data["model_version"] == "singapore-hgb-calibrated-1.0"
     assert data["status"] == "Pre-Qualifying"
     assert data["metadata"]["prediction_input"]["grid_source"] == "projected_grid"
-    assert data["metadata"]["backtest_summary"]["top3_accuracy"] == pytest.approx(0.8571)
+    assert data["metadata"]["backtest_summary"]["top3_accuracy"] == pytest.approx(0.8667)
     assert isinstance(data["predictions"], list)
     assert data["predictions"]
+    assert len(data["predictions"]) == 22
+    assert len({item["driver"] for item in data["predictions"]}) == 22
+    assert sum(item["probability"] for item in data["predictions"]) == pytest.approx(1.0, abs=0.001)
+    assert data["predictions"][0] == {"driver": "Russell", "team": "Mercedes", "probability": 0.3704}
 
     postprocess = data["metadata"]["prediction_postprocess"]
     assert postprocess["model_weight"] == pytest.approx(0.8)
@@ -35,7 +39,7 @@ def test_next_race_predictions_preserve_current_azerbaijan_values(client):
         item for item in data["predictions"] if item["driver"] == "Antonelli"
     )
     assert antonelli["team"] == "Mercedes"
-    assert antonelli["probability"] == pytest.approx(0.1766)
+    assert antonelli["probability"] == pytest.approx(0.0872)
 
 
 def test_next_race_predictions_use_json_without_model_import(client, monkeypatch):

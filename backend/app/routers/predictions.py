@@ -12,8 +12,8 @@ from app.services.prediction_history import capture_forecast, history_response
 router = APIRouter(prefix="/api/predictions")
 
 _MODELS_DIR = Path(__file__).resolve().parent.parent / "models"
-_PREDICTIONS_PATH = _MODELS_DIR / "azerbaijan_predictions.json"
-_METADATA_PATH = _MODELS_DIR / "azerbaijan_metadata.json"
+_PREDICTIONS_PATH = _MODELS_DIR / "singapore_predictions.json"
+_METADATA_PATH = _MODELS_DIR / "singapore_metadata.json"
 
 
 class PredictionItem(BaseModel):
@@ -168,8 +168,8 @@ def get_next_race_prediction():
     metadata = _load_metadata()
     capture_forecast(original_predictions, metadata)
     return {
-        "race": metadata.get("race", "Azerbaijan GP"),
-        "circuit": metadata.get("circuit", "Baku City Circuit"),
+        "race": metadata["race"],
+        "circuit": metadata["circuit"],
         "predictions": predictions,
         "model_version": metadata.get("model_version"),
         "status": _prediction_status(metadata),

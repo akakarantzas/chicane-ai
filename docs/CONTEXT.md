@@ -54,9 +54,9 @@ chicane-ai/
 |       +-- data/
 |       |   +-- drivers.py       Shared backend driver/team constants
 |       +-- models/
-|       |   +-- barcelona_catalunya_predictions.json
-|       |   +-- barcelona_catalunya_metadata.json
-|       |   +-- barcelona_catalunya_model.pkl
+|       |   +-- singapore_predictions.json
+|       |   +-- singapore_metadata.json
+|       |   +-- singapore_model.pkl
 |       +-- routers/
 |           +-- contact.py
 |           +-- h2h.py
@@ -85,19 +85,19 @@ Navigation is handled in `frontend/src/App.jsx` with local React state. There is
 
 ## Prediction Data
 
-Current prediction data is centered around the 2026 Barcelona-Catalunya Grand Prix.
+Current prediction data is centered around the 2026 Singapore Grand Prix.
 
-- Model version: `barcelona-catalunya-hgb-calibrated-1.4`
+- Model version: `singapore-hgb-calibrated-1.0`
 - Status: Pre-Qualifying (`projected_grid`)
-- P1: Antonelli, Mercedes, 28.3%
-- P2: Norris, McLaren, 25.1%
-- P3: Piastri, McLaren, 17.2%
-- P4: Russell, Mercedes, 12.8%
-- P5: Verstappen, Red Bull Racing, 5.0%
+- P1: Russell, Mercedes, 37.0%
+- P2: Norris, McLaren, 13.1%
+- P3: Leclerc, Ferrari, 12.5%
+- P4: Antonelli, Mercedes, 8.7%
+- P5: Hamilton, Ferrari, 5.6%
 
 Frontend prediction views load from `GET /api/predictions/next-race`.
-Backend API prediction data is served from `backend/app/models/barcelona_catalunya_predictions.json` with metadata from `backend/app/models/barcelona_catalunya_metadata.json`.
-Training and export live in the standalone model repo: `f1-2026-barcelona-catalunya-grand-prix-winner-prediction`.
+Backend API prediction data is served from `backend/app/models/singapore_predictions.json` with metadata from `backend/app/models/singapore_metadata.json`.
+Training and export live in the standalone model repo: `f1-2026-singapore-grand-prix-winner-prediction`.
 
 ## Backend API Endpoints
 

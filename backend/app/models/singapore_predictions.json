@@ -1,0 +1,112 @@
+[
+  {
+    "driver": "Russell",
+    "team": "Mercedes",
+    "probability": 0.3704
+  },
+  {
+    "driver": "Norris",
+    "team": "McLaren",
+    "probability": 0.1313
+  },
+  {
+    "driver": "Leclerc",
+    "team": "Ferrari",
+    "probability": 0.125
+  },
+  {
+    "driver": "Antonelli",
+    "team": "Mercedes",
+    "probability": 0.0872
+  },
+  {
+    "driver": "Hamilton",
+    "team": "Ferrari",
+    "probability": 0.0557
+  },
+  {
+    "driver": "Verstappen",
+    "team": "Red Bull Racing",
+    "probability": 0.038
+  },
+  {
+    "driver": "Piastri",
+    "team": "McLaren",
+    "probability": 0.037
+  },
+  {
+    "driver": "Hadjar",
+    "team": "Red Bull Racing",
+    "probability": 0.0259
+  },
+  {
+    "driver": "Sainz",
+    "team": "Williams",
+    "probability": 0.0142
+  },
+  {
+    "driver": "Perez",
+    "team": "Cadillac",
+    "probability": 0.013
+  },
+  {
+    "driver": "Albon",
+    "team": "Williams",
+    "probability": 0.0113
+  },
+  {
+    "driver": "Lindblad",
+    "team": "Racing Bulls",
+    "probability": 0.0104
+  },
+  {
+    "driver": "Gasly",
+    "team": "Alpine",
+    "probability": 0.0103
+  },
+  {
+    "driver": "Lawson",
+    "team": "Racing Bulls",
+    "probability": 0.0101
+  },
+  {
+    "driver": "Colapinto",
+    "team": "Alpine",
+    "probability": 0.0093
+  },
+  {
+    "driver": "Alonso",
+    "team": "Aston Martin",
+    "probability": 0.0081
+  },
+  {
+    "driver": "Ocon",
+    "team": "Haas",
+    "probability": 0.008
+  },
+  {
+    "driver": "Stroll",
+    "team": "Aston Martin",
+    "probability": 0.0079
+  },
+  {
+    "driver": "Hulkenberg",
+    "team": "Audi",
+    "probability": 0.0075
+  },
+  {
+    "driver": "Bortoleto",
+    "team": "Audi",
+    "probability": 0.0067
+  },
+  {
+    "driver": "Bottas",
+    "team": "Cadillac",
+    "probability": 0.0064
+  },
+  {
+    "driver": "Bearman",
+    "team": "Haas",
+    "probability": 0.0062
+  }
+]
