@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 
 import AppNav from '../components/AppNav'
 import useIsMobile from '../hooks/useIsMobile'
+import { fetchPredictionHistory } from '../lib/predictions'
 import azerbaijanPredictions from '../data/azerbaijan_predictions.json'
 import barcelonaPredictions from '../data/barcelona_catalunya_predictions.json'
 
@@ -9,6 +10,7 @@ const AZERBAIJAN_GP_2026 = {
   race: 'Azerbaijan Grand Prix',
   circuit: 'Baku City Circuit',
   date: 'September 26, 2026',
+  raceDate: '2026-09-26',
   actualWinner: 'Russell',
   resultSource: 'https://www.formula1.com/en/results/2026/races/1295/azerbaijann/race-result',
   predictions: azerbaijanPredictions,
@@ -18,6 +20,7 @@ const BARCELONA_GP_2026 = {
   race: 'Barcelona-Catalunya Grand Prix',
   circuit: 'Circuit de Barcelona-Catalunya',
   date: 'June 14, 2026',
+  raceDate: '2026-06-14',
   actualWinner: 'Hamilton',
   predictions: barcelonaPredictions,
 }
@@ -26,6 +29,7 @@ const MIAMI_GP_2026 = {
   race: 'Miami Grand Prix',
   circuit: 'Miami International Autodrome',
   date: 'May 3, 2026',
+  raceDate: '2026-05-03',
   actualWinner: 'Antonelli',
   predictions: [
     { driver: 'Antonelli', team: 'Mercedes', probability: 0.7091 },
@@ -151,7 +155,10 @@ function PredictionArchiveRow({ prediction, index, actualWinner, isMobile }) {
   )
 }
 
-function VerifiedRaceCard({ race, isMobile }) {
+function VerifiedRaceCard({ race: raceArchive, isMobile }) {
+  const [forecastId, setForecastId] = useState(null)
+  const forecast = raceArchive.forecasts?.find((item) => item.id === forecastId)
+  const race = forecast ? { ...raceArchive, ...forecast } : raceArchive
   const [showFullGrid, setShowFullGrid] = useState(false)
   const displayedPredictions = showFullGrid ? race.predictions : race.predictions.slice(0, 5)
   const winnerPredicted = race.predictions[0].driver === race.actualWinner
@@ -184,7 +191,7 @@ function VerifiedRaceCard({ race, isMobile }) {
               rel="noopener noreferrer"
               style={{ display: 'inline-block', marginTop: '8px', color: '#A1A1AA', fontSize: '12px', textDecoration: 'underline' }}
             >
-              Official race result
+              Race result source
             </a>
           )}
         </div>
@@ -198,6 +205,26 @@ function VerifiedRaceCard({ race, isMobile }) {
         <StatBlock label="Actual winner" value={race.actualWinner} accent={winnerPredicted} />
         <StatBlock label="Win probability" value={formatPercent(race.predictions[0].probability)} />
       </div>
+
+      {raceArchive.forecasts?.length > 1 ? (
+        <label className="mt-5 flex flex-wrap items-center gap-3 text-sm text-[#A1A1AA]">
+          Archived forecast
+          <select
+            aria-label={`Forecast for ${race.race}`}
+            value={forecast?.id ?? raceArchive.forecasts[0].id}
+            onChange={(event) => setForecastId(event.target.value)}
+            className="max-w-full rounded border border-white/10 bg-[#121216] px-3 py-2 text-[#F4F4F5]"
+          >
+            {raceArchive.forecasts.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.status} · {new Date(item.generatedAt ?? item.recordedAt).toLocaleString()}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : race.status && (
+        <p className="mt-5 text-sm text-[#A1A1AA]">Archived forecast: {race.status}</p>
+      )}
 
       <div style={{ marginTop: '26px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: '16px', marginBottom: '10px' }}>
@@ -235,12 +262,59 @@ function VerifiedRaceCard({ race, isMobile }) {
           </button>
         )}
       </div>
+
+      {race.actualResults?.length > 0 && (
+        <details className="mt-6 text-sm">
+          <summary className="cursor-pointer text-[#A1A1AA]">Race classification ({race.actualResults.length} {race.actualResults.length === 1 ? 'driver' : 'drivers'})</summary>
+          <ol className="mt-3 list-none p-0">
+            {race.actualResults.map((result) => (
+              <li key={result.fullName} className="grid grid-cols-[32px_minmax(0,1fr)_minmax(0,0.7fr)] gap-3 border-t border-white/10 py-2">
+                <span className="num text-[#A1A1AA]">{result.classification}</span>
+                <span>{result.fullName}</span>
+                <span className="break-words text-right text-[#A1A1AA]">{result.status}</span>
+              </li>
+            ))}
+          </ol>
+        </details>
+      )}
     </section>
   )
 }
 
 export default function History({ onNavigate }) {
   const isMobile = useIsMobile()
+  const [history, setHistory] = useState(null)
+  const [historyError, setHistoryError] = useState(false)
+
+  useEffect(() => {
+    let active = true
+    let timeoutId
+    const controller = new AbortController()
+    async function refresh() {
+      try {
+        const data = await fetchPredictionHistory({ signal: controller.signal })
+        if (!active) return
+        if (!['unavailable', 'disabled'].includes(data.status)) setHistory(data)
+        setHistoryError(['stale', 'unavailable', 'disabled'].includes(data.status))
+      } catch (error) {
+        if (active && error.name !== 'AbortError') setHistoryError(true)
+      } finally {
+        if (active) timeoutId = window.setTimeout(refresh, 60_000)
+      }
+    }
+    refresh()
+    return () => {
+      active = false
+      controller.abort()
+      window.clearTimeout(timeoutId)
+    }
+  }, [])
+
+  // Preserve the existing historical imports; future cards come from the API.
+  const racesByDate = new Map([AZERBAIJAN_GP_2026, BARCELONA_GP_2026, MIAMI_GP_2026]
+    .map((race) => [race.raceDate, race]))
+  for (const race of history?.races ?? []) racesByDate.set(race.raceDate, race)
+  const races = [...racesByDate.values()].sort((a, b) => b.raceDate.localeCompare(a.raceDate))
 
   useEffect(() => {
     document.body.classList.add('history-scrollbar')
@@ -263,12 +337,24 @@ export default function History({ onNavigate }) {
           <div className="mb-10">
             <h1 className="page-title">Prediction History</h1>
             <p className="text-[#A1A1AA] mt-2" style={{ fontSize: '15px' }}>Track record of AI predictions vs actual race results</p>
+            <p className="mt-2 text-sm text-[#A1A1AA]">New races appear automatically once their results are published.</p>
+            {historyError && (
+              <p role="status" className="mt-3 text-sm text-[#F59E0B]">
+                Latest history could not be refreshed. Showing saved results; retrying automatically.
+              </p>
+            )}
+            {!history && !historyError && (
+              <p role="status" className="mt-3 text-sm text-[#A1A1AA]">Checking for newly completed races…</p>
+            )}
+            {history?.pending_count > 0 && (
+              <p role="status" className="mt-3 text-sm text-[#A1A1AA]">
+                Awaiting published results for {history.pending_count} {history.pending_count === 1 ? 'race' : 'races'}.
+              </p>
+            )}
           </div>
 
           <div style={{ display: 'grid', gap: '24px' }}>
-            <VerifiedRaceCard race={AZERBAIJAN_GP_2026} isMobile={isMobile} />
-            <VerifiedRaceCard race={BARCELONA_GP_2026} isMobile={isMobile} />
-            <VerifiedRaceCard race={MIAMI_GP_2026} isMobile={isMobile} />
+            {races.map((race) => <VerifiedRaceCard key={race.raceDate} race={race} isMobile={isMobile} />)}
           </div>
         </div>
       </main>

@@ -14,6 +14,7 @@ def fixed_h2h_calendar(monkeypatch):
     from app.routers import h2h
     from app.services.h2h_standings import unavailable_standings
     monkeypatch.setenv("H2H_MONITOR_ENABLED", "false")  # Tests never write the installation's real journal.
+    monkeypatch.setenv("PREDICTION_HISTORY_ENABLED", "false")
     monkeypatch.setattr(h2h, "_load_standings", lambda *args: unavailable_standings())
     monkeypatch.setattr(h2h, "utc_now", lambda: datetime(2026, 9, 25, tzinfo=timezone.utc))
     monkeypatch.setattr(h2h, "get_season_schedule", lambda year: [

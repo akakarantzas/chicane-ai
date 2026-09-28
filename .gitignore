@@ -50,3 +50,4 @@ cache/
 # Local frozen H2H evaluation datasets and reports
 /backend/evaluation/
 /backend/data/h2h-monitor.sqlite*
+/backend/data/prediction-history.sqlite*

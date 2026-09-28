@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Response
 import json
 from json import JSONDecodeError
 import math
@@ -7,6 +7,7 @@ from pathlib import Path
 from pydantic import BaseModel, Field
 
 from app.data.drivers import PREDICTION_DRIVER_GRID_2026
+from app.services.prediction_history import capture_forecast, history_response
 
 router = APIRouter(prefix="/api/predictions")
 
@@ -162,8 +163,10 @@ def _complete_2026_grid(predictions: list[dict]) -> list[dict]:
 
 @router.get("/next-race", response_model=NextRacePredictionResponse)
 def get_next_race_prediction():
-    predictions = _complete_2026_grid(_load_predictions())
+    original_predictions = _load_predictions()
+    predictions = _complete_2026_grid(original_predictions)
     metadata = _load_metadata()
+    capture_forecast(original_predictions, metadata)
     return {
         "race": metadata.get("race", "Azerbaijan GP"),
         "circuit": metadata.get("circuit", "Baku City Circuit"),
@@ -172,3 +175,9 @@ def get_next_race_prediction():
         "status": _prediction_status(metadata),
         "metadata": _public_metadata(metadata),
     }
+
+
+@router.get("/history")
+def get_prediction_history(response: Response):
+    response.headers["Cache-Control"] = "no-store"
+    return history_response()

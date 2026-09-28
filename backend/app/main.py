@@ -1,4 +1,6 @@
 import os
+from contextlib import asynccontextmanager
+from threading import Event, Thread
 
 from dotenv import load_dotenv
 from fastapi import FastAPI
@@ -7,8 +9,26 @@ from fastapi.middleware.cors import CORSMiddleware
 load_dotenv()
 
 from app.routers import predictions, h2h, contact
+from app.services import prediction_history
 
-app = FastAPI(title="Chicane.ai API")
+
+@asynccontextmanager
+async def lifespan(app):
+    stop = Event()
+    worker = None
+    if prediction_history.enabled():
+        worker = Thread(target=prediction_history.run_worker, args=(stop,),
+                        name="prediction-history", daemon=True)
+        worker.start()
+    try:
+        yield
+    finally:
+        stop.set()
+        if worker is not None:
+            worker.join(timeout=2)
+
+
+app = FastAPI(title="Chicane.ai API", lifespan=lifespan)
 
 cors_origins = [
     origin.strip()
