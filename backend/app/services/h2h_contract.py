@@ -1,7 +1,7 @@
 """Versioned product rules for a Grand Prix finish-ahead comparison.
 
 These are ChicaneAI's comparison rules, not a betting settlement policy.
-See docs/h2h-accuracy-plan.md for the definition and rollout sequence.
+See docs/h2h.md for scoring rules and operational details.
 """
 
 import math

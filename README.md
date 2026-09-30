@@ -80,7 +80,7 @@ For the contact form, copy `backend/.env.example` to `backend/.env` and configur
 
 Run a single backend worker because H2H comparisons and predictions share
 in-memory data. Multiple workers require sticky routing or shared storage.
-See [the H2H rollout](docs/h2h-accuracy-plan.md) for caching and deployment details.
+See [the H2H technical reference](docs/h2h.md) for caching and deployment details.
 
 If PowerShell blocks the activation script, allow local scripts for your user:
 
