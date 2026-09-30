@@ -1,195 +1,128 @@
-# ChicaneAI - Project Context
+﻿# ChicaneAI project context
 
-## What It Is
+ChicaneAI is a Formula 1 analytics app with race-winner forecasts, driver
+head-to-head comparisons, prediction history and a season calendar.
 
-AI-powered Formula 1 analytics and race prediction platform built by Apostolos Kakarantzas, IT student at Deree - The American College of Greece, specializing in Intelligent Systems & Automation.
+This document describes the architecture. Use the [README](../README.md) for
+local setup and the feature guides below for operational details.
 
-## Stack
+## Application structure
 
-- Frontend: React + Tailwind CSS with Vite
-- Backend: FastAPI with Python
-- ML/data: scikit-learn models, pre-generated prediction data, and FastF1-powered H2H stats
-- Data source: FastF1 plus fallback external F1 APIs inside the H2H backend logic
-- Database: none currently; PostgreSQL is planned but not implemented
-- Deployment status: ready for frontend deployment once backend hosting, CORS, and environment variables are configured
+| Area | Implementation |
+| --- | --- |
+| Frontend | React, Tailwind CSS and Vite in `frontend/` |
+| Navigation | Local React state in `frontend/src/App.jsx`; no URL routing or deep links |
+| API | FastAPI in `backend/app/main.py` |
+| Race-winner forecasts | Exported scikit-learn model and JSON artifacts in `backend/app/models/` |
+| H2H | Historical finish-ahead heuristic with reconciled results and published standings |
+| Persistent records | Local SQLite journals for forecast history and H2H monitoring |
+| Automatic qualifying updates | Background inference with updates stored as atomic JSON documents |
+| CI | GitHub Actions runs backend tests, frontend tests, the frontend build and a dependency audit |
 
-## Repo
+The pages are Home, Predictions, H2H, History, Calendar and Contact. Shared
+navigation lives in `frontend/src/components/AppNav.jsx`; API URL construction
+lives in `frontend/src/lib/api.js`.
 
-github.com/akakarantzas/chicane-ai
+## Race-winner predictions
 
-## Project Structure
+Home and Predictions fetch `GET /api/predictions/next-race` through the shared
+`usePredictionFeed` hook. They refresh every 60 seconds and retain the last
+successful forecast if a later refresh fails.
 
-```text
-chicane-ai/
-+-- frontend/
-|   +-- public/                  Static assets, fonts, logo, hero video
-|   +-- src/
-|       +-- App.jsx              useState-based page routing
-|       +-- main.jsx             React entry point
-|       +-- index.css            Global design, layout, animation, responsive CSS
-|       +-- assets/circuits/     Circuit image assets
-|       +-- components/
-|       |   +-- AppNav.jsx
-|       |   +-- AnimatedCircuit.jsx
-|       |   +-- NextRaceCircuitCard.jsx
-|       |   +-- ui/
-|       +-- data/
-|       |   +-- circuits.js
-|       |   +-- drivers.js
-|       |   +-- races.js
-|       +-- hooks/
-|       |   +-- useIsMobile.js
-|       +-- lib/
-|       |   +-- api.js           Backend API URL helper
-|       +-- pages/
-|           +-- Home.jsx
-|           +-- Predictions.jsx
-|           +-- H2H.jsx
-|           +-- History.jsx
-|           +-- Season.jsx
-|           +-- Contact.jsx
-+-- backend/
-|   +-- app/
-|       +-- main.py              FastAPI app, CORS, router registration
-|       +-- data/
-|       |   +-- drivers.py       Shared backend driver/team constants
-|       +-- models/
-|       |   +-- singapore_predictions.json
-|       |   +-- singapore_metadata.json
-|       |   +-- singapore_model.pkl
-|       +-- routers/
-|           +-- contact.py
-|           +-- h2h.py
-|           +-- predictions.py
-+-- docs/
-|   +-- CONTEXT.md
-|   +-- design.md
-|   +-- security_audit.md
-+-- README.md
-```
+The active model artifacts are for Singapore. Training and export belong to the
+separate [Singapore model repository](https://github.com/akakarantzas/f1-2026-singapore-grand-prix-winner-prediction).
+The app serves the published baseline JSON or its matching post-qualifying update.
+API request handlers do not train or load the model.
 
-## Current Navigation
+While the backend is running, a worker checks official Grand Prix qualifying
+completion and the full classification. It substitutes qualifying positions into
+frozen pre-race features, runs the saved model and archives both forecast stages
+before publishing the update. Qualifying order can differ from the final starting
+grid after penalties. New forecasts are not generated after race start.
 
-Predictions - H2H - History - Calendar - Contact
+The current forecast's version, stage, probabilities and generation time belong
+in its API payload and artifact metadata, rather than being duplicated here.
+See [Singapore artifact publication](singapore-predictions.md) and
+[automatic post-qualifying updates](post-qualifying-predictions.md).
 
-Navigation is handled in `frontend/src/App.jsx` with local React state. There is no URL router or deep-linking yet.
+## H2H comparisons
 
-## Current Site State
+H2H predicts which selected driver finishes ahead in the next Grand Prix. It uses
+a separate heuristic from the full-field race-winner model. Its raw scores are
+uncalibrated; the interface shows evidence and can withhold a favorite when that
+evidence is insufficient.
 
-- Home: video hero, race countdown, next-race circuit card, scrollable 2026 race calendar, latest prediction preview, and season stats.
-- Predictions: full next-race prediction table fetched from the backend, with animated probability bars and show-more behavior.
-- H2H: driver selectors, driver comparison cards, FastF1-backed comparison results, and H2H prediction card.
-- History: verified Miami 2026 prediction archive with actual winner comparison.
-- Calendar: scrollable 2026 race calendar using shared frontend race data.
-- Contact: contact form posting to the backend plus feature request chips.
+Calendars come from FastF1 with a Jolpica fallback. Result reconciliation uses
+Jolpica, FastF1 and OpenF1; championship values come from published standings.
+Comparison and prediction share process-local snapshots, and the UI pins its
+prediction to the comparison's current-season data version.
 
-## Prediction Data
+The first eligible pre-race comparison is recorded in a SQLite journal, including
+abstentions. The H2H tab shows score explanations and recording status. Aggregate
+monitoring remains available through the API; its panel is not displayed in the tab.
 
-Current prediction data is centered around the 2026 Singapore Grand Prix.
+See the [H2H technical reference](h2h.md) for scoring, coverage, caching and
+deployment requirements, and [monitoring operations](h2h-monitoring.md) for storage.
 
-- Model version: `singapore-hgb-calibrated-1.0`
-- Status: Pre-Qualifying (`projected_grid`)
-- P1: Russell, Mercedes, 37.0%
-- P2: Norris, McLaren, 13.1%
-- P3: Leclerc, Ferrari, 12.5%
-- P4: Antonelli, Mercedes, 8.7%
-- P5: Hamilton, Ferrari, 5.6%
+## History and calendars
 
-Frontend prediction views load from `GET /api/predictions/next-race`.
-Backend API prediction data is served from `backend/app/models/singapore_predictions.json` with metadata from `backend/app/models/singapore_metadata.json`.
-Training and export live in the standalone model repo: `f1-2026-singapore-grand-prix-winner-prediction`.
+History combines the existing Miami, Barcelona-Catalunya and Azerbaijan records
+with archived forecasts and published outcomes from `GET /api/predictions/history`.
+It refreshes automatically and supports selecting recorded forecast versions.
+The backend history worker archives published forecasts and checks for results;
+it is separate from the H2H monitoring journal.
 
-## Backend API Endpoints
+The Home and Calendar views use the frontend-local 2026 schedule in
+`frontend/src/data/races.js`. H2H and prediction-history services use provider
+calendars. Updating the frontend schedule does not change the backend's target
+discovery. Circuit images, paths and animation settings are maintained in
+`frontend/src/assets/circuits/`, `frontend/src/data/circuits.js` and the shared
+circuit components.
 
-- `GET /api/health` returns backend health status.
-- `GET /api/predictions/next-race` returns the current prediction payload.
-- `GET /api/h2h/compare?driver1=ANT&driver2=VER&year=2026` returns driver comparison stats.
-- `GET /api/h2h/predict?driver1=ANT&driver2=VER` returns H2H winner prediction data.
-- `POST /api/contact` accepts contact form submissions.
+See [prediction-history operations](prediction-history.md) for archival rules,
+result reconciliation and storage recovery.
 
-There is no `/api/races` endpoint anymore. Race calendar data is frontend-local in `frontend/src/data/races.js`.
+## API surface
 
-## Configuration
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /api/health` | Backend health check |
+| `GET /api/predictions/next-race` | Active race-winner forecast and metadata |
+| `GET /api/predictions/history` | Recorded forecasts and available race outcomes |
+| `GET /api/h2h/compare` | Selected drivers' season statistics and snapshot information |
+| `GET /api/h2h/predict` | Finish-ahead prediction, evidence and recording status |
+| `GET /api/h2h/monitoring` | Read-only summary of recorded H2H forecasts and outcomes |
+| `POST /api/contact` | Contact-form submission through Resend |
 
-Frontend backend URL:
+FastAPI's `/docs` page describes request parameters and response schemas.
 
-- Local default: `http://localhost:8000`
-- Deployment: set `VITE_API_BASE_URL` to the deployed backend URL.
+## Configuration and persistence
 
-Backend CORS:
+- Set `VITE_API_BASE_URL` in the frontend build environment for the backend URL.
+  Its local default is `http://localhost:8000`.
+- Use [backend/.env.example](../backend/.env.example) for backend configuration.
+  `CORS_ORIGINS` permits frontend origins; `RESEND_API_KEY` and `CONTACT_EMAIL`
+  configure contact delivery.
+- Forecast history defaults to `backend/data/prediction-history.sqlite` and H2H
+  monitoring to `backend/data/h2h-monitor.sqlite`. The paths can be set with
+  `PREDICTION_HISTORY_DB_PATH` and `H2H_MONITOR_DB_PATH`.
+- Post-qualifying publications default to `backend/data/prediction-updates/`,
+  configurable with `PREDICTION_UPDATES_DIR`.
+- Preserve these stores on durable local disk or a persistent deployment volume.
+  They are ignored by Git. H2H snapshots are in memory and disappear on restart.
+- Automatic qualifying inference requires both `POST_QUALIFYING_ENABLED` and
+  `PREDICTION_HISTORY_ENABLED`. Background workers run with the FastAPI process.
+  The current file-based publisher is intended for a single backend worker.
 
-- Configured in `backend/app/main.py`
-- Local defaults: `http://localhost:5173`, `http://127.0.0.1:5173`
-- Deployment: set `CORS_ORIGINS` to include the Vercel frontend domain.
+## Development and verification
 
-Contact form:
+Backend services and regression tests live in `backend/app/services/` and
+`backend/tests/`. Frontend tests use Vitest and React Testing Library alongside
+the source files. CI configuration is in
+[.github/workflows/ci.yml](../.github/workflows/ci.yml); it uses Python 3.12 and
+Node.js 22.
 
-- Requires `RESEND_API_KEY` and `CONTACT_EMAIL` in the backend environment.
-
-## Design System Summary
-
-- Background: `#0C0C0E`
-- Card/surface: `#1A1A1F`, `#27272A`
-- Accent red: `#E8002D`
-- Primary text: `#F4F4F5`
-- Muted text: `#A1A1AA`
-- Buttons: 44px height, 8px radius
-- Cards: mostly 8px radius in current implementation
-- Content width: max 1280px, centered
-- Mobile responsiveness: implemented with shared mobile nav and targeted responsive CSS
-
-See `docs/design.md` for the fuller design reference.
-
-## What's Done
-
-- All 6 current pages are implemented.
-- Shared navbar and mobile menu are centralized in `AppNav.jsx`.
-- Shared mobile breakpoint hook is centralized in `useIsMobile.js`.
-- Frontend driver, race, and prediction constants are centralized under `frontend/src/data/`.
-- Backend driver/team constants are centralized in `backend/app/data/drivers.py`.
-- Unused races backend router was removed.
-- Frontend API URL handling is centralized in `frontend/src/lib/api.js`.
-- Mobile responsiveness pass was completed and the frontend build passed.
-- Project documentation is organized under `docs/` except `README.md`.
-
-## What's Next
-
-- Deploy backend to a reachable host.
-- Deploy frontend through Vercel.
-- Configure production backend URL and backend CORS.
-- Add linting and basic smoke tests.
-- Add CI/build checks.
-- Add URL routing/deep-linking later if needed.
-- Continue model improvements and post-race verification updates.
-
-## Local Development
-
-Frontend:
-
-```powershell
-cd frontend
-npm install
-npm run dev
-```
-
-Backend:
-
-```powershell
-cd backend
-python -m venv venv
-.\venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
-python -m uvicorn app.main:app --reload
-```
-
-Frontend runs at `http://localhost:5173`.
-Backend runs at `http://127.0.0.1:8000`.
-
-## Save Progress
-
-```powershell
-git status
-git add <files>
-git commit -m "short descriptive message"
-git push
-```
+For related details, see the [design reference](design.md),
+[H2H backtesting guide](h2h-backtesting.md),
+[H2H model evaluation](h2h-model-evaluation.md) and
+[H2H uncertainty policy](h2h-uncertainty.md).
