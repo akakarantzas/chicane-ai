@@ -27,6 +27,7 @@
 - Note: Hero H1 intentionally set to 72px for visual impact. All other H1s use 42px.
 - Logo: DM Sans, SemiBold 600, italic, letter-spacing -0.05em
 - Body/UI: Helvetica, Arial, sans-serif
+- Numerals and select display text: Formula1 (`.num` class), served from `frontend/public/fonts/`
 
 ## Spacing System
 - Base unit: 8px
@@ -83,17 +84,9 @@ Prediction bars:
 - Home: hero with video bg, stats, countdown, calendar, latest prediction
 - Predictions: full driver win probability breakdown
 - History: past predictions vs actual results
+- H2H: driver head-to-head comparison and finish-ahead prediction
 - Season: 2026 race calendar
-
-## How to Use This File
-When building anything new, ask:
-1. What does `docs/design.md` say about this component?
-2. Am I following the color system?
-3. Am I following the spacing system?
-4. Am I following the typography scale?
-
-If something doesn't match, fix the code or update `docs/design.md`.
-This file evolves as the product evolves.
+- Contact: contact form
 
 ## Issues / TODO
 - Buttons may not be consistent across all pages
@@ -108,5 +101,3 @@ This file evolves as the product evolves.
 - Align all card spacing to 24px consistently
 - Add consistent hover states everywhere
 - Improve hero section typography hierarchy
-- Add Drivers and Standings pages
-- Add post-race result verification after Miami GP
