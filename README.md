@@ -11,10 +11,6 @@ AI-powered Formula 1 analytics and race prediction web app.
 - **History** - past predictions verified against real results
 - **Season calendar** - 2026 F1 race schedule
 
-## Track Record
-
-Accurately predicted Antonelli (Mercedes) as the 2026 Miami GP winner.
-
 ## Stack
 
 **Frontend**
