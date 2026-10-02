@@ -44,6 +44,8 @@ npm run dev
 
 Runs on `http://localhost:5173`
 
+If the backend is not on `http://localhost:8000`, copy `frontend/.env.example` to `frontend/.env` and set `VITE_API_BASE_URL`.
+
 ### Backend
 
 Recommended: Python 3.12.
