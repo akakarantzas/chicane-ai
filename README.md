@@ -7,6 +7,7 @@ AI-powered Formula 1 analytics and race prediction web app.
 ## Features
 
 - **Race predictions** - win probability for each driver using a Gradient Boosting model trained on FastF1 data
+- **Post-qualifying updates** - Singapore forecasts update automatically while the backend runs, after official qualifying completion and the full classification are available
 - **H2H comparisons** - reconciled driver statistics with freshness reporting and a historical finish-ahead heuristic
 - **History** - past predictions verified against real results
 - **Season calendar** - 2026 F1 race schedule
@@ -31,14 +32,17 @@ AI-powered Formula 1 analytics and race prediction web app.
 - [H2H uncertainty](docs/h2h-uncertainty.md) - uncalibrated scores, evidence safeguards and calibration audit
 - [H2H monitoring](docs/h2h-monitoring.md) - score explanations, pre-race records and published-result tracking
 - [Automatic prediction history](docs/prediction-history.md) - forecast publication, archiving and automatic race-result updates
+- [Post-qualifying predictions](docs/post-qualifying-predictions.md) - automatic Singapore forecast updates and publication rules
 
 ## Setup
 
 ### Frontend
 
+Recommended: Node.js 22.12 or later.
+
 ```powershell
 cd frontend
-npm install
+npm ci
 npm run dev
 ```
 
@@ -46,13 +50,20 @@ Runs on `http://localhost:5173`
 
 If the backend is not on `http://localhost:8000`, copy `frontend/.env.example` to `frontend/.env` and set `VITE_API_BASE_URL`.
 
+Run frontend checks from the `frontend` directory:
+
+```powershell
+npm test
+npm run build
+npm audit --audit-level=moderate
+```
+
 ### Backend
 
 Recommended: Python 3.12.
 
 ```powershell
 cd backend
-Remove-Item -Recurse -Force .\venv -ErrorAction SilentlyContinue
 python -m venv venv
 .\venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
