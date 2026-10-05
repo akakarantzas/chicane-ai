@@ -41,7 +41,7 @@ export default function NextRaceCircuitCard({
         <div>
           <div className="mb-6 flex items-center gap-3">
             <span className="h-2 w-2 rounded-full bg-[#E8002D]" />
-            <span className="text-[13px] font-medium uppercase tracking-[0.1em] text-[#E8002D]">NEXT RACE</span>
+            <span className="text-[13px] font-medium uppercase tracking-widest text-[#E8002D]">NEXT RACE</span>
           </div>
 
           <p className="mb-3 text-[13px] font-semibold uppercase tracking-[0.08em] text-[#E8002D]">

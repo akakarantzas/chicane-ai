@@ -1,6 +1,28 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss' source(none);
+
+@source '../index.html';
+@source './**/*.{js,jsx,ts,tsx}';
+
+@theme {
+  --font-sans: Helvetica, Arial, sans-serif;
+  --font-display: 'Formula1', Helvetica, Arial, sans-serif;
+}
+
+/* Preserve the form and border defaults used before the Tailwind 4 upgrade. */
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--color-gray-400);
+  }
+}
 
 :root {
   --red-action: #E10600;

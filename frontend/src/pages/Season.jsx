@@ -108,7 +108,7 @@ export default function Season({ onNavigate }) {
         </div>
       </main>
 
-      <footer className="border-t border-white/[0.06] relative" style={{ zIndex: 1, padding: '28px 32px' }}>
+      <footer className="border-t border-white/6 relative" style={{ zIndex: 1, padding: '28px 32px' }}>
         <p style={{ fontSize: '14px', color: '#A1A1AA', textAlign: 'center', margin: 0 }}>© 2026 ChicaneAI, All rights reserved.</p>
       </footer>
 

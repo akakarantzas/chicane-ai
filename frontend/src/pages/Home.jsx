@@ -574,7 +574,7 @@ export default function Home({ onNavigate }) {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-white/[0.06]" style={{ padding: '28px 32px' }}>
+      <footer className="border-t border-white/6" style={{ padding: '28px 32px' }}>
         <p style={{ fontSize: '14px', color: '#A1A1AA', textAlign: 'center', margin: 0 }}>© 2026 ChicaneAI, All rights reserved.</p>
       </footer>
 

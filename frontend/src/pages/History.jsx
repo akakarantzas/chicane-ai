@@ -213,7 +213,7 @@ function VerifiedRaceCard({ race: raceArchive, isMobile }) {
             aria-label={`Forecast for ${race.race}`}
             value={forecast?.id ?? raceArchive.forecasts[0].id}
             onChange={(event) => setForecastId(event.target.value)}
-            className="max-w-full rounded border border-white/10 bg-[#121216] px-3 py-2 text-[#F4F4F5]"
+            className="max-w-full rounded-sm border border-white/10 bg-[#121216] px-3 py-2 text-[#F4F4F5]"
           >
             {raceArchive.forecasts.map((item) => (
               <option key={item.id} value={item.id}>
@@ -271,7 +271,7 @@ function VerifiedRaceCard({ race: raceArchive, isMobile }) {
               <li key={result.fullName} className="grid grid-cols-[32px_minmax(0,1fr)_minmax(0,0.7fr)] gap-3 border-t border-white/10 py-2">
                 <span className="num text-[#A1A1AA]">{result.classification}</span>
                 <span>{result.fullName}</span>
-                <span className="break-words text-right text-[#A1A1AA]">{result.status}</span>
+                <span className="wrap-break-word text-right text-[#A1A1AA]">{result.status}</span>
               </li>
             ))}
           </ol>
@@ -359,7 +359,7 @@ export default function History({ onNavigate }) {
         </div>
       </main>
 
-      <footer className="border-t border-white/[0.06] relative" style={{ zIndex: 1, padding: '28px 32px' }}>
+      <footer className="border-t border-white/6 relative" style={{ zIndex: 1, padding: '28px 32px' }}>
         <p style={{ fontSize: '14px', color: '#A1A1AA', textAlign: 'center', margin: 0 }}>© 2026 ChicaneAI, All rights reserved.</p>
       </footer>
     </div>

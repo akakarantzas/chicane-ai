@@ -911,7 +911,7 @@ export default function H2H({ onNavigate }) {
       </div>
 
       {/* ── Footer ── */}
-      <footer className="border-t border-white/[0.06]" style={{ padding: '28px 32px', position: 'relative', zIndex: 1 }}>
+      <footer className="border-t border-white/6" style={{ padding: '28px 32px', position: 'relative', zIndex: 1 }}>
         <p style={{ fontSize: '14px', color: '#A1A1AA', textAlign: 'center', margin: 0 }}>
           © 2026 ChicaneAI, All rights reserved.
         </p>
