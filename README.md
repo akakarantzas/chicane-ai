@@ -2,6 +2,8 @@
 
 [![ci](https://github.com/akakarantzas/chicane-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/akakarantzas/chicane-ai/actions/workflows/ci.yml)
 
+![ChicaneAI banner](docs/hero-banner.png)
+
 AI-powered Formula 1 analytics and race prediction web app.
 
 ## Features
