@@ -104,11 +104,6 @@ Then run:
 .\venv\Scripts\Activate.ps1
 ```
 
-## What's Next
-
-- Model improvements
-- Deployment
-
 ## License
 
 MIT
