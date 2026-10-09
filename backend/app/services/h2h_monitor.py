@@ -195,14 +195,14 @@ def capture_prediction(prediction, rows, event, driver1, driver2, now):
     try:
         result = record_forecast(prediction, rows, event, driver1, driver2, now)
     except (sqlite3.Error, OSError, ValueError, KeyError, TypeError):
-        logger.warning("H2H forecast recording unavailable", exc_info=True)
+        logger.warning("H2H forecast recording unavailable")
         return {"status": "unavailable", "reason": "recording_failed"}
     try:
         source_times = {year: item["freshness"].get("retrieved_at") for year, item in prediction.get("snapshots", {}).items()
                         if item.get("freshness", {}).get("status") == "fresh"}
         result["settlement"] = settle_results(rows, now, source_times=source_times)
     except (sqlite3.Error, OSError, ValueError, KeyError, TypeError):
-        logger.warning("H2H outcome refresh unavailable", exc_info=True)
+        logger.warning("H2H outcome refresh unavailable")
         result["settlement"] = {"status": "unavailable"}
     return result
 
@@ -269,7 +269,7 @@ def monitoring_summary():
     try:
         return summary()
     except (sqlite3.Error, OSError, ValueError, KeyError, TypeError):
-        logger.warning("H2H monitoring summary unavailable", exc_info=True)
+        logger.warning("H2H monitoring summary unavailable")
         return {"status": "unavailable", "groups": []}
 
 

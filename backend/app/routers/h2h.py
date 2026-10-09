@@ -2,9 +2,10 @@ import os
 import json
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
+from typing import Annotated
 
 import fastf1
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 
 from app.data.drivers import DRIVER_ROSTER_2026
 from app.services.h2h_cache import get_season_snapshot
@@ -24,6 +25,8 @@ from app.services.h2h_logic import (
 )
 
 router = APIRouter(prefix="/api/h2h")
+DriverCode = Annotated[str, Query(min_length=1, max_length=16)]
+SnapshotID = Annotated[str | None, Query(max_length=32, pattern=r"^[a-f0-9]{32}$")]
 
 CACHE_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "..", "cache")
 _fastf1_cache_enabled = False
@@ -39,7 +42,7 @@ def _normalise_driver_code(value: str) -> str:
 def _validate_driver_code(value: str, label: str) -> str:
     code = _normalise_driver_code(value)
     if code not in DRIVER_ROSTER_2026:
-        raise HTTPException(status_code=400, detail=f"Unknown {label}: {value}")
+        raise HTTPException(status_code=400, detail=f"Unknown {label}.")
     return code
 
 
@@ -284,12 +287,10 @@ def _load_results(year: int, strict: bool = True) -> list[dict]:
         return []
 
     rows = []
-    source_errors = []
-
     try:
         rows.extend(_load_fastf1_results(year, events, strict))
-    except Exception as exc:
-        source_errors.append(str(exc))
+    except Exception:
+        pass
 
     for loader in (
         lambda: _load_jolpica_results(year),
@@ -297,21 +298,19 @@ def _load_results(year: int, strict: bool = True) -> list[dict]:
     ):
         try:
             rows.extend(loader())
-        except Exception as exc:
-            source_errors.append(str(exc))
+        except Exception:
+            pass
 
     rows = reconcile_results(rows, events)
     if strict and not rows:
         detail = f"No H2H race results found for {year}"
-        if source_errors:
-            detail += f". Sources failed: {'; '.join(source_errors[:3])}"
         raise HTTPException(status_code=502, detail=detail)
 
     return rows
 
 
 @router.get("/predict")
-def predict_h2h(driver1: str, driver2: str, snapshot_id: str | None = None):
+def predict_h2h(driver1: DriverCode, driver2: DriverCode, snapshot_id: SnapshotID = None):
     # Keep this handler sync: FastAPI runs sync endpoints in a threadpool, and
     # the expensive season loads are additionally guarded by the in-process cache.
     abbrev1, abbrev2 = _validate_driver_pair(driver1, driver2)
@@ -364,7 +363,7 @@ def h2h_monitoring():
 
 
 @router.get("/compare")
-def compare_drivers(driver1: str, driver2: str, year: int = SEASON):
+def compare_drivers(driver1: DriverCode, driver2: DriverCode, year: int = SEASON):
     # Keep this handler sync for the same reason as /predict.
     abbrev1, abbrev2 = _validate_driver_pair(driver1, driver2)
     year = _validate_year(year)

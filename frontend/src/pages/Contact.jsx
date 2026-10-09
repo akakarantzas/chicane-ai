@@ -77,7 +77,7 @@ function ContactForm() {
       if (res.ok && data.success) {
         setStatus('success')
       } else {
-        setServerError(data.detail || data.error || 'Something went wrong. Please try again.')
+        setServerError(typeof data.detail === 'string' ? data.detail : 'Please check your contact details and try again.')
         setStatus('error')
       }
     } catch {

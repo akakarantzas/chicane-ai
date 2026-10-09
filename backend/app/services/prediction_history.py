@@ -186,7 +186,7 @@ def capture_forecast(predictions, metadata):
     try:
         return record_forecast(predictions, metadata)
     except Exception:
-        logger.exception("Could not archive the published race forecast")
+        logger.warning("Could not archive the published race forecast")
         return {"status": "unavailable"}
 
 
@@ -311,7 +311,7 @@ def scan_forecasts(models_dir=None):
             import_forecast(json.loads(manifest.read_text(encoding="utf-8")))
         except Exception:
             failures += 1
-            logger.exception("Could not import archived forecast %s", manifest.name)
+            logger.warning("Could not import archived forecast")
     for metadata_path in sorted(directory.glob("*_metadata.json")):
         prediction_path = metadata_path.with_name(metadata_path.name.replace("_metadata.json", "_predictions.json"))
         if not prediction_path.exists():
@@ -326,7 +326,7 @@ def scan_forecasts(models_dir=None):
             record_forecast(predictions, metadata)
         except Exception:
             failures += 1
-            logger.exception("Could not archive forecast artifacts %s", metadata_path.name)
+            logger.warning("Could not archive forecast artifacts")
     return failures
 
 
@@ -381,7 +381,7 @@ def refresh_history(*, force=False):
             settle_results()
         except Exception:
             error = True
-            logger.exception("Prediction history refresh failed; keeping saved forecasts and results")
+            logger.warning("Prediction history refresh failed; keeping saved forecasts and results")
         state = {"status": "stale" if error else "ready", "checked_at": utc_now().isoformat()}
         _last_refresh[key] = (time.monotonic(), state)
         return state
@@ -436,7 +436,7 @@ def history_response():
     try:
         return {**read_history(), **state}
     except Exception:
-        logger.exception("Could not read prediction history")
+        logger.warning("Could not read prediction history")
         return {"status": "unavailable", "races": [], "pending_count": 0, "checked_at": state["checked_at"]}
 
 

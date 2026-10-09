@@ -134,7 +134,7 @@ def get_season_snapshot(year, events, now, loader, *, snapshot_id=None):
             elif signature and not rows:
                 error = "results_unavailable"
         except Exception:
-            logger.exception("H2H snapshot refresh failed for %s", year)
+            logger.warning("H2H snapshot refresh failed for %s", year)
             rows, standings, error = [], unavailable_standings(), "refresh_failed"
 
         if (error and compatible_previous and previous.data["retrieved_at"] is not None

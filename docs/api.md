@@ -9,6 +9,12 @@ Local base URL: `http://127.0.0.1:8000`. Start the backend using the
 - Responses are JSON. Send contact requests with `Content-Type: application/json`.
 - A `null` statistic means unavailable, not zero. HTTP 200 can include unavailable
   data; inspect the response's status fields.
+- API requests are limited to 60 per client IP per minute, with a 600-request
+  worker-wide cap. H2H additionally allows 20 per IP and 120 per worker per minute.
+  Contact has the stricter hourly limits below. Health and CORS preflight are exempt.
+- Limits return `429` with `Retry-After` in seconds. Request bodies are capped at
+  16 KiB (`413`); query strings at 2,048 bytes (`414`). See
+  [security and deployment](security.md) for proxy and multi-instance requirements.
 
 Examples below use PowerShell. Response excerpts are illustrative, not live results.
 Only the next-race endpoint currently declares a detailed response model in OpenAPI;
@@ -117,7 +123,7 @@ Invoke-RestMethod 'http://127.0.0.1:8000/api/h2h/compare?driver1=NOR&driver2=PIA
 
 | Query parameter | Type | Required/default |
 | --- | --- | --- |
-| `driver1`, `driver2` | string | Both required |
+| `driver1`, `driver2` | string | Both required; 1–16 characters each before normalization |
 | `year` | integer | Defaults to `2026`; supports `2024`, `2025`, `2026` |
 
 Returns `year`, `scope` (`season`), `driver1`, `driver2`, and four metadata objects:
@@ -147,8 +153,8 @@ Invoke-RestMethod 'http://127.0.0.1:8000/api/h2h/predict?driver1=NOR&driver2=PIA
 
 | Query parameter | Type | Required/default |
 | --- | --- | --- |
-| `driver1`, `driver2` | string | Both required |
-| `snapshot_id` | string | Optional; pins the current-season snapshot from compare's `freshness.snapshot_id` |
+| `driver1`, `driver2` | string | Both required; 1–16 characters each before normalization |
+| `snapshot_id` | string | Optional; 32 lowercase hexadecimal characters from compare's `freshness.snapshot_id` |
 
 Uses 2024–2026 history before the target event; there is no `year` parameter.
 Only use a snapshot from a current-season comparison. An expired or lost pin
@@ -255,15 +261,15 @@ This request sends a real email when delivery is configured.
 
 | JSON field | Type | Validation |
 | --- | --- | --- |
-| `name` | string or null | Optional; missing/blank names become `Anonymous` |
-| `email` | string | Required; validated after trimming whitespace |
+| `name` | string or null | Optional; at most 100 characters, no internal line breaks; missing/blank becomes `Anonymous` |
+| `email` | string | Required; valid format, 3–254 characters after trimming |
 | `message` | string | Required; 1–2,000 characters after trimming |
 
-Success: `200` with `{"success":true}`. Limit: three submissions per client IP
-per rolling hour, stored in memory. Attempts that pass input validation consume
-the limit even if configuration or delivery subsequently fails.
+Unknown JSON fields are rejected. Success: `200` with `{"success":true}`.
+Limit: three attempts per client IP and 30 per worker per rolling hour, stored in
+memory. Invalid input and failed delivery also consume the attempt limit.
 
-Errors: `422` invalid input, `429` rate limit, `500` email service not configured,
+Errors: `415` non-JSON content type, `422` invalid input, `429` rate limit, `500` email service not configured,
 or `502` delivery failed. Configure `RESEND_API_KEY` and `CONTACT_EMAIL` on the server.
 
 ## Errors and client handling

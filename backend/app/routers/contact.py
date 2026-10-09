@@ -1,22 +1,18 @@
 import html
 import json
+import logging
 import os
 import re
-import time
-from collections import defaultdict
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 from fastapi import APIRouter, HTTPException
-from fastapi import Request as FastAPIRequest
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 
 router = APIRouter(prefix="/api")
 
 _EMAIL_RE = re.compile(r'^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$')
-_RATE_STORE: dict[str, list[float]] = defaultdict(list)
-_RATE_LIMIT = 3
-_RATE_WINDOW = 3600
+logger = logging.getLogger(__name__)
 _PLACEHOLDER_VALUES = {
     "re_placeholder_replace_me",
     "you@example.com",
@@ -24,9 +20,10 @@ _PLACEHOLDER_VALUES = {
 
 
 class ContactPayload(BaseModel):
-    name: str | None = None
-    email: str
-    message: str
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    name: str | None = Field(default=None, max_length=100, pattern=r"^[^\r\n]*$")
+    email: str = Field(min_length=3, max_length=254)
+    message: str = Field(min_length=1, max_length=2000)
 
 
 def _is_placeholder(value: str) -> bool:
@@ -48,7 +45,7 @@ def _get_contact_config() -> tuple[str, str]:
 
 
 @router.post("/contact")
-def submit_contact(payload: ContactPayload, request: FastAPIRequest):
+def submit_contact(payload: ContactPayload):
     if not _EMAIL_RE.match(payload.email.strip()):
         raise HTTPException(status_code=422, detail="Please enter a valid email address.")
 
@@ -57,13 +54,6 @@ def submit_contact(payload: ContactPayload, request: FastAPIRequest):
         raise HTTPException(status_code=422, detail="Message cannot be empty.")
     if len(message) > 2000:
         raise HTTPException(status_code=422, detail="Message must be under 2000 characters.")
-
-    ip = request.client.host if request.client else "unknown"
-    now = time.time()
-    recent = [t for t in _RATE_STORE[ip] if now - t < _RATE_WINDOW]
-    if len(recent) >= _RATE_LIMIT:
-        raise HTTPException(status_code=429, detail="Too many submissions. Please try again later.")
-    _RATE_STORE[ip] = recent + [now]
 
     api_key, to_email = _get_contact_config()
 
@@ -98,11 +88,11 @@ def submit_contact(payload: ContactPayload, request: FastAPIRequest):
         with urlopen(req, timeout=10) as resp:
             resp.read()
     except HTTPError as e:
-        body = e.read().decode("utf-8", errors="replace")
-        print(f"[contact] Resend HTTP {e.code}: {body}")
+        # Provider bodies/exception text can include credentials or submitted data.
+        logger.warning("Contact delivery rejected by provider (HTTP %s)", e.code)
         raise HTTPException(status_code=502, detail="Failed to send message. Please try again.")
-    except (URLError, OSError) as e:
-        print(f"[contact] Resend network error: {e}")
+    except (URLError, OSError):
+        logger.warning("Contact delivery failed due to a network error")
         raise HTTPException(status_code=502, detail="Failed to send message. Please try again.")
 
     return {"success": True}

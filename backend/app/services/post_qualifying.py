@@ -50,7 +50,7 @@ def read_update(predictions, metadata):
     except FileNotFoundError:
         return None
     except (ValueError, KeyError, TypeError, OSError):
-        logger.warning("Ignoring unreadable post-qualifying publication", exc_info=True)
+        logger.warning("Ignoring unreadable post-qualifying publication")
         return None
 
 
@@ -174,5 +174,5 @@ def run_worker(stop):
             logger.info("Post-qualifying update: %s", refresh())
         except Exception:
             # Keep serving the latest successfully published forecast and retry next minute.
-            logger.exception("Post-qualifying update deferred")
+            logger.warning("Post-qualifying update deferred")
         stop.wait(60)

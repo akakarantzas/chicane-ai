@@ -195,7 +195,7 @@ def test_h2h_compare_invalid_driver1_returns_400_without_loading_data(
     )
 
     assert response.status_code == 400
-    assert response.json()["detail"] == "Unknown driver1: XXX"
+    assert response.json()["detail"] == "Unknown driver1."
 
 
 def test_h2h_compare_invalid_driver2_returns_400_without_loading_data(
@@ -209,7 +209,7 @@ def test_h2h_compare_invalid_driver2_returns_400_without_loading_data(
     )
 
     assert response.status_code == 400
-    assert response.json()["detail"] == "Unknown driver2: XXX"
+    assert response.json()["detail"] == "Unknown driver2."
 
 
 def test_h2h_compare_unsupported_year_returns_400_without_loading_data(
@@ -319,7 +319,7 @@ def test_h2h_predict_invalid_driver1_returns_400_without_loading_data(
     )
 
     assert response.status_code == 400
-    assert response.json()["detail"] == "Unknown driver1: XXX"
+    assert response.json()["detail"] == "Unknown driver1."
 
 
 def test_h2h_predict_invalid_driver2_returns_400_without_loading_data(
@@ -333,7 +333,7 @@ def test_h2h_predict_invalid_driver2_returns_400_without_loading_data(
     )
 
     assert response.status_code == 400
-    assert response.json()["detail"] == "Unknown driver2: XXX"
+    assert response.json()["detail"] == "Unknown driver2."
 
 
 def test_h2h_predict_rejects_same_driver_without_loading_data(

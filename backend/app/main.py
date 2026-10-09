@@ -5,11 +5,14 @@ from threading import Event, Thread
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 
 load_dotenv()
 
 from app.routers import predictions, h2h, contact
 from app.services import prediction_history, post_qualifying
+from app.security import PublicAPIGuard
 
 
 @asynccontextmanager
@@ -36,6 +39,16 @@ async def lifespan(app):
 
 
 app = FastAPI(title="Chicane.ai API", lifespan=lifespan)
+app.add_middleware(PublicAPIGuard)
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_error(request, exc):
+    # Pydantic's default error includes the submitted input (potentially a secret).
+    return JSONResponse(status_code=422, content={
+        "detail": [{"loc": error["loc"], "type": error["type"], "msg": error["msg"]}
+                   for error in exc.errors()]
+    })
 
 cors_origins = [
     origin.strip()
@@ -49,9 +62,9 @@ cors_origins = [
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_credentials=False,
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type"],
 )
 
 

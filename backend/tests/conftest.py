@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app.routers import contact
+from app.security import API_LIMITER, H2H_LIMITER, CONTACT_LIMITER
 from app.services.h2h_cache import clear_h2h_cache
 from app.services.h2h_schedule import RaceEvent, clear_schedule_cache
 
@@ -28,11 +28,13 @@ def fixed_h2h_calendar(monkeypatch, tmp_path):
 
 @pytest.fixture(autouse=True)
 def clear_process_state():
-    contact._RATE_STORE.clear()
+    for limiter in (API_LIMITER, H2H_LIMITER, CONTACT_LIMITER):
+        limiter.clear()
     clear_h2h_cache()
     clear_schedule_cache()
     yield
-    contact._RATE_STORE.clear()
+    for limiter in (API_LIMITER, H2H_LIMITER, CONTACT_LIMITER):
+        limiter.clear()
     clear_h2h_cache()
     clear_schedule_cache()
 

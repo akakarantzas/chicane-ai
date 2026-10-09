@@ -29,6 +29,7 @@ AI-powered Formula 1 analytics and race prediction web app.
 ## Documentation
 
 - [API reference](docs/api.md) - endpoints, parameters, responses, and errors
+- [Security](docs/security.md) - credential handling, request limits, and deployment requirements
 - `docs/CONTEXT.md` - project context and current architecture notes
 - `docs/design.md` - design system reference
 - [H2H model evaluation](docs/h2h-model-evaluation.md) - offline experiment protocol and measured results

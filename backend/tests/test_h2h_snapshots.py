@@ -34,7 +34,7 @@ def test_prediction_first_and_comparison_share_current_season_cache(client, monk
 def test_invalid_pin_is_rejected_before_loading_historical_sources(client, monkeypatch):
     calls = []
     monkeypatch.setattr(h2h, "_load_results", lambda *args, **kwargs: calls.append(1) or [])
-    response = client.get("/api/h2h/predict?driver1=NOR&driver2=PIA&snapshot_id=missing")
+    response = client.get("/api/h2h/predict?driver1=NOR&driver2=PIA&snapshot_id=" + "0" * 32)
     assert response.status_code == 409
     assert "Compare" in response.json()["detail"]
     assert calls == []
