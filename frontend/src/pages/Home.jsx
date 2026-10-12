@@ -213,6 +213,7 @@ function GhostPredictionRow({ isMobile, onNavigate, prediction, index = 3 }) {
 
   useEffect(() => {
     if (!isVisible) return undefined
+    setDisplayPct(0)
     const duration = 2880
     const delay = index * 55 + 180
     let frameId
@@ -228,7 +229,7 @@ function GhostPredictionRow({ isMobile, onNavigate, prediction, index = 3 }) {
     }
     timeoutId = window.setTimeout(startAnimation, delay)
     return () => { window.clearTimeout(timeoutId); if (frameId) cancelAnimationFrame(frameId) }
-  }, [isVisible])
+  }, [index, isVisible, pctValue])
 
   return (
     <div style={{ position: 'relative' }} ref={rowRef}>
