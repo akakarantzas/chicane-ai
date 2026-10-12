@@ -1722,6 +1722,16 @@ footer.border-t {
 
 .contact-chip {
   display: inline-block;
+  padding: 4px 12px;
+  border: 1px solid rgba(232,0,45,0.34);
+  border-radius: 8px;
+  color: #E8002D;
+  background: rgba(232,0,45,0.1);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: none;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .contact-chip:hover {

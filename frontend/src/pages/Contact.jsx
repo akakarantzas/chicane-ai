@@ -11,25 +11,8 @@ const FEATURE_CHIPS = [
 ]
 
 function FeatureChip({ label }) {
-  const [hovered, setHovered] = useState(false)
   return (
-    <span
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        display: 'inline-block',
-        color: '#E8002D',
-        backgroundColor: hovered ? 'rgba(232,0,45,0.16)' : 'rgba(232,0,45,0.1)',
-        border: `1px solid ${hovered ? '#E8002D' : 'rgba(232,0,45,0.34)'}`,
-        borderRadius: '8px',
-        padding: '4px 12px',
-        fontSize: '13px',
-        fontWeight: 600,
-        whiteSpace: 'nowrap',
-        boxShadow: hovered ? '0 0 14px rgba(232,0,45,0.18)' : 'none',
-        transition: 'background-color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease',
-      }}
-    >
+    <span className="contact-chip">
       {label}
     </span>
   )
