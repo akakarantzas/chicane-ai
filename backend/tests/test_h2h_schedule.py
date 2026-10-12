@@ -7,6 +7,7 @@ import pytest
 from fastapi import HTTPException
 
 from app.routers import h2h
+from app.services import h2h_providers
 from app.services import h2h_schedule as schedules
 from app.services.h2h_schedule import RaceEvent, next_race, race_coverage
 
@@ -148,8 +149,8 @@ def test_jolpica_schedule_parsing_and_truncation(monkeypatch):
 def test_only_due_events_are_requested_from_fastf1(monkeypatch):
     events = [event(1, NOW - timedelta(days=5)), event(2, NOW + timedelta(days=1)), event(3, NOW - timedelta(hours=1))]
     calls = []
-    monkeypatch.setattr(h2h, "utc_now", lambda: NOW)
-    monkeypatch.setattr(h2h, "_ensure_fastf1_cache_enabled", lambda: None)
+    monkeypatch.setattr(h2h_providers, "utc_now", lambda: NOW)
+    monkeypatch.setattr(h2h_providers, "_ensure_fastf1_cache_enabled", lambda: None)
     def session(year, number, kind):
         calls.append((year, number, kind))
         return SimpleNamespace(
@@ -157,8 +158,8 @@ def test_only_due_events_are_requested_from_fastf1(monkeypatch):
             load=lambda **kwargs: None,
             results=pd.DataFrame([{"Abbreviation": "NOR", "Position": 1, "Status": "Finished"}]),
         )
-    monkeypatch.setattr(h2h.fastf1, "get_session", session)
-    rows = h2h._load_fastf1_results(2026, events, False)
+    monkeypatch.setattr(h2h_providers.fastf1, "get_session", session)
+    rows = h2h_providers.load_fastf1_results(2026, events, False)
     assert calls == [(2026, 1, "R")]
     assert rows[0]["round"] == 1
     assert rows[0]["race_date"] == "2026-09-20"
@@ -167,31 +168,31 @@ def test_only_due_events_are_requested_from_fastf1(monkeypatch):
 @pytest.mark.parametrize("status", ["", "Running", "Unknown"])
 def test_fastf1_grid_only_rows_are_not_results(monkeypatch, status):
     past = event(1, NOW - timedelta(days=1))
-    monkeypatch.setattr(h2h, "_ensure_fastf1_cache_enabled", lambda: None)
-    monkeypatch.setattr(h2h.fastf1, "get_session", lambda *args: SimpleNamespace(
+    monkeypatch.setattr(h2h_providers, "_ensure_fastf1_cache_enabled", lambda: None)
+    monkeypatch.setattr(h2h_providers.fastf1, "get_session", lambda *args: SimpleNamespace(
         event=SimpleNamespace(get_session_date=lambda *args, **kwargs: past.starts_at),
         load=lambda **kwargs: None,
         results=pd.DataFrame([{"Abbreviation": "NOR", "Position": 1, "Status": status}]),
     ))
-    assert h2h._load_fastf1_results(2026, [past], False) == []
+    assert h2h_providers.load_fastf1_results(2026, [past], False) == []
 
 
 def test_jolpica_filters_future_results_and_matches_dates_when_rounds_differ(monkeypatch):
     events = [event(7, NOW - timedelta(days=1)), event(8, NOW + timedelta(days=1))]
-    monkeypatch.setattr(h2h, "get_season_schedule", lambda year: events)
+    monkeypatch.setattr(h2h_providers, "get_season_schedule", lambda year: events)
     races = [{"round": str(number), "raceName": name, "date": date,
               "Results": [{"Driver": {"code": "NOR"}, "position": "1", "status": "Finished"}]}
              for number, name, date in [(5, "Past", "2026-09-24"), (6, "Future", "2026-09-26")]]
-    monkeypatch.setattr(h2h, "_fetch_json", lambda url: {"MRData": {"RaceTable": {"Races": races}}})
-    rows = h2h._load_jolpica_results(2026)
+    monkeypatch.setattr(h2h_providers, "fetch_json", lambda url: {"MRData": {"RaceTable": {"Races": races}}})
+    rows = h2h_providers.load_jolpica_results(2026)
     assert len(rows) == 1
     assert rows[0]["round"] == 7
     assert rows[0]["race"] == "Past"
 
 
 def test_openf1_does_not_request_results_for_future_or_unfinished_sessions(monkeypatch):
-    monkeypatch.setattr(h2h, "utc_now", lambda: NOW)
-    monkeypatch.setattr(h2h, "get_season_schedule", lambda year: [event(1, NOW - timedelta(days=1))])
+    monkeypatch.setattr(h2h_providers, "utc_now", lambda: NOW)
+    monkeypatch.setattr(h2h_providers, "get_season_schedule", lambda year: [event(1, NOW - timedelta(days=1))])
     def fetch(url):
         assert "/sessions?" in url
         return [
@@ -199,15 +200,15 @@ def test_openf1_does_not_request_results_for_future_or_unfinished_sessions(monke
             {"session_key": 2, "date_start": "2026-09-24T10:00:00Z", "date_end": None},
             {"session_key": 3, "date_start": "2026-09-24T10:00:00Z", "date_end": "2026-09-25T13:00:00Z"},
         ]
-    monkeypatch.setattr(h2h, "_fetch_json", fetch)
-    assert h2h._load_openf1_results(2026) == []
+    monkeypatch.setattr(h2h_providers, "fetch_json", fetch)
+    assert h2h_providers.load_openf1_results(2026) == []
 
 
 def test_historical_partial_fastf1_results_do_not_skip_fallback_sources(monkeypatch):
     calls = []
-    monkeypatch.setattr(h2h, "_load_fastf1_results", lambda *args: [{**published_row(1), "year": 2024, "source": "fastf1"}])
-    monkeypatch.setattr(h2h, "_load_jolpica_results", lambda year: (calls.append("jolpica") or [{**published_row(2), "year": year, "source": "jolpica"}]))
-    monkeypatch.setattr(h2h, "_load_openf1_results", lambda year: (calls.append("openf1") or []))
+    monkeypatch.setattr(h2h_providers, "load_fastf1_results", lambda *args: [{**published_row(1), "year": 2024, "source": "fastf1"}])
+    monkeypatch.setattr(h2h_providers, "load_jolpica_results", lambda year: (calls.append("jolpica") or [{**published_row(2), "year": year, "source": "jolpica"}]))
+    monkeypatch.setattr(h2h_providers, "load_openf1_results", lambda year: (calls.append("openf1") or []))
     assert len(h2h._load_results(2024)) == 2
     assert calls == ["jolpica", "openf1"]
 
@@ -250,22 +251,22 @@ def test_jolpica_pagination_reassembles_races_split_between_pages(monkeypatch):
         return {"MRData": {"total": "2", "limit": "1", "offset": str(offset),
                 "RaceTable": {"Races": [{"round": "1", "date": "2026-03-08", "raceName": "Australia",
                                          "Results": [result]}]}}}
-    monkeypatch.setattr(h2h, "_fetch_json", fetch)
-    rows = h2h._load_jolpica_results(2026)
+    monkeypatch.setattr(h2h_providers, "fetch_json", fetch)
+    rows = h2h_providers.load_jolpica_results(2026)
     assert calls == [0, 1]
     assert [row["abbreviation"] for row in rows] == ["NOR", "PIA"]
     assert [row["position"] for row in rows] == [1, 2]
 
 
 def test_jolpica_does_not_silently_accept_a_truncated_page(monkeypatch):
-    monkeypatch.setattr(h2h, "_fetch_json", lambda url: {"MRData": {"total": "100", "RaceTable": {"Races": []}}})
+    monkeypatch.setattr(h2h_providers, "fetch_json", lambda url: {"MRData": {"total": "100", "RaceTable": {"Races": []}}})
     with pytest.raises(ValueError, match="pagination"):
-        h2h._jolpica_result_races(2026)
+        h2h_providers.jolpica_result_races(2026)
 
 
 def test_jolpica_detects_a_repeated_page_instead_of_looping(monkeypatch):
-    monkeypatch.setattr(h2h, "_fetch_json", lambda url: {"MRData": {
+    monkeypatch.setattr(h2h_providers, "fetch_json", lambda url: {"MRData": {
         "total": "2", "offset": "0", "RaceTable": {"Races": [{"round": "1", "date": "2026-03-08", "Results": [{}]}]},
     }})
     with pytest.raises(ValueError, match="pagination"):
-        h2h._jolpica_result_races(2026)
+        h2h_providers.jolpica_result_races(2026)

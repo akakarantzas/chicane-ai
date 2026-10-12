@@ -4,6 +4,7 @@ import pytest
 from fastapi import HTTPException
 
 from app.routers import h2h
+from app.services import h2h_providers
 from app.services.h2h_contract import published_points
 from app.services.h2h_logic import build_stats
 from app.services.h2h_standings import load_standings, unavailable_standings
@@ -122,7 +123,7 @@ def test_source_failure_is_unavailable_and_is_retried(payload, caplog):
 @pytest.mark.parametrize("value", [None, "", "\\N", True, False, -1, "NaN", float("inf"), "bad"])
 def test_unknown_or_invalid_points_are_never_zero(value):
     assert published_points(value) is None
-    assert h2h._normalise_points(value) is None
+    assert h2h_providers._normalise_points(value) is None
 
 
 @pytest.mark.parametrize("value,expected", [(0, 0), ("0", 0), ("12.5", 12.5), (25, 25)])

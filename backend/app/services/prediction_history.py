@@ -259,8 +259,8 @@ def published_result(race, event, minimum_entries):
 
 def load_result_races(year):
     # Reuse the existing paginated adapter; a race can span response pages.
-    from app.routers.h2h import _jolpica_result_races
-    return _jolpica_result_races(year)
+    from app.services.h2h_providers import jolpica_result_races
+    return jolpica_result_races(year)
 
 
 def settle_results(*, path=None, now=None, loader=None):

@@ -4,6 +4,7 @@ from itertools import permutations
 import pytest
 
 from app.routers import h2h
+from app.services import h2h_providers
 from app.services.h2h_contract import result_exclusion_reason
 from app.services.h2h_logic import build_stats, head_to_head_record
 from app.services.h2h_results import reconcile_results
@@ -130,14 +131,14 @@ def test_pairwise_grouping_uses_round_even_when_display_names_differ():
 
 
 def test_jolpica_preserves_provider_id_and_actual_race_number_without_current_roster_fallback(monkeypatch):
-    monkeypatch.setattr(h2h, "_jolpica_result_races", lambda year: [{
+    monkeypatch.setattr(h2h_providers, "jolpica_result_races", lambda year: [{
         "round": "1", "date": "2024-03-08", "raceName": "Australia", "Results": [
             {"Driver": {"code": "VER", "driverId": "max_verstappen", "permanentNumber": "33"},
              "number": "1", "position": "1", "status": "Finished"},
             {"Driver": {"permanentNumber": "1"}, "position": "2"},
         ],
     }])
-    rows = h2h._load_jolpica_results(2024)
+    rows = h2h_providers.load_jolpica_results(2024)
     assert len(rows) == 1
     assert rows[0]["abbreviation"] == "VER"
     assert rows[0]["driver_id"] == "max_verstappen"
@@ -158,8 +159,8 @@ def test_openf1_uses_only_session_scoped_driver_identity(monkeypatch, drivers, e
         if "/session_result?" in url:
             return [{"driver_number": 1, "position": 1, "dnf": False, "dns": False, "dsq": False}]
         return drivers
-    monkeypatch.setattr(h2h, "_fetch_json", fetch)
-    rows = h2h._load_openf1_results(2024)
+    monkeypatch.setattr(h2h_providers, "fetch_json", fetch)
+    rows = h2h_providers.load_openf1_results(2024)
     assert [row["abbreviation"] for row in rows] == expected
 
 
@@ -168,9 +169,9 @@ def test_compare_and_predict_share_deduplicated_results(client, monkeypatch):
         return [result(year=year, race_date=f"{year}-03-08", source=source),
                 result(year=year, race_date=f"{year}-03-08", source=source,
                        abbreviation="PIA", driver_id="piastri", number="81", position=2, points=18)]
-    monkeypatch.setattr(h2h, "_load_fastf1_results", lambda year, *args: rows(year, "fastf1"))
-    monkeypatch.setattr(h2h, "_load_jolpica_results", lambda year: rows(year, "jolpica") * 2)
-    monkeypatch.setattr(h2h, "_load_openf1_results", lambda year: [
+    monkeypatch.setattr(h2h_providers, "load_fastf1_results", lambda year, *args: rows(year, "fastf1"))
+    monkeypatch.setattr(h2h_providers, "load_jolpica_results", lambda year: rows(year, "jolpica") * 2)
+    monkeypatch.setattr(h2h_providers, "load_openf1_results", lambda year: [
         {**row, "driver_id": "", "race": "Melbourne"} for row in rows(year, "openf1")])
     comparison = client.get("/api/h2h/compare?driver1=NOR&driver2=PIA").json()
     assert comparison["driver1"]["races"] == 1

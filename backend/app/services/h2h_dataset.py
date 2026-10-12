@@ -5,20 +5,19 @@ from datetime import datetime, timezone
 import json
 from pathlib import Path
 
+from app.services import h2h_providers
 from app.services.h2h_backtest import normalized_events
 from app.services.h2h_results import reconcile_results
-from app.services.h2h_schedule import HISTORY_YEARS, race_coverage
+from app.services.h2h_schedule import HISTORY_YEARS, get_season_schedule, race_coverage
 
 
 def export_dataset(years, *, schedule_loader=None, result_loader=None, fallback_loader=None, now=None):
-    from app.routers import h2h
-
     years = sorted(set(years))
     if not years or any(year not in HISTORY_YEARS for year in years):
         raise ValueError(f"years must be drawn from {HISTORY_YEARS}")
-    schedule_loader = schedule_loader or h2h.get_season_schedule
-    result_loader = result_loader or h2h._load_jolpica_results
-    fallback_loader = fallback_loader or (lambda year, events: h2h._load_fastf1_results(year, events, False))
+    schedule_loader = schedule_loader or get_season_schedule
+    result_loader = result_loader or h2h_providers.load_jolpica_results
+    fallback_loader = fallback_loader or (lambda year, events: h2h_providers.load_fastf1_results(year, events, False))
     now = now or datetime.now(timezone.utc)
     rows, seasons = [], {}
     for year in years:
@@ -44,7 +43,7 @@ def export_dataset(years, *, schedule_loader=None, result_loader=None, fallback_
     normalized_events(rows)  # Also reject identities that conflict across seasons.
     return {"schema_version": 1, "rows": rows, "provenance": {
         "started_at": now.isoformat(), "completed_at": datetime.now(timezone.utc).isoformat(),
-        "result_source": "jolpica with FastF1 for missing calendar races", "source_url": h2h.JOLPICA_BASE_URL,
+        "result_source": "jolpica with FastF1 for missing calendar races", "source_url": h2h_providers.JOLPICA_BASE_URL,
         "calendar_policy": "application FastF1 calendar with Jolpica fallback",
         "seasons": seasons,
         "limitations": ["No independent classification audit; source choice is recorded per row.",

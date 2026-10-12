@@ -8,6 +8,7 @@ from fastapi import HTTPException
 
 from app import security
 from app.routers import contact, h2h
+from app.services import h2h_providers
 
 
 @pytest.mark.parametrize('error_type', ['http', 'network'])
@@ -116,8 +117,8 @@ def test_provider_exception_not_logged_or_returned_by_h2h(monkeypatch, caplog):
     marker = 'synthetic-private-provider-content'
     def fail(*args, **kwargs):
         raise RuntimeError(marker)
-    for name in ('_load_fastf1_results', '_load_jolpica_results', '_load_openf1_results'):
-        monkeypatch.setattr(h2h, name, fail)
+    for name in ('load_fastf1_results', 'load_jolpica_results', 'load_openf1_results'):
+        monkeypatch.setattr(h2h_providers, name, fail)
     with pytest.raises(HTTPException) as caught:
         h2h._load_results(2026)
     assert caught.value.status_code == 502

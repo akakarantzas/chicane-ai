@@ -1,4 +1,5 @@
 from app.routers import h2h
+from app.services import h2h_providers
 
 
 def fail_if_loader_called(*args, **kwargs):
@@ -82,17 +83,17 @@ def test_h2h_compare_uses_separate_cache_entries_by_year(
 
 def test_fastf1_cache_is_enabled_lazily(monkeypatch, caplog):
     calls = []
-    monkeypatch.setattr(h2h, "_fastf1_cache_enabled", False)
-    monkeypatch.setattr(h2h.os, "makedirs", lambda path, exist_ok=True: calls.append(("makedirs", path, exist_ok)))
-    monkeypatch.setattr(h2h.fastf1.Cache, "enable_cache", lambda path: calls.append(("enable_cache", path)))
-    monkeypatch.setattr(h2h.fastf1, "get_session", lambda *args, **kwargs: (_ for _ in ()).throw(RuntimeError("no live fastf1")))
+    monkeypatch.setattr(h2h_providers, "_fastf1_cache_enabled", False)
+    monkeypatch.setattr(h2h_providers.os, "makedirs", lambda path, exist_ok=True: calls.append(("makedirs", path, exist_ok)))
+    monkeypatch.setattr(h2h_providers.fastf1.Cache, "enable_cache", lambda path: calls.append(("enable_cache", path)))
+    monkeypatch.setattr(h2h_providers.fastf1, "get_session", lambda *args, **kwargs: (_ for _ in ()).throw(RuntimeError("no live fastf1")))
 
-    assert h2h._load_fastf1_results(2026, h2h.get_season_schedule(2026)[:1], strict=False) == []
-    assert h2h._load_fastf1_results(2026, h2h.get_season_schedule(2026)[1:2], strict=False) == []
+    assert h2h_providers.load_fastf1_results(2026, h2h.get_season_schedule(2026)[:1], strict=False) == []
+    assert h2h_providers.load_fastf1_results(2026, h2h.get_season_schedule(2026)[1:2], strict=False) == []
 
     assert calls == [
-        ("makedirs", h2h.CACHE_DIR, True),
-        ("enable_cache", h2h.CACHE_DIR),
+        ("makedirs", h2h_providers.CACHE_DIR, True),
+        ("enable_cache", h2h_providers.CACHE_DIR),
     ]
     assert "provider=fastf1 operation=load_race" in caplog.text
     assert "error_type=RuntimeError" in caplog.text
@@ -114,9 +115,9 @@ def test_load_results_falls_back_when_fastf1_fails(monkeypatch, sample_h2h_rows)
         calls.append("openf1")
         return []
 
-    monkeypatch.setattr(h2h, "_load_fastf1_results", fail_fastf1)
-    monkeypatch.setattr(h2h, "_load_jolpica_results", load_jolpica)
-    monkeypatch.setattr(h2h, "_load_openf1_results", load_openf1)
+    monkeypatch.setattr(h2h_providers, "load_fastf1_results", fail_fastf1)
+    monkeypatch.setattr(h2h_providers, "load_jolpica_results", load_jolpica)
+    monkeypatch.setattr(h2h_providers, "load_openf1_results", load_openf1)
 
     rows = h2h._load_results(2026)
     assert {(r["round"], r["abbreviation"], r["position"], r["points"]) for r in rows} == {
@@ -142,9 +143,9 @@ def test_load_results_uses_openf1_if_jolpica_fails(monkeypatch, sample_h2h_rows)
         calls.append("openf1")
         return [{**row, "source": "openf1"} for row in sample_h2h_rows]
 
-    monkeypatch.setattr(h2h, "_load_fastf1_results", load_fastf1)
-    monkeypatch.setattr(h2h, "_load_jolpica_results", fail_jolpica)
-    monkeypatch.setattr(h2h, "_load_openf1_results", load_openf1)
+    monkeypatch.setattr(h2h_providers, "load_fastf1_results", load_fastf1)
+    monkeypatch.setattr(h2h_providers, "load_jolpica_results", fail_jolpica)
+    monkeypatch.setattr(h2h_providers, "load_openf1_results", load_openf1)
 
     rows = h2h._load_results(2026)
     assert {(r["round"], r["abbreviation"], r["position"], r["points"]) for r in rows} == {

@@ -12,18 +12,25 @@ from app.services.h2h_schedule import RaceEvent, clear_schedule_cache
 def fixed_h2h_calendar(monkeypatch, tmp_path):
     """API/unit tests never depend on a live schedule or the wall-clock date."""
     from app.routers import h2h
+    from app.services import h2h_providers
     from app.services.h2h_standings import unavailable_standings
     monkeypatch.setenv("H2H_MONITOR_ENABLED", "false")  # Tests never write the installation's real journal.
     monkeypatch.setenv("PREDICTION_HISTORY_ENABLED", "false")
     monkeypatch.setenv("POST_QUALIFYING_ENABLED", "false")
     monkeypatch.setenv("PREDICTION_UPDATES_DIR", str(tmp_path / "updates"))
     monkeypatch.setattr(h2h, "_load_standings", lambda *args: unavailable_standings())
-    monkeypatch.setattr(h2h, "utc_now", lambda: datetime(2026, 9, 25, tzinfo=timezone.utc))
-    monkeypatch.setattr(h2h, "get_season_schedule", lambda year: [
-        RaceEvent(year, 1, "Australia", datetime(year, 3, 8, 5, tzinfo=timezone.utc)),
-        RaceEvent(year, 2, "China", datetime(year, 3, 15, 7, tzinfo=timezone.utc)),
-        RaceEvent(year, 3, "Next Test Grand Prix", datetime(year, 9, 26, 11, tzinfo=timezone.utc)),
-    ])
+    def now():
+        return datetime(2026, 9, 25, tzinfo=timezone.utc)
+
+    def schedule(year):
+        return [
+            RaceEvent(year, 1, "Australia", datetime(year, 3, 8, 5, tzinfo=timezone.utc)),
+            RaceEvent(year, 2, "China", datetime(year, 3, 15, 7, tzinfo=timezone.utc)),
+            RaceEvent(year, 3, "Next Test Grand Prix", datetime(year, 9, 26, 11, tzinfo=timezone.utc)),
+        ]
+    for module in (h2h, h2h_providers):
+        monkeypatch.setattr(module, "utc_now", now)
+        monkeypatch.setattr(module, "get_season_schedule", schedule)
 
 
 @pytest.fixture(autouse=True)
@@ -117,11 +124,11 @@ def sample_h2h_rows():
 
 @pytest.fixture
 def block_live_h2h_sources(monkeypatch):
-    from app.routers import h2h
+    from app.services import h2h_providers
 
     def fail_live_call(*args, **kwargs):
         raise AssertionError("Live H2H data source was called during a test")
 
-    monkeypatch.setattr(h2h, "_load_fastf1_results", fail_live_call)
-    monkeypatch.setattr(h2h, "_load_jolpica_results", fail_live_call)
-    monkeypatch.setattr(h2h, "_load_openf1_results", fail_live_call)
+    monkeypatch.setattr(h2h_providers, "load_fastf1_results", fail_live_call)
+    monkeypatch.setattr(h2h_providers, "load_jolpica_results", fail_live_call)
+    monkeypatch.setattr(h2h_providers, "load_openf1_results", fail_live_call)
