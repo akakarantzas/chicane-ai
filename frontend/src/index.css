@@ -229,45 +229,6 @@ button.nav-link.nav-link-active.nav-link-active-history:hover {
   color: #22C55E;
 }
 
-.primary-action {
-  height: 46px;
-  padding: 0 22px;
-  border-radius: 8px;
-  font-size: 15px;
-  font-weight: 600;
-  background: #E8002D;
-  color: #F4F4F5;
-  border: 1px solid rgba(255,255,255,0.12);
-  box-shadow: 0 10px 24px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.18);
-  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.primary-action:hover {
-  background: #E8002D !important;
-  transform: translateY(-2px);
-  box-shadow: 0 14px 32px rgba(0,0,0,0.44), inset 0 1px 0 rgba(255,255,255,0.24);
-}
-
-.secondary-action {
-  width: 100%;
-  height: 44px;
-  background-color: transparent;
-  border: 1px solid rgba(255,255,255,0.1);
-  color: #A1A1AA;
-  padding: 0 20px;
-  border-radius: 8px;
-  font-size: 15px;
-  margin-top: 4px;
-  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
-}
-
-.secondary-action:hover {
-  background-color: #1A1A1F !important;
-  color: #F4F4F5 !important;
-  border-color: rgba(232, 0, 45, 0.35) !important;
-  transform: translateY(-1px);
-}
-
 .section-shell {
   max-width: 1280px;
   margin: 0 auto;
@@ -336,7 +297,6 @@ button.nav-link.nav-link-active.nav-link-active-history:hover {
   text-shadow: 0 8px 28px rgba(0,0,0,0.65);
 }
 
-.premium-race-card,
 .premium-prediction-row,
 .premium-stat-card {
   border-radius: 8px;
@@ -345,7 +305,6 @@ button.nav-link.nav-link-active.nav-link-active-history:hover {
   box-shadow: 0 16px 38px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.08);
 }
 
-.premium-race-card::before,
 .premium-prediction-row::before,
 .premium-stat-card::before {
   content: none;
@@ -417,24 +376,6 @@ button.nav-link.nav-link-active.nav-link-active-history:hover {
   color: #A1A1AA;
   background: #27272A;
   border: 1px solid rgba(244,244,245,0.08);
-}
-
-.premium-race-card {
-  position: relative;
-  overflow: hidden;
-  min-height: 146px;
-  transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease, opacity 0.22s ease;
-}
-
-.premium-race-card:hover {
-  border-color: rgba(232,0,45,0.58) !important;
-  box-shadow: 0 16px 34px rgba(0,0,0,0.42), 0 0 22px rgba(232,0,45,0.22), inset 0 1px 0 rgba(255,255,255,0.11);
-}
-
-.premium-race-card-active {
-  background: #1A1A1F;
-  border-color: rgba(232,0,45,0.52) !important;
-  box-shadow: 0 16px 34px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.12);
 }
 
 .premium-prediction-row {
@@ -908,10 +849,6 @@ button.nav-link.nav-link-active.nav-link-active-history:hover {
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, background-color 0.2s ease;
 }
 
-.race-card {
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
-}
-
 .home-calendar-section {
   overflow: hidden;
 }
@@ -1226,7 +1163,6 @@ button.nav-link.nav-link-active.nav-link-active-history:hover {
   margin-bottom: 24px;
 }
 
-.predictions-page-kicker,
 .predictions-card-eyebrow {
   display: inline-flex;
   align-items: center;
@@ -1237,14 +1173,6 @@ button.nav-link.nav-link-active.nav-link-active-history:hover {
   letter-spacing: 0.12em;
   line-height: 1;
   text-transform: uppercase;
-}
-
-.predictions-page-kicker {
-  margin-bottom: 12px;
-  padding: 6px 10px;
-  border: 1px solid rgba(232,0,45,0.28);
-  border-radius: 999px;
-  background: rgba(232,0,45,0.08);
 }
 
 .predictions-page-card {
@@ -1285,20 +1213,6 @@ button.nav-link.nav-link-active.nav-link-active-history:hover {
   margin-top: 8px;
   color: #A1A1AA;
   font-size: 13px;
-}
-
-.predictions-card-status {
-  flex-shrink: 0;
-  padding: 7px 11px;
-  border-radius: 999px;
-  color: #E8002D;
-  background: rgba(232,0,45,0.08);
-  border: 1px solid rgba(232,0,45,0.26);
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  line-height: 1;
-  text-transform: uppercase;
 }
 
 .predictions-column-head {
@@ -1456,30 +1370,6 @@ button.nav-link.nav-link-active.nav-link-active-history:hover {
 
 .predictions-animate-in .predictions-bar-fill {
   animation: prediction-bar-grow 2.88s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-}
-
-.predictions-show-more-button {
-  width: 100%;
-  height: 42px;
-  margin-top: 12px;
-  border-radius: 8px;
-  border: none;
-  background:
-    linear-gradient(145deg, rgba(244,244,245,0.05), rgba(244,244,245,0.018) 42%, rgba(12,12,14,0.5)),
-    rgba(18,18,22,0.9);
-  color: #E5E7EB;
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  box-shadow: inset 0 1px 0 rgba(244,244,245,0.055);
-  transition: border-color 0.18s ease, background-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
-}
-
-.predictions-show-more-button:hover {
-  border-color: rgba(232,0,45,0.36);
-  color: #F4F4F5;
-  transform: translateY(-1px);
 }
 
 .h2h-confidence-bar-fill {
@@ -2144,10 +2034,6 @@ button:active { transform: translateY(0px); opacity: 1; }
     padding-top: 14px;
   }
 
-  .primary-action {
-    width: 100%;
-  }
-
   .countdown-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
     gap: 8px !important;
@@ -2167,14 +2053,6 @@ button:active { transform: translateY(0px); opacity: 1; }
     margin-top: 6px;
     font-size: 10px;
     letter-spacing: 0.14em;
-  }
-
-  .race-meta-pills {
-    flex-wrap: wrap;
-  }
-
-  .home-race-card {
-    width: 168px !important;
   }
 
   .home-calendar-header {
@@ -2230,10 +2108,6 @@ button:active { transform: translateY(0px); opacity: 1; }
   .home-calendar-location,
   .home-calendar-date {
     font-size: 11px;
-  }
-
-  .season-race-card {
-    width: 224px !important;
   }
 
   .latest-prediction-row {
@@ -2405,11 +2279,6 @@ button:active { transform: translateY(0px); opacity: 1; }
     min-width: 132px;
   }
 
-  .season-legend {
-    align-items: flex-start !important;
-    flex-direction: column;
-    gap: 10px !important;
-  }
 }
 
 @media (max-width: 430px) {
