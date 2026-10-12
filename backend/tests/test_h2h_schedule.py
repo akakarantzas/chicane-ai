@@ -97,11 +97,11 @@ def test_calendar_without_start_time_retains_date_without_inventing_a_time(monke
     assert race.public()["date"] == "2026-09-25"
 
 
-def test_calendar_fallback_and_cache_expiration(monkeypatch):
+def test_calendar_fallback_and_cache_expiration(monkeypatch, caplog):
     clock = [0.0]
     calls = []
     monkeypatch.setattr(schedules.time, "monotonic", lambda: clock[0])
-    monkeypatch.setattr(schedules, "_fastf1_schedule", lambda year: (_ for _ in ()).throw(RuntimeError("offline")))
+    monkeypatch.setattr(schedules, "_fastf1_schedule", lambda year: (_ for _ in ()).throw(RuntimeError("synthetic-calendar-provider-detail")))
     def fallback(year):
         calls.append(year)
         return [event(1, NOW + timedelta(days=len(calls)))]
@@ -109,6 +109,9 @@ def test_calendar_fallback_and_cache_expiration(monkeypatch):
     first = schedules.get_season_schedule(2026)
     first.clear()  # Callers cannot mutate the cache's collection.
     assert len(schedules.get_season_schedule(2026)) == 1
+    assert "provider=fastf1 operation=load_calendar" in caplog.text
+    assert "error_type=RuntimeError" in caplog.text
+    assert "synthetic-calendar-provider-detail" not in caplog.text
     assert calls == [2026]
     clock[0] = schedules.SCHEDULE_TTL_SECONDS + 1
     assert schedules.get_season_schedule(2026)[0].starts_at == NOW + timedelta(days=2)

@@ -1,5 +1,6 @@
 import os
 import json
+import logging
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 from typing import Annotated
@@ -25,6 +26,7 @@ from app.services.h2h_logic import (
 )
 
 router = APIRouter(prefix="/api/h2h")
+logger = logging.getLogger(__name__)
 DriverCode = Annotated[str, Query(min_length=1, max_length=16)]
 SnapshotID = Annotated[str | None, Query(max_length=32, pattern=r"^[a-f0-9]{32}$")]
 
@@ -127,7 +129,12 @@ def _load_fastf1_results(year: int, events: list[RaceEvent], strict: bool) -> li
                 })
             if _published_results(event_rows):
                 rows.extend(event_rows)
-        except Exception:
+        except Exception as exc:
+            logger.warning(
+                "H2H provider request failed provider=fastf1 operation=load_race "
+                "year=%s round=%s error_type=%s",
+                year, event.round, type(exc).__name__,
+            )
             if strict and not rows:
                 # Keep trying external sources before surfacing a hard failure.
                 continue
@@ -287,19 +294,20 @@ def _load_results(year: int, strict: bool = True) -> list[dict]:
         return []
 
     rows = []
-    try:
-        rows.extend(_load_fastf1_results(year, events, strict))
-    except Exception:
-        pass
-
-    for loader in (
-        lambda: _load_jolpica_results(year),
-        lambda: _load_openf1_results(year),
-    ):
+    providers = (
+        ("fastf1", lambda: _load_fastf1_results(year, events, strict)),
+        ("jolpica", lambda: _load_jolpica_results(year)),
+        ("openf1", lambda: _load_openf1_results(year)),
+    )
+    for provider, loader in providers:
         try:
             rows.extend(loader())
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.warning(
+                "H2H provider request failed provider=%s operation=load_season_results "
+                "year=%s error_type=%s",
+                provider, year, type(exc).__name__,
+            )
 
     rows = reconcile_results(rows, events)
     if strict and not rows:

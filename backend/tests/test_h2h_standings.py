@@ -109,10 +109,13 @@ def test_no_results_due_does_not_fetch_a_future_table():
     assert result == unavailable_standings("no_results_due")
 
 
-def test_source_failure_is_unavailable_and_is_retried(payload):
+def test_source_failure_is_unavailable_and_is_retried(payload, caplog):
     def failed(url):
-        raise TimeoutError("offline")
+        raise TimeoutError("synthetic-provider-response-private-detail")
     assert load_standings(2026, h2h.get_season_schedule(2026), NOW, failed)["status"] == "unavailable"
+    assert "provider=jolpica operation=load_standings" in caplog.text
+    assert "error_type=TimeoutError" in caplog.text
+    assert "synthetic-provider-response-private-detail" not in caplog.text
     assert load(payload)["status"] == "available"
 
 

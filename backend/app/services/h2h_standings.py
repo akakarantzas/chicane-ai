@@ -81,5 +81,9 @@ def load_standings(year: int, events: list[RaceEvent], now: datetime,
         return {"status": "available", "source": "jolpica",
                 "through_event": through_event.public(), "drivers": drivers}
     except Exception as exc:
-        logger.warning("H2H standings unavailable for %s: %s", year, exc)
+        logger.warning(
+            "H2H provider request failed provider=jolpica operation=load_standings "
+            "year=%s error_type=%s",
+            year, type(exc).__name__,
+        )
         return unavailable_standings()

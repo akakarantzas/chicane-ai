@@ -112,7 +112,7 @@ def test_chunked_body_cannot_bypass_limit():
     asyncio.run(scenario())
 
 
-def test_provider_exception_not_returned_by_h2h(monkeypatch):
+def test_provider_exception_not_logged_or_returned_by_h2h(monkeypatch, caplog):
     marker = 'synthetic-private-provider-content'
     def fail(*args, **kwargs):
         raise RuntimeError(marker)
@@ -122,6 +122,11 @@ def test_provider_exception_not_returned_by_h2h(monkeypatch):
         h2h._load_results(2026)
     assert caught.value.status_code == 502
     assert marker not in caught.value.detail
+    assert marker not in caplog.text
+    assert "provider=fastf1 operation=load_season_results" in caplog.text
+    assert "provider=jolpica operation=load_season_results" in caplog.text
+    assert "provider=openf1 operation=load_season_results" in caplog.text
+    assert "error_type=RuntimeError" in caplog.text
 
 
 def test_h2h_input_bounds_and_nonreflective_errors(client):

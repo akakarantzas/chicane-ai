@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 import json
+import logging
 from threading import Lock
 import time
 from urllib.request import Request, urlopen
@@ -10,6 +11,8 @@ from urllib.request import Request, urlopen
 import fastf1
 from fastapi import HTTPException
 import pandas as pd
+
+logger = logging.getLogger(__name__)
 
 SEASON = 2026  # The app's driver roster and season overview are for this season.
 HISTORY_YEARS = (2024, 2025, SEASON)
@@ -125,10 +128,16 @@ def get_season_schedule(year: int) -> list[RaceEvent]:
         cached = _schedule_cache.get(year)
         if cached and time.monotonic() - cached[0] < SCHEDULE_TTL_SECONDS:
             return list(cached[1])
-        for loader in (_fastf1_schedule, _jolpica_schedule):
+        providers = (("fastf1", _fastf1_schedule), ("jolpica", _jolpica_schedule))
+        for provider, loader in providers:
             try:
                 events = loader(year)
-            except Exception:
+            except Exception as exc:
+                logger.warning(
+                    "H2H provider request failed provider=%s operation=load_calendar "
+                    "year=%s error_type=%s",
+                    provider, year, type(exc).__name__,
+                )
                 continue
             _schedule_cache[year] = (time.monotonic(), tuple(events))
             return list(events)

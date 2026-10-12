@@ -80,7 +80,7 @@ def test_h2h_compare_uses_separate_cache_entries_by_year(
     assert calls == [(2026, True), (2025, True)]
 
 
-def test_fastf1_cache_is_enabled_lazily(monkeypatch):
+def test_fastf1_cache_is_enabled_lazily(monkeypatch, caplog):
     calls = []
     monkeypatch.setattr(h2h, "_fastf1_cache_enabled", False)
     monkeypatch.setattr(h2h.os, "makedirs", lambda path, exist_ok=True: calls.append(("makedirs", path, exist_ok)))
@@ -94,6 +94,9 @@ def test_fastf1_cache_is_enabled_lazily(monkeypatch):
         ("makedirs", h2h.CACHE_DIR, True),
         ("enable_cache", h2h.CACHE_DIR),
     ]
+    assert "provider=fastf1 operation=load_race" in caplog.text
+    assert "error_type=RuntimeError" in caplog.text
+    assert "no live fastf1" not in caplog.text
 
 
 def test_load_results_falls_back_when_fastf1_fails(monkeypatch, sample_h2h_rows):
