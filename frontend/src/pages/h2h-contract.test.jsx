@@ -202,6 +202,38 @@ test('an older prediction response cannot overwrite a newer comparison', async (
   expect(screen.getByText('Newer prediction')).toBeInTheDocument()
 })
 
+test.each([
+  ['Select first driver', 'Lando Norris', 'NOR', 'VER'],
+  ['Select second driver', 'Oscar Piastri', 'ANT', 'PIA'],
+])('changing %s ignores an unfinished comparison and uses the new pair', async (label, name, driver1, driver2) => {
+  let finishOld
+  const fetch = vi.spyOn(globalThis, 'fetch')
+    .mockImplementationOnce(() => new Promise((resolve) => { finishOld = resolve }))
+    .mockResolvedValueOnce({ ok: true, json: async () => ({
+      year: 2026, driver1: {}, driver2: {}, freshness: { status: 'fresh', snapshot_id: 'new-selection' },
+    }) })
+    .mockResolvedValueOnce({ ok: true, json: async () => null })
+  render(<H2H onNavigate={vi.fn()} />)
+  fireEvent.click(screen.getByRole('button', { name: 'Compare' }))
+  expect(screen.getByRole('status', { name: 'Fetching real F1 data' })).toBeInTheDocument()
+
+  fireEvent.click(screen.getByRole('button', { name: label }))
+  fireEvent.click(within(screen.getByRole('listbox', { name: label })).getByRole('option', { name: new RegExp(name) }))
+  expect(screen.getByText('Pick your drivers')).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Compare' })).toBeEnabled()
+
+  await act(async () => {
+    finishOld({ ok: true, json: async () => ({ year: 2025, driver1: {}, driver2: {} }) })
+  })
+  expect(screen.queryByText('2025 Season Overview')).not.toBeInTheDocument()
+  expect(fetch).toHaveBeenCalledTimes(1)
+
+  fireEvent.click(screen.getByRole('button', { name: 'Compare' }))
+  await screen.findByText('2026 Season Overview')
+  expect(fetch).toHaveBeenNthCalledWith(2, `http://localhost:8000/api/h2h/compare?driver1=${driver1}&driver2=${driver2}&year=2026`)
+  await waitFor(() => expect(fetch).toHaveBeenNthCalledWith(3, `http://localhost:8000/api/h2h/predict?driver1=${driver1}&driver2=${driver2}&snapshot_id=new-selection`))
+})
+
 test('uncalibrated heuristic is never rendered as a confidence percentage', async () => {
   await compareWith({ prediction_status: 'available', predicted_winner: 'ANT',
     predicted_winner_full_name: 'Kimi Antonelli', confidence: .99,
