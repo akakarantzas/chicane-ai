@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import AppNav from '../components/AppNav'
 import useIsMobile from '../hooks/useIsMobile'
+import { useAnimatedPercentage, useVisibleOnce } from '../hooks/usePredictionAnimation'
 import usePredictionFeed from '../hooks/usePredictionFeed'
 
 const POSITION_COLORS = ['#E8002D', '#f97316', '#eab308']
@@ -13,43 +14,12 @@ function positionColor(i) {
 function PredictionRow({ prediction, index, isLast, isExtra = false, extraIndex = 0 }) {
   const [isHovered, setIsHovered] = useState(false)
   const pctValue = prediction.probability * 100
-  const [displayPct, setDisplayPct] = useState(0)
   const barWidth = `${pctValue}%`
   const isTop3 = index < 3
   const rowDelay = isExtra ? `${extraIndex * 55}ms` : `${index * 55}ms`
   const barDelayMs = index * 55 + 180
   const barDelay = `${barDelayMs}ms`
-
-  useEffect(() => {
-    setDisplayPct(0)
-
-    const duration = 2880
-    let frameId
-    let timeoutId
-
-    const startAnimation = () => {
-      const start = performance.now()
-
-      const tick = (now) => {
-        const progress = Math.min((now - start) / duration, 1)
-        const eased = 1 - Math.pow(1 - progress, 3)
-        setDisplayPct(pctValue * eased)
-
-        if (progress < 1) {
-          frameId = requestAnimationFrame(tick)
-        }
-      }
-
-      frameId = requestAnimationFrame(tick)
-    }
-
-    timeoutId = window.setTimeout(startAnimation, barDelayMs)
-
-    return () => {
-      window.clearTimeout(timeoutId)
-      if (frameId) cancelAnimationFrame(frameId)
-    }
-  }, [barDelayMs, pctValue])
+  const displayPct = useAnimatedPercentage(pctValue, { delay: barDelayMs })
 
   return (
     <li
@@ -110,40 +80,9 @@ function PredictionRow({ prediction, index, isLast, isExtra = false, extraIndex 
 }
 
 function GhostPredictionRow({ prediction, onExpand }) {
-  const rowRef = useRef(null)
-  const [isVisible, setIsVisible] = useState(false)
-  const [displayPct, setDisplayPct] = useState(0)
+  const [rowRef, isVisible] = useVisibleOnce()
   const pctValue = prediction.probability * 100
-
-  useEffect(() => {
-    const node = rowRef.current
-    if (!node) return undefined
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setIsVisible(true); observer.disconnect() } },
-      { threshold: 0.35 },
-    )
-    observer.observe(node)
-    return () => observer.disconnect()
-  }, [])
-
-  useEffect(() => {
-    if (!isVisible) return undefined
-    const duration = 2880
-    const delay = 5 * 55 + 180
-    let frameId
-    let timeoutId
-    const startAnimation = () => {
-      const start = performance.now()
-      const tick = (now) => {
-        const progress = Math.min((now - start) / duration, 1)
-        setDisplayPct(pctValue * (1 - Math.pow(1 - progress, 3)))
-        if (progress < 1) frameId = requestAnimationFrame(tick)
-      }
-      frameId = requestAnimationFrame(tick)
-    }
-    timeoutId = window.setTimeout(startAnimation, delay)
-    return () => { window.clearTimeout(timeoutId); if (frameId) cancelAnimationFrame(frameId) }
-  }, [isVisible, pctValue])
+  const displayPct = useAnimatedPercentage(pctValue, { delay: 5 * 55 + 180, active: isVisible })
 
   return (
     <div style={{ position: 'relative', marginTop: '8px' }} ref={rowRef}>

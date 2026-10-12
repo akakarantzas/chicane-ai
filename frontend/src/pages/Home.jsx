@@ -5,6 +5,7 @@ import ButtonHeartbeatEffectDemo from '../components/ui/heartbeat-effect-button'
 import { circuits } from '../data/circuits'
 import { getNextRace, useRaceCalendar } from '../data/races'
 import useIsMobile from '../hooks/useIsMobile'
+import { useAnimatedPercentage, useVisibleOnce } from '../hooks/usePredictionAnimation'
 import usePredictionFeed from '../hooks/usePredictionFeed'
 import canadaTrack from '../assets/circuits/canada-track-white.png'
 import monacoTrack from '../assets/circuits/monaco-track-white.png'
@@ -60,62 +61,11 @@ function CountdownCard({ value, label, isMobile, accent }) {
 
 function LatestPredictionCard({ prediction, index, isMobile }) {
   const [isHovered, setIsHovered] = useState(false)
-  const rowRef = useRef(null)
-  const [isVisible, setIsVisible] = useState(false)
-  const [displayPct, setDisplayPct] = useState(0)
+  const [rowRef, isVisible] = useVisibleOnce()
   const pctValue = prediction.probability * 100
+  const displayPct = useAnimatedPercentage(pctValue, { delay: index * 55 + 180, active: isVisible })
   const barWidth = `${pctValue}%`
   const barColor = BAR_COLORS[index]
-
-  useEffect(() => {
-    const node = rowRef.current
-    if (!node) return undefined
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true)
-          observer.disconnect()
-        }
-      },
-      { threshold: 0.35 },
-    )
-
-    observer.observe(node)
-    return () => observer.disconnect()
-  }, [])
-
-  useEffect(() => {
-    if (!isVisible) return undefined
-
-    const duration = 2880
-    const delay = index * 55 + 180
-    let frameId
-    let timeoutId
-
-    const startAnimation = () => {
-      const start = performance.now()
-
-      const tick = (now) => {
-        const progress = Math.min((now - start) / duration, 1)
-        const eased = 1 - Math.pow(1 - progress, 3)
-        setDisplayPct(pctValue * eased)
-
-        if (progress < 1) {
-          frameId = requestAnimationFrame(tick)
-        }
-      }
-
-      frameId = requestAnimationFrame(tick)
-    }
-
-    timeoutId = window.setTimeout(startAnimation, delay)
-
-    return () => {
-      window.clearTimeout(timeoutId)
-      if (frameId) cancelAnimationFrame(frameId)
-    }
-  }, [index, isVisible, pctValue])
 
   return (
     <div
@@ -195,41 +145,9 @@ function StatCard({ number, label }) {
 }
 
 function GhostPredictionRow({ isMobile, onNavigate, prediction, index = 3 }) {
-  const rowRef = useRef(null)
-  const [isVisible, setIsVisible] = useState(false)
-  const [displayPct, setDisplayPct] = useState(0)
+  const [rowRef, isVisible] = useVisibleOnce()
   const pctValue = prediction.probability * 100
-
-  useEffect(() => {
-    const node = rowRef.current
-    if (!node) return undefined
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setIsVisible(true); observer.disconnect() } },
-      { threshold: 0.35 },
-    )
-    observer.observe(node)
-    return () => observer.disconnect()
-  }, [])
-
-  useEffect(() => {
-    if (!isVisible) return undefined
-    setDisplayPct(0)
-    const duration = 2880
-    const delay = index * 55 + 180
-    let frameId
-    let timeoutId
-    const startAnimation = () => {
-      const start = performance.now()
-      const tick = (now) => {
-        const progress = Math.min((now - start) / duration, 1)
-        setDisplayPct(pctValue * (1 - Math.pow(1 - progress, 3)))
-        if (progress < 1) frameId = requestAnimationFrame(tick)
-      }
-      frameId = requestAnimationFrame(tick)
-    }
-    timeoutId = window.setTimeout(startAnimation, delay)
-    return () => { window.clearTimeout(timeoutId); if (frameId) cancelAnimationFrame(frameId) }
-  }, [index, isVisible, pctValue])
+  const displayPct = useAnimatedPercentage(pctValue, { delay: index * 55 + 180, active: isVisible })
 
   return (
     <div style={{ position: 'relative' }} ref={rowRef}>

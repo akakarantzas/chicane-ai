@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 
 import AppNav from '../components/AppNav'
 import useIsMobile from '../hooks/useIsMobile'
+import { useAnimatedPercentage } from '../hooks/usePredictionAnimation'
 import { fetchPredictionHistory } from '../lib/predictions'
 import azerbaijanPredictions from '../data/azerbaijan_predictions.json'
 import barcelonaPredictions from '../data/barcelona_catalunya_predictions.json'
@@ -80,40 +81,9 @@ function StatBlock({ label, value, accent = false }) {
 function PredictionArchiveRow({ prediction, index, actualWinner, isMobile }) {
   const isWinner = prediction.driver === actualWinner
   const pctValue = prediction.probability * 100
-  const [displayPct, setDisplayPct] = useState(0)
   const barDelayMs = index * 55 + 180
   const barDelay = `${barDelayMs}ms`
-
-  useEffect(() => {
-    setDisplayPct(0)
-
-    const duration = 2880
-    let frameId
-    let timeoutId
-
-    const startAnimation = () => {
-      const start = performance.now()
-
-      const tick = (now) => {
-        const progress = Math.min((now - start) / duration, 1)
-        const eased = 1 - Math.pow(1 - progress, 3)
-        setDisplayPct(pctValue * eased)
-
-        if (progress < 1) {
-          frameId = requestAnimationFrame(tick)
-        }
-      }
-
-      frameId = requestAnimationFrame(tick)
-    }
-
-    timeoutId = window.setTimeout(startAnimation, barDelayMs)
-
-    return () => {
-      window.clearTimeout(timeoutId)
-      if (frameId) cancelAnimationFrame(frameId)
-    }
-  }, [barDelayMs, pctValue])
+  const displayPct = useAnimatedPercentage(pctValue, { delay: barDelayMs })
 
   return (
     <li
