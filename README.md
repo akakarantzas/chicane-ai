@@ -26,6 +26,12 @@ AI-powered Formula 1 analytics and race prediction web app.
 - scikit-learn (Gradient Boosting + Random Forest)
 - FastF1 (real F1 timing and results data)
 
+## Quick start (Windows)
+
+Run `setup.bat` from the repository root to create the backend virtual environment and install
+all dependencies. Use `setup.bat run` to also start both servers, then open
+`http://localhost:5173`.
+
 ## Documentation
 
 - [API reference](docs/api.md) - endpoints, parameters, responses, and errors
