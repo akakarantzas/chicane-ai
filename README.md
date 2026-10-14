@@ -23,7 +23,7 @@ AI-powered Formula 1 analytics and race prediction web app.
 - FastAPI (Python)
 
 **ML**
-- scikit-learn (Gradient Boosting + Random Forest)
+- scikit-learn (calibrated histogram Gradient Boosting)
 - FastF1 (real F1 timing and results data)
 
 ## Quick start (Windows)
