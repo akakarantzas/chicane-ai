@@ -111,6 +111,10 @@ Exécutez ensuite :
 .\venv\Scripts\Activate.ps1
 ```
 
+## Avertissement
+
+ChicaneAI est un projet de fan non officiel. Il n'est ni affilié à la Formule 1, à la FIA ou à une écurie de Formule 1, ni approuvé ou soutenu par eux. F1, FORMULA 1 et les marques associées sont des marques de Formula One Licensing BV et de leurs propriétaires respectifs. La licence MIT ne couvre que le code de ce projet, et non les marques, données ou polices de tiers.
+
 ## Licence
 
-MIT
+MIT - [LICENSE](LICENSE)

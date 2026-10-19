@@ -111,6 +111,10 @@ Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 .\venv\Scripts\Activate.ps1
 ```
 
+## 免責聲明
+
+ChicaneAI 是非官方的粉絲專案，與 Formula 1、FIA 或任何 Formula 1 車隊均無隸屬、背書或關聯。F1、FORMULA 1 及相關標誌為 Formula One Licensing BV 及其各自所有者的商標。MIT 授權僅涵蓋本專案的程式碼，不包含第三方的商標、資料或字型。
+
 ## 授權
 
-MIT
+MIT - [LICENSE](LICENSE)
