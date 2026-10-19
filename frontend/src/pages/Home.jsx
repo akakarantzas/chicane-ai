@@ -11,6 +11,7 @@ import canadaTrack from '../assets/circuits/canada-track-white.png'
 import monacoTrack from '../assets/circuits/monaco-track-white.png'
 import azerbaijanTrack from '../assets/circuits/azerbaijan-track-white.png'
 import singaporeTrack from '../assets/circuits/singapore-track-white.png'
+import unitedStatesTrack from '../assets/circuits/united-states-track-white.png'
 
 function RaceCard({ name, country, date, status, cardRef }) {
   const isCurrent   = status === 'current'
@@ -271,9 +272,11 @@ export default function Home({ onNavigate }) {
   const currentRaceName = currentRace.name.replace(/\bGP\b/g, 'Grand Prix')
   const currentRaceDate = `${currentRace.date}, 2026`
   const currentRaceCountryLabel = `${currentRace.city ?? currentRace.country} · ${currentRace.code}`
-  const currentRaceCircuit = currentRace.code === 'SG' ? circuits.singapore : currentRace.code === 'AZ' ? circuits.azerbaijan : currentRace.code === 'MC' ? circuits.monaco : currentRace.code === 'CA' ? circuits.canada : null
-  const currentRaceTrackImage = currentRace.code === 'SG' ? singaporeTrack : currentRace.code === 'AZ' ? azerbaijanTrack : currentRace.code === 'MC' ? monacoTrack : currentRace.code === 'CA' ? canadaTrack : null
-  const useTrackImageOverlay = ['SG', 'AZ', 'MC'].includes(currentRace.code)
+  // The US country code is also used for Miami and Las Vegas.
+  const isUnitedStatesGP = currentRace.circuitId === 'united-states'
+  const currentRaceCircuit = isUnitedStatesGP ? circuits.unitedStates : currentRace.code === 'SG' ? circuits.singapore : currentRace.code === 'AZ' ? circuits.azerbaijan : currentRace.code === 'MC' ? circuits.monaco : currentRace.code === 'CA' ? circuits.canada : null
+  const currentRaceTrackImage = isUnitedStatesGP ? unitedStatesTrack : currentRace.code === 'SG' ? singaporeTrack : currentRace.code === 'AZ' ? azerbaijanTrack : currentRace.code === 'MC' ? monacoTrack : currentRace.code === 'CA' ? canadaTrack : null
+  const useTrackImageOverlay = isUnitedStatesGP || ['SG', 'AZ', 'MC'].includes(currentRace.code)
   const latestPredictions = predictionPreview.predictions
   const topPredictions = latestPredictions.slice(0, 3)
   const ghostPrediction = latestPredictions[3]
