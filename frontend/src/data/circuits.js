@@ -1,3 +1,10 @@
+import canadaTrack from '../assets/circuits/canada-track-white.png'
+import monacoTrack from '../assets/circuits/monaco-track-white.png'
+import miamiTrack from '../assets/circuits/miami-track-white.png'
+import azerbaijanTrack from '../assets/circuits/azerbaijan-track-white.png'
+import singaporeTrack from '../assets/circuits/singapore-track-white.png'
+import unitedStatesTrack from '../assets/circuits/united-states-track-white.png'
+
 export const MONACO_CENTERLINE_PATH = `
 M 83 679
 L 85 670
@@ -246,9 +253,12 @@ Z
 `
 
 export const circuits = {
-  unitedStates: {
+  'united-states': {
     id: 'united-states',
     name: 'Circuit of the Americas',
+    image: unitedStatesTrack,
+    renderMode: 'image-overlay',
+    duration: 4300,
     viewBox: '0 0 1584 993',
     path: UNITED_STATES_CENTERLINE_PATH,
     start: { x: 299.08, y: 753.21 },
@@ -256,6 +266,9 @@ export const circuits = {
   singapore: {
     id: 'singapore',
     name: 'Marina Bay Street Circuit',
+    image: singaporeTrack,
+    renderMode: 'image-overlay',
+    duration: 4300,
     viewBox: '0 0 1672 941',
     path: SINGAPORE_CENTERLINE_PATH,
     start: { x: 1574.84, y: 429.19 },
@@ -263,6 +276,9 @@ export const circuits = {
   azerbaijan: {
     id: 'azerbaijan',
     name: 'Baku City Circuit',
+    image: azerbaijanTrack,
+    renderMode: 'image-overlay',
+    duration: 4300,
     viewBox: '0 0 1448 1086',
     // Hide transparent vertical margins without changing the track's scale.
     imageVerticalTrim: { top: 150, bottom: 100 },
@@ -272,6 +288,9 @@ export const circuits = {
   miami: {
     id: 'miami',
     name: 'Miami International Autodrome',
+    image: miamiTrack,
+    renderMode: 'svg',
+    duration: 4300,
     viewBox: '0 0 800 420',
     // Smooth animation guide traced from the PNG track centerline and normalized to 800x420.
     path: `
@@ -344,6 +363,9 @@ Z
   canada: {
     id: 'canada',
     name: 'Circuit Gilles-Villeneuve',
+    image: canadaTrack,
+    renderMode: 'svg',
+    duration: 4300,
     viewBox: '0 0 800 420',
     path: `
 M44.1 53.9
@@ -565,10 +587,11 @@ Z
   monaco: {
     id: 'monaco',
     name: 'Circuit de Monaco',
+    image: monacoTrack,
+    renderMode: 'image-overlay',
+    duration: 4300,
     viewBox: '0 0 1672 941',
     path: MONACO_CENTERLINE_PATH,
     start: { x: 86, y: 681 },
   },
 }
-
-export const nextRaceCircuit = circuits.canada
