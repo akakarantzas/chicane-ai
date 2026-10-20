@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import AppNav from '../components/AppNav'
 import NextRaceCircuitCard from '../components/NextRaceCircuitCard'
 import ButtonHeartbeatEffectDemo from '../components/ui/heartbeat-effect-button'
-import { circuits } from '../data/circuits'
 import { getNextRace, useRaceCalendar } from '../data/races'
 import useIsMobile from '../hooks/useIsMobile'
 import { useAnimatedPercentage, useVisibleOnce } from '../hooks/usePredictionAnimation'
@@ -264,11 +263,6 @@ export default function Home({ onNavigate }) {
     predictions: [],
     loading: predictionLoading,
   }
-  const currentRaceName = currentRace.name.replace(/\bGP\b/g, 'Grand Prix')
-  const currentRaceDate = `${currentRace.date}, 2026`
-  const currentRaceCountryLabel = `${currentRace.city ?? currentRace.country} · ${currentRace.code}`
-  const currentRaceCircuit = circuits[currentRace.circuitId]
-  const useTrackImageOverlay = currentRaceCircuit?.renderMode === 'image-overlay'
   const latestPredictions = predictionPreview.predictions
   const topPredictions = latestPredictions.slice(0, 3)
   const ghostPrediction = latestPredictions[3]
@@ -369,23 +363,9 @@ export default function Home({ onNavigate }) {
         <div className="section-shell" style={{ padding: isMobile ? '0 16px' : '0 32px' }}>
           <div>
             <NextRaceCircuitCard
-              raceName={currentRaceName}
-              round={`Round ${currentRace.round} · 2026 Season`}
-              venue={currentRace.venue ?? currentRaceCircuit?.name ?? 'Race weekend'}
-              date={currentRaceDate}
-              status={predictionPreview.status}
-              countryLabel={currentRaceCountryLabel}
-              trackImage={currentRaceCircuit?.image}
-              trackAlt={`${currentRaceName} Circuit`}
-              showTrackImage={useTrackImageOverlay}
-              circuitPath={currentRaceCircuit?.path}
-              viewBox={currentRaceCircuit?.viewBox}
-              imageVerticalTrim={currentRaceCircuit?.imageVerticalTrim}
-              animationDuration={currentRaceCircuit?.duration}
-              showAnimatedPath={!useTrackImageOverlay}
-              showDebugPath={false}
-              pathVariant="glow"
-              alignOverlayWithTrackImage={useTrackImageOverlay}
+              race={currentRace}
+              prediction={predictionData}
+              predictionLoading={predictionLoading}
             />
           </div>
             <div style={{ marginTop: isMobile ? '24px' : '32px' }}>

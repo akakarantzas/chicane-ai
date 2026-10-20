@@ -4,9 +4,13 @@ Start at `src/data/circuits.js`. Each registered circuit keeps its image import,
 animation path, viewBox, duration, render mode, and optional image trimming
 together. Image files remain in `src/assets/circuits/`.
 
-`src/data/races.js` assigns a stable `circuitId` to each race. `Home.jsx` selects
-`circuits[currentRace.circuitId]` and passes its settings to the shared
-`NextRaceCircuitCard` and `AnimatedCircuit` components.
+`src/data/races.js` assigns a stable `circuitId` to each race. `Home.jsx` passes
+the current calendar race to `NextRaceCircuitCard`. The card selects
+`circuits[race.circuitId]` and derives its title, round, venue, date, image, and
+animation from that same race. The calendar refreshes every second on Home.
+When the race changes, the circuit panel remounts to reset the marker and remove
+the previous image. Prediction status appears only when the feed's race matches
+the card's race; otherwise the card shows "Predictions pending".
 
 ## Add an animation
 
