@@ -34,6 +34,10 @@ matches the image canvas. Use `svg` when the path supplies the visible track.
 Canada and Miami currently use SVG rendering; the other registered circuits
 use PNG overlays. Azerbaijan also uses `imageVerticalTrim`.
 
+Spain uses `spain-track-white.svg`, traced from the supplied Madrid reference
+`spanish-gp-circuit.png`. Its SVG image and marker share the same geometry.
+The older `spain-track-white.png` depicts Barcelona and is not used for Madrid.
+
 Every calendar race has an ID, including tracks whose animations have not yet
 been registered. Those races render without a circuit animation until an entry
 is added. Miami, United States, and Las Vegas have separate IDs, as do Barcelona
