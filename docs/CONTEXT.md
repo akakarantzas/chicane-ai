@@ -77,7 +77,8 @@ The Home and Calendar views use the frontend-local 2026 schedule in
 calendars. Updating the frontend schedule does not change the backend's target
 discovery. Circuit images, paths and animation settings are maintained in
 `frontend/src/assets/circuits/`, `frontend/src/data/circuits.js` and the shared
-circuit components.
+circuit components. See the [circuit registry guide](../frontend/docs/circuit-registry.md)
+for how races select circuits and how to add an animation.
 
 See [prediction-history operations](prediction-history.md) for archival rules,
 result reconciliation and storage recovery.
