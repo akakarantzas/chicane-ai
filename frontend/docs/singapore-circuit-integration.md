@@ -26,7 +26,7 @@ now supplies Marina Bay Street Circuit as the card's venue.
 - Inspected a red debug overlay against the supplied transparent PNG.
 - Sampled 3,800 points along the cubic path: all landed on opaque white track pixels.
 - Production build passed, including the Singapore track asset.
-- Frontend test suite passed (43 tests across 4 files).
+- Frontend test suite passed.
 - Debug paths remain disabled in the shipped UI.
 - Live playback and desktop/mobile browser checks were unavailable because the
   in-app browser exposed no sessions. Pixel checks verify path alignment;

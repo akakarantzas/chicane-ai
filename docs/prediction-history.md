@@ -114,7 +114,7 @@ frontend polling and cleanup, forecast selection, and retention during refresh
 failure. They use temporary archives and synthetic race fixtures; no future
 forecast or result is fabricated in the installation's real history.
 
-Final validation on September 28, 2026: 347 backend tests, 43 frontend tests,
+Final validation on September 28, 2026: the backend and frontend test suites
 and the production frontend build passed. The running History endpoint returned
 HTTP 200 with the expected response and `Cache-Control: no-store`. Visual browser
 verification was unavailable. Existing backend dependency deprecation warnings remain.

@@ -47,7 +47,7 @@ forecast. Past Azerbaijan artifacts and History entries remain available.
 ## Verification
 
 - Seven model regression tests passed in the standalone Docker image.
-- All 347 backend tests and 43 frontend tests passed.
+- The backend and frontend test suites passed.
 - The frontend production build passed.
 - Frontend API rendering checks show Singapore Grand Prix Predictions and
   Marina Bay Street Circuit, and reject the former Azerbaijan heading.
