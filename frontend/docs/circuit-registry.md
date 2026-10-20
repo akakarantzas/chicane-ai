@@ -1,8 +1,8 @@
 # Circuit registry
 
-Start at `src/data/circuits.js`. Each registered circuit keeps its PNG import,
+Start at `src/data/circuits.js`. Each registered circuit keeps its image import,
 animation path, viewBox, duration, render mode, and optional image trimming
-together. PNG files remain in `src/assets/circuits/`.
+together. Image files remain in `src/assets/circuits/`.
 
 `src/data/races.js` assigns a stable `circuitId` to each race. `Home.jsx` selects
 `circuits[currentRace.circuitId]` and passes its settings to the shared
@@ -38,10 +38,9 @@ Spain uses `spain-track-white.svg`, traced from the supplied Madrid reference
 `spanish-gp-circuit.png`. Its SVG image and marker share the same geometry.
 The older `spain-track-white.png` depicts Barcelona and is not used for Madrid.
 
-Every calendar race has an ID, including tracks whose animations have not yet
-been registered. Those races render without a circuit animation until an entry
-is added. Miami, United States, and Las Vegas have separate IDs, as do Barcelona
-and the Spanish GP.
+All 24 calendar races have registered animations. Miami, United States, and Las
+Vegas have separate IDs, as do Barcelona and the Spanish GP. Suzuka's closed
+path follows both straight-through passes of its figure-eight crossover.
 
 ## Reuse next season
 

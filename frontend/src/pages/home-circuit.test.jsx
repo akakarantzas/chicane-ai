@@ -17,7 +17,22 @@ vi.mock('../hooks/usePredictionFeed', () => ({
   }),
 }))
 
+test('every scheduled race has a registered circuit animation', () => {
+  const races = getRaceCalendar(new Date('2026-01-01'))
+  expect(races).toHaveLength(24)
+  for (const race of races) {
+    expect(circuits[race.circuitId], race.name).toMatchObject({
+      id: race.circuitId,
+      image: expect.any(String),
+      path: expect.any(String),
+      viewBox: expect.any(String),
+      duration: 4300,
+    })
+  }
+})
+
 test.each([
+  ['2026-12-01', 'abu-dhabi', true],
   ['2026-11-25', 'qatar', true],
   ['2026-11-20', 'las-vegas', true],
   ['2026-11-04', 'brazil', true],
