@@ -18,6 +18,7 @@ vi.mock('../hooks/usePredictionFeed', () => ({
 }))
 
 test.each([
+  ['2026-11-20', 'las-vegas', true],
   ['2026-11-04', 'brazil', true],
   ['2026-10-28', 'mexico', true],
   ['2026-09-10', 'spain', true],
@@ -57,15 +58,17 @@ test.each([
   })
 })
 
-test('Las Vegas does not inherit another US circuit animation', () => {
+test('Las Vegas uses its own circuit despite sharing the US country code', () => {
   vi.mocked(useRaceCalendar).mockReturnValue(getRaceCalendar(new Date('2026-11-20')))
   vi.mocked(NextRaceCircuitCard).mockClear()
   render(<Home onNavigate={vi.fn()} />)
 
   expect(NextRaceCircuitCard.mock.lastCall[0]).toMatchObject({
     raceName: 'Las Vegas Grand Prix',
-    trackImage: undefined,
-    circuitPath: undefined,
-    showTrackImage: false,
+    trackImage: circuits['las-vegas'].image,
+    circuitPath: circuits['las-vegas'].path,
+    showTrackImage: true,
   })
+  expect(circuits['las-vegas'].path).not.toBe(circuits['united-states'].path)
+  expect(circuits['las-vegas'].path).not.toBe(circuits.miami.path)
 })
