@@ -1,13 +1,17 @@
 # Azerbaijan circuit animation
 
+> Historical note: this describes the original per-circuit work. Circuits are now
+> selected through the registry in `src/data/circuits.js`; see
+> [circuit-registry.md](circuit-registry.md) for the current process.
+
 The next-race card uses the supplied `public/azerbaijan-circuit.png` outline,
 cleaned into `src/assets/circuits/azerbaijan-track-white.png` (1448 × 1086,
 transparent background). The labeled sector map in `src/assets/circuits/azerbaijan-circuit.png`
 is preserved.
 
 `AZERBAIJAN_CENTERLINE_PATH` in `src/data/circuits.js` traces the cleaned PNG
-with one closed cubic Bézier path. `Home.jsx` imports the PNG and selects
-`circuits.azerbaijan` for race code `AZ`. The existing `AnimatedCircuit` uses
+with one closed cubic Bézier path. The registry entry `circuits.azerbaijan` supplies
+the PNG and path, and the Azerbaijan race selects it through its `circuitId`. The existing `AnimatedCircuit` uses
 `getTotalLength()` and `getPointAtLength()` for its looping red marker.
 The visible track remains the PNG; the SVG guide is transparent.
 

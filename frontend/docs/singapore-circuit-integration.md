@@ -1,5 +1,9 @@
 # Singapore circuit animation
 
+> Historical note: this describes the original per-circuit work. Circuits are now
+> selected through the registry in `src/data/circuits.js`; see
+> [circuit-registry.md](circuit-registry.md) for the current process.
+
 The next-race card uses the existing transparent white outline at
 `src/assets/circuits/singapore-track-white.png`, following the Azerbaijan
 image-overlay setup. The original white-track and labeled sector images are preserved.
@@ -9,7 +13,8 @@ centerline with one closed cubic Bezier path. The trace was refined using
 alpha-weighted white-pixel cross sections and fitted cubic curves.
 Its native coordinate space and viewBox are `0 0 1672 941`.
 
-`Home.jsx` selects `circuits.singapore` and the white PNG for race code `SG`.
+The registry entry `circuits.singapore` supplies the white PNG, and the Singapore race
+selects it through its `circuitId`.
 The PNG supplies the visible white line; the SVG guide stays transparent.
 The existing `AnimatedCircuit` supplies the same red ball, glow, and 4300 ms
 loop as Azerbaijan, using `getTotalLength()` and `getPointAtLength()`.
