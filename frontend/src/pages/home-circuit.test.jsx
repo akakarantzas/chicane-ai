@@ -18,6 +18,7 @@ vi.mock('../hooks/usePredictionFeed', () => ({
 }))
 
 test.each([
+  ['2026-07-01', 'great-britain', true],
   ['2026-06-20', 'austria', true],
   ['2026-06-10', 'barcelona', true],
   ['2026-04-15', 'saudi-arabia', true],
