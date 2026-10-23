@@ -111,6 +111,14 @@ Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 .\venv\Scripts\Activate.ps1
 ```
 
+## 联系方式
+
+关于本项目的问题、合作咨询或反馈：
+
+- LinkedIn: [Apostolos Kakarantzas](https://www.linkedin.com/in/akakarantzas/)
+- X / Twitter: [@aevagnarly](https://x.com/aevagnarly)
+- 电子邮件: [hello@akakarantzas.com](mailto:hello@akakarantzas.com)
+
 ## 免责声明
 
 ChicaneAI 是非官方的粉丝项目，与 Formula 1、FIA 或任何 Formula 1 车队均无隶属、背书或关联。F1、FORMULA 1 及相关标志为 Formula One Licensing BV 及其各自所有者的商标。MIT 许可证仅涵盖本项目的代码，不包含第三方的商标、数据或字体。

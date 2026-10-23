@@ -114,6 +114,14 @@ Then run:
 .\venv\Scripts\Activate.ps1
 ```
 
+## Contact
+
+Questions, partnership inquiries, or feedback about this project:
+
+- LinkedIn: [Apostolos Kakarantzas](https://www.linkedin.com/in/akakarantzas/)
+- X / Twitter: [@aevagnarly](https://x.com/aevagnarly)
+- Email: [hello@akakarantzas.com](mailto:hello@akakarantzas.com)
+
 ## Disclaimer
 
 ChicaneAI is an unofficial fan project. It is not affiliated with, endorsed by, or associated with Formula 1, the FIA, or any Formula 1 team. F1, FORMULA 1 and related marks are trademarks of Formula One Licensing BV and their respective owners. The MIT license covers this project's code only, not third-party trademarks, data or fonts.

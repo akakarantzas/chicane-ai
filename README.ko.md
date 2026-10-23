@@ -111,6 +111,14 @@ Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 .\venv\Scripts\Activate.ps1
 ```
 
+## 문의
+
+이 프로젝트에 대한 질문, 제휴 문의 또는 피드백:
+
+- LinkedIn: [Apostolos Kakarantzas](https://www.linkedin.com/in/akakarantzas/)
+- X / Twitter: [@aevagnarly](https://x.com/aevagnarly)
+- 이메일: [hello@akakarantzas.com](mailto:hello@akakarantzas.com)
+
 ## 면책 조항
 
 ChicaneAI는 비공식 팬 프로젝트이며, 포뮬러 1, FIA 또는 어떤 포뮬러 1 팀과도 제휴, 보증 또는 연관 관계가 없습니다. F1, FORMULA 1 및 관련 상표는 Formula One Licensing BV와 각 소유자의 상표입니다. MIT 라이선스는 이 프로젝트의 코드에만 적용되며, 제3자의 상표, 데이터, 글꼴에는 적용되지 않습니다.
