@@ -236,12 +236,12 @@ def test_history_api_refreshes_released_results_and_preserves_saved_results_on_f
     assert data["races"][0]["actualWinner"] == "Russell"
 
 
-def test_prediction_endpoint_captures_the_original_forecast(archive, client, monkeypatch):
+def test_prediction_endpoint_is_read_only(archive, client, monkeypatch):
     from app.routers import predictions as router
     monkeypatch.setattr(router, "_load_predictions", predictions)
     monkeypatch.setattr(router, "_load_metadata", metadata)
     assert client.get("/api/predictions/next-race").status_code == 200
-    assert json.loads(history.forecast_records()[0]["payload_json"])["predictions"] == predictions()
+    assert not archive.exists()  # archiving belongs to the background worker
 
 
 def test_background_worker_refreshes_without_a_history_request(monkeypatch):

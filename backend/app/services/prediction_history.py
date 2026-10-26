@@ -178,18 +178,6 @@ def record_forecast(predictions, metadata, *, now=None, event=None, path=None):
     return {"status": "recorded" if cursor.rowcount else "already_recorded", "id": record_id}
 
 
-def capture_forecast(predictions, metadata):
-    if not enabled():
-        return {"status": "disabled"}
-    if (MODELS_DIR / ".prediction-publish.lock").exists():
-        return {"status": "not_recorded", "reason": "artifacts_updating"}
-    try:
-        return record_forecast(predictions, metadata)
-    except Exception:
-        logger.warning("Could not archive the published race forecast")
-        return {"status": "unavailable"}
-
-
 def forecast_records(path=None):
     path = Path(path) if path is not None else database_path()
     if not path.exists():

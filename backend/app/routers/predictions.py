@@ -7,7 +7,7 @@ from pathlib import Path
 from pydantic import BaseModel, Field
 
 from app.data.drivers import PREDICTION_DRIVER_GRID_2026
-from app.services.prediction_history import capture_forecast, history_response
+from app.services.prediction_history import history_response
 from app.services import post_qualifying
 
 router = APIRouter(prefix="/api/predictions")
@@ -169,7 +169,6 @@ def get_next_race_prediction(response: Response):
     response.headers["Cache-Control"] = "no-store"
     original_predictions = _load_predictions()
     metadata = _load_metadata()
-    capture_forecast(original_predictions, metadata)
     update = post_qualifying.read_update(original_predictions, metadata)
     if update:
         original_predictions, metadata = update["predictions"], update["metadata"]
