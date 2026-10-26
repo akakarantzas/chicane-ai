@@ -393,8 +393,7 @@ def read_history(*, path=None, now=None):
             continue
         result = outcomes.get(record["event_id"])
         if not result:
-            if timestamp(event["starts_at"]) <= now:
-                pending.add(record["event_id"])
+            pending.add(record["event_id"])
             continue
         payload = json.loads(record["payload_json"])
         winner_names = {normalized(result["actualWinner"]), normalized(result["winnerFullName"])}
