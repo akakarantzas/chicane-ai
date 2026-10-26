@@ -102,6 +102,12 @@ def get_season_snapshot(year, events, now, loader, *, snapshot_id=None):
     with _registry_lock:
         lock = _locks.setdefault(year, Lock())
     signature = _signature(events, now)
+    if not snapshot_id and lock.locked():
+        # A refresh is running: serve the last good bundle (labelled stale by
+        # _public) instead of queueing every request thread behind the network.
+        previous = _season_cache.get(year)
+        if previous and time.monotonic() - previous.loaded_at < MAX_STALE_SECONDS:
+            return _public(previous, events, now, signature)
     with lock:
         clock = time.monotonic()
         if snapshot_id:

@@ -244,6 +244,17 @@ def test_prediction_endpoint_is_read_only(archive, client, monkeypatch):
     assert not archive.exists()  # archiving belongs to the background worker
 
 
+def test_history_request_does_not_queue_behind_a_running_refresh(archive):
+    from concurrent.futures import ThreadPoolExecutor
+    state = history.refresh_history(force=True)
+    pool = ThreadPoolExecutor(1)
+    try:
+        with history._refresh_lock:  # simulate the worker mid-refresh
+            assert pool.submit(history.refresh_history).result(timeout=2) == state
+    finally:
+        pool.shutdown(wait=False)
+
+
 def test_background_worker_refreshes_without_a_history_request(monkeypatch):
     calls = []
     class Stop:

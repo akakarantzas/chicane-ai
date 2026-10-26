@@ -359,6 +359,8 @@ def refresh_history(*, force=False):
     if not enabled():
         return {"status": "disabled", "checked_at": None}
     key = str(database_path())
+    if _last_refresh.get(key) and _refresh_lock.locked():
+        return _last_refresh[key][1]  # a refresh is running; don't queue behind its network calls
     with _refresh_lock:
         previous = _last_refresh.get(key)
         if not force and previous and time.monotonic() - previous[0] < refresh_seconds():

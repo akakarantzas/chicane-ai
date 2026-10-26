@@ -220,6 +220,21 @@ def test_simultaneous_requests_run_only_one_loader(clock):
     assert calls == [1]
 
 
+def test_requests_during_a_refresh_get_the_last_good_snapshot_without_waiting(clock):
+    first = get(clock)
+    clock[0] = 11  # past the TTL, so a refresh is due
+    def must_not_load(*args):
+        raise AssertionError("a waiting request must not start its own load")
+    pool = ThreadPoolExecutor(1)
+    try:
+        with cache._locks[2026]:  # simulate another request mid-refresh
+            served = pool.submit(get, clock, must_not_load).result(timeout=2)
+    finally:
+        pool.shutdown(wait=False)
+    assert served["freshness"]["snapshot_id"] == first["freshness"]["snapshot_id"]
+    assert served["freshness"]["status"] == "stale"
+
+
 def test_partial_snapshot_retries_sooner_than_normal_ttl(clock, monkeypatch):
     monkeypatch.setenv("H2H_CACHE_TTL_SECONDS", "900")
     partial = payload()
