@@ -245,12 +245,28 @@ function useCountdown(target) {
   return { days, hours, minutes, seconds }
 }
 
+// Owns the one-second timer so only the countdown re-renders each tick, not the whole page.
+function CountdownGrid({ target, isMobile }) {
+  const { days, hours, minutes, seconds } = useCountdown(target)
+  return (
+    <div className="countdown-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', gap: isMobile ? '8px' : '20px', marginBottom: 0, order: 2 }}>
+      {[
+        { value: days,    label: 'Days'    },
+        { value: hours,   label: 'Hours'   },
+        { value: minutes, label: 'Minutes' },
+        { value: seconds, label: 'Seconds', accent: true },
+      ].map((item) => (
+        <CountdownCard key={item.label} {...item} isMobile={isMobile} />
+      ))}
+    </div>
+  )
+}
+
 export default function Home({ onNavigate }) {
   const isMobile = useIsMobile()
   const races = useRaceCalendar(1000)
   const currentRace = races.find((race) => race.status === 'current') ?? getNextRace()
   const countdownTarget = new Date(currentRace.raceAt).getTime()
-  const { days, hours, minutes, seconds } = useCountdown(countdownTarget)
   const currentRaceRef = useRef(null)
   const calendarScrollRef = useRef(null)
   const currentRaceRound = currentRace?.round
@@ -369,17 +385,7 @@ export default function Home({ onNavigate }) {
             />
           </div>
             <div style={{ marginTop: isMobile ? '24px' : '32px' }}>
-              {/* Countdown grid */}
-              <div className="countdown-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', gap: isMobile ? '8px' : '20px', marginBottom: 0, order: 2 }}>
-                {[
-                  { value: days,    label: 'Days'    },
-                  { value: hours,   label: 'Hours'   },
-                  { value: minutes, label: 'Minutes' },
-                  { value: seconds, label: 'Seconds', accent: true },
-                ].map((item) => (
-                  <CountdownCard key={item.label} {...item} isMobile={isMobile} />
-                ))}
-              </div>
+              <CountdownGrid target={countdownTarget} isMobile={isMobile} />
             </div>
         </div>
       </section>

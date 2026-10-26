@@ -46,12 +46,18 @@ export function getNextRace(now = new Date()) {
   return getRaceCalendar(now).find((race) => race.status === 'current') ?? RACE_SCHEDULE[RACE_SCHEDULE.length - 1]
 }
 
+const calendarSignature = (races) => races.map((race) => `${race.round}:${race.status}`).join()
+
 export function useRaceCalendar(refreshMs = 60_000) {
   const [races, setRaces] = useState(() => getRaceCalendar())
 
   useEffect(() => {
     const id = window.setInterval(() => {
-      setRaces(getRaceCalendar())
+      // Keep the same array unless a race changed status, so consumers don't re-render every tick.
+      setRaces((previous) => {
+        const next = getRaceCalendar()
+        return calendarSignature(previous) === calendarSignature(next) ? previous : next
+      })
     }, refreshMs)
 
     return () => window.clearInterval(id)
