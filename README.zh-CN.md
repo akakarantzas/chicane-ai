@@ -90,7 +90,7 @@ python -m uvicorn app.main:app --reload
 ```powershell
 cd backend
 .\venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
+python -m pip install -r requirements-dev.txt
 python -m pytest tests
 ```
 
