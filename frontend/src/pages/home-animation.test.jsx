@@ -31,4 +31,4 @@ test('home ghost prediction animates to the refreshed probability', async () => 
   rerender(<Home {...props} />)
 
   expect(await screen.findByText('5.4%', {}, { timeout: 5000 })).toBeInTheDocument()
-})
+}, 15_000) // two real animations take ~4s, so the 5s default flakes under load
