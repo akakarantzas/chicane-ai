@@ -46,28 +46,24 @@ def _get_contact_config() -> tuple[str, str]:
 
 @router.post("/contact")
 def submit_contact(payload: ContactPayload):
-    if not _EMAIL_RE.match(payload.email.strip()):
+    # ContactPayload already strips whitespace and enforces the message length.
+    if not _EMAIL_RE.match(payload.email):
         raise HTTPException(status_code=422, detail="Please enter a valid email address.")
-
-    message = payload.message.strip()
-    if not message:
-        raise HTTPException(status_code=422, detail="Message cannot be empty.")
-    if len(message) > 2000:
-        raise HTTPException(status_code=422, detail="Message must be under 2000 characters.")
 
     api_key, to_email = _get_contact_config()
 
-    name_str = html.escape(payload.name.strip()) if payload.name and payload.name.strip() else "Anonymous"
-    email_str = html.escape(payload.email.strip())
-    message_str = html.escape(message).replace("\n", "<br>")
+    name = payload.name or "Anonymous"
+    email_str = html.escape(payload.email)
+    message_str = html.escape(payload.message).replace("\n", "<br>")
 
     body = json.dumps({
         "from": "onboarding@resend.dev",
         "to": [to_email],
-        "reply_to": payload.email.strip(),
-        "subject": f"ChicaneAI - message from {name_str}",
+        "reply_to": payload.email,
+        # The subject is plain text; only the HTML body is escaped.
+        "subject": f"ChicaneAI - message from {name}",
         "html": (
-            f"<p><strong>Name:</strong> {name_str}</p>"
+            f"<p><strong>Name:</strong> {html.escape(name)}</p>"
             f"<p><strong>Email:</strong> {email_str}</p>"
             f"<p><strong>Message:</strong></p>"
             f"<p>{message_str}</p>"
