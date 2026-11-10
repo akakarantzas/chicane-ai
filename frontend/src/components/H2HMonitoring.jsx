@@ -1,8 +1,4 @@
-import { useState } from 'react'
-import { apiUrl } from '../lib/api'
-
 const decimal = (value) => Number.isFinite(value) ? value.toFixed(3) : '—'
-const percentage = (value) => Number.isFinite(value) ? `${(value * 100).toFixed(1)}%` : 'Not yet measured'
 
 export function ScoreExplanation({ prediction }) {
   const explanation = prediction.explanation
@@ -49,65 +45,4 @@ export function RecordingStatus({ monitoring }) {
     <p>{message}</p>
     {monitoring.settlement?.status === 'unavailable' && <p>Outcome refresh is unavailable; previous published outcomes may still be shown.</p>}
   </div>
-}
-
-export default function MonitoringPanel() {
-  const [report, setReport] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-  async function refresh() {
-    setLoading(true)
-    setError(null)
-    try {
-      const response = await fetch(apiUrl('/api/h2h/monitoring'))
-      if (!response.ok) throw new Error('Monitoring unavailable. Try again later.')
-      const data = await response.json()
-      if (!['available', 'no_records', 'disabled', 'unavailable'].includes(data.status)) throw new Error('Monitoring unavailable. Try again later.')
-      setReport(data)
-    } catch (err) {
-      setReport(null)
-      setError(err.message)
-    } finally { setLoading(false) }
-  }
-  return (
-    <section className="mt-6 rounded-xl border border-white/10 bg-[#1A1A1F] p-6 text-sm text-[#A1A1AA]" aria-label="Prediction monitoring">
-      <button className="cursor-pointer text-[#E5E7EB]" onClick={refresh} disabled={loading}>
-        {loading ? 'Loading monitoring…' : report ? 'Refresh prediction monitoring' : 'Show prediction monitoring'}
-      </button>
-      {error && <p role="alert" className="mt-3">{error}</p>}
-      {report?.status === 'disabled' && <p className="mt-3">Prediction tracking is disabled on this server.</p>}
-      {report?.status === 'unavailable' && <p role="alert" className="mt-3">Monitoring storage is unavailable.</p>}
-      {report?.status === 'no_records' && <p className="mt-3">No pre-race forecasts have been recorded yet. No measured accuracy is available.</p>}
-      {report?.status === 'available' && <>
-        <p className="mt-3">First pre-race forecasts requested on this server, including abstentions. Repeated comparisons do not replace them.</p>
-        {report.groups.map((group) => <div className="mt-4" key={`${group.model_version}/${group.rule_version}/${group.policy_version}`}>
-          <h3 className="font-semibold text-[#E5E7EB]">{group.model_version} · {group.policy_version}</h3>
-          <p>Scoring rules: {group.rule_version}</p>
-          <p>{group.overall.logged_pairs} recorded pairs · {group.scored_races} races with scored predictions</p>
-          <p>Pending: {group.overall.pending_pairs} · Excluded: {group.overall.excluded_pairs} · Eligible: {group.overall.eligible_pairs}</p>
-          <p>Pair accuracy: {percentage(group.overall.accuracy)} · Race-average accuracy: {percentage(group.race_macro_accuracy)}</p>
-          <p>Abstentions among logged forecasts: {percentage(group.overall.abstention_rate)} · Decisions among eligible outcomes: {percentage(group.overall.decision_coverage)}</p>
-          <p>Result evidence revisions: {group.result_revisions}. Last recorded outcome: {group.latest_outcome_at ?? 'none'}.</p>
-          {group.trend.status === 'available'
-            ? <p>Previous 5 scored races: {percentage(group.trend.previous_accuracy)} · Latest 5: {percentage(group.trend.recent_accuracy)}. Descriptive comparison, not a significance test.</p>
-            : <p>Performance trend needs at least 10 races with scored predictions.</p>}
-          {group.races?.length > 0 && <details className="mt-3">
-            <summary className="cursor-pointer">Results by race</summary>
-            <div className="mt-2 overflow-x-auto"><table className="w-full text-left text-xs">
-              <thead><tr><th className="p-2">Race</th><th className="p-2">Decided / eligible</th>
-                <th className="p-2">Accuracy</th><th className="p-2">Pending / excluded</th></tr></thead>
-              <tbody>{group.races.map((race) => <tr key={race.event_id}>
-                <th className="p-2 font-normal">{race.date} · {race.race}</th>
-                <td className="p-2">{race.decided_pairs} / {race.eligible_pairs}</td>
-                <td className="p-2">{percentage(race.accuracy)}</td>
-                <td className="p-2">{race.pending_pairs} / {race.excluded_pairs}</td>
-              </tr>)}</tbody>
-            </table></div>
-          </details>}
-        </div>)}
-        <p className="mt-3 text-xs">Requested pairs are self-selected and correlated. These results are not calibrated confidence or a guarantee of future accuracy.
-          Outcomes refresh when predictions are requested or an operator imports published results, not continuously.</p>
-      </>}
-    </section>
-  )
 }
