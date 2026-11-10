@@ -58,13 +58,11 @@ which drops the Saudi round and moves Bahrain to October 4 as round 16.
 
 ## Remaining steps
 
-2. Make prediction coverage explicitly use the same pre-target boundary as
-   scoring. Preserve separate coverage for the season overview and the pinned
-   data snapshot. Target and later results must never become required prediction
-   inputs. Missing earlier due rounds must remain visible. Check request timing
-   boundaries and calendar changes before treating this as a fix for the original
-   warning.
-   Suggested commit: `fix: align h2h prediction coverage with its target`.
+2. Add focused regression coverage for an upcoming Azerbaijan race, an earlier
+   missing race, the same calendar after Azerbaijan, and requests crossing race
+   start. Verify both coverage boundaries and exclusion of target outcomes from
+   scoring. Run the affected backend and frontend checks.
+   Suggested commit: `test: cover h2h target and result coverage boundaries`.
 
 3. Display the actual H2H target and the latest race used by its history. Explain
    genuine missing earlier results with race dates so users can distinguish a
@@ -72,11 +70,15 @@ which drops the Saudi round and moves Bahrain to October 4 as round 16.
    from the H2H calendar and response rather than the saved full-grid forecast.
    Suggested commit: `fix: clarify h2h prediction target and history`.
 
-4. Add focused regression coverage for an upcoming Azerbaijan race, an earlier
-   missing race, the same calendar after Azerbaijan, and requests crossing race
-   start. Verify both coverage boundaries and exclusion of target outcomes from
-   scoring. Run the affected backend and frontend checks.
-   Suggested commit: `test: cover h2h target and result coverage boundaries`.
+4. Only if a step 2 test fails: make prediction coverage explicitly use the same
+   pre-target boundary as scoring. Today coverage counts only rounds whose
+   results are due, and `next_race` only selects a race that starts after the
+   server time, so the target cannot be due (see "Relevant existing behavior").
+   Without a failing test this step would add a second coverage path for no
+   behavior change. If it is needed, preserve separate coverage for the season
+   overview and the pinned data snapshot, never require target or later results,
+   and keep missing earlier due rounds visible.
+   Suggested commit: `fix: align h2h prediction coverage with its target`.
 
 Generating an Azerbaijan forecast after its start would require a separate,
 explicit historical replay mode with pre-race input and availability cutoffs.
