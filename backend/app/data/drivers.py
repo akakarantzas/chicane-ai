@@ -31,11 +31,3 @@ DRIVER_ROSTER_2026 = {
     }
     for driver in DRIVER_ROSTER_2026_ORDERED
 }
-
-PREDICTION_DRIVER_GRID_2026 = [
-    {
-        "driver": driver["full_name"].split()[-1],
-        "team": driver["team"],
-    }
-    for driver in DRIVER_ROSTER_2026_ORDERED
-]

@@ -6,7 +6,6 @@ from pathlib import Path
 
 from pydantic import BaseModel, Field
 
-from app.data.drivers import PREDICTION_DRIVER_GRID_2026
 from app.services.prediction_history import history_response
 from app.services import post_qualifying
 from app.services.h2h_schedule import utc_now
@@ -148,27 +147,6 @@ def _public_metadata(metadata: dict) -> dict:
     }
 
 
-def _complete_2026_grid(predictions: list[dict]) -> list[dict]:
-    by_driver = {
-        item.get("driver", "").lower(): item
-        for item in predictions
-        if item.get("driver")
-    }
-
-    completed = list(predictions)
-    for index, driver in enumerate(PREDICTION_DRIVER_GRID_2026):
-        key = driver["driver"].lower()
-        if key in by_driver:
-            continue
-
-        completed.append({
-            "driver": driver["driver"],
-            "team": driver["team"],
-            "probability": round(max(0.0008, 0.003 - index * 0.00008), 4),
-        })
-
-    return sorted(completed, key=lambda item: item.get("probability", 0), reverse=True)
-
 @router.get("/next-race", response_model=NextRacePredictionResponse)
 def get_next_race_prediction(response: Response):
     response.headers["Cache-Control"] = "no-store"
@@ -177,7 +155,7 @@ def get_next_race_prediction(response: Response):
     update = post_qualifying.read_update(original_predictions, metadata)
     if update:
         original_predictions, metadata = update["predictions"], update["metadata"]
-    predictions = _complete_2026_grid(original_predictions)
+    predictions = sorted(original_predictions, key=lambda item: item["probability"], reverse=True)
     return {
         "race": metadata["race"],
         "circuit": metadata["circuit"],
