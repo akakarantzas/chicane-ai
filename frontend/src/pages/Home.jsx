@@ -1,33 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import AppNav from '../components/AppNav'
 import NextRaceCircuitCard from '../components/NextRaceCircuitCard'
+import RaceCalendar from '../components/RaceCalendar'
 import ButtonHeartbeatEffectDemo from '../components/ui/heartbeat-effect-button'
 import { getNextRace, useRaceCalendar } from '../data/races'
 import useIsMobile from '../hooks/useIsMobile'
 import { useAnimatedPercentage, useVisibleOnce } from '../hooks/usePredictionAnimation'
 import usePredictionFeed from '../hooks/usePredictionFeed'
-
-function RaceCard({ name, country, date, status, cardRef }) {
-  const isCurrent   = status === 'current'
-  const isCompleted = status === 'completed'
-  const [isHovered, setIsHovered] = useState(false)
-
-  return (
-    <div
-      ref={cardRef}
-      className={`home-calendar-card ${isCurrent ? 'home-calendar-card-active' : ''} ${isCompleted ? 'home-calendar-card-completed' : ''}`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      style={{
-        transform: isHovered ? 'translateY(-5px)' : 'translateY(0)',
-      }}
-    >
-      <p className="home-calendar-race">{name}</p>
-      <p className="home-calendar-location">{country}</p>
-      <p className="home-calendar-date" style={isCurrent ? { color: '#E8002D' } : undefined}>{date}</p>
-    </div>
-  )
-}
 
 function CountdownCard({ value, label, isMobile, accent }) {
   return (
@@ -267,9 +246,6 @@ export default function Home({ onNavigate }) {
   const races = useRaceCalendar(1000)
   const currentRace = races.find((race) => race.status === 'current') ?? getNextRace()
   const countdownTarget = new Date(currentRace.raceAt).getTime()
-  const currentRaceRef = useRef(null)
-  const calendarScrollRef = useRef(null)
-  const currentRaceRound = currentRace?.round
   const statsRef = useRef(null)
   const [statsVisible, setStatsVisible] = useState(false)
   const { data: predictionData, loading: predictionLoading } = usePredictionFeed()
@@ -292,44 +268,6 @@ export default function Home({ onNavigate }) {
     if (statsRef.current) observer.observe(statsRef.current)
     return () => observer.disconnect()
   }, [])
-
-  useEffect(() => {
-    const card = currentRaceRef.current
-    const container = calendarScrollRef.current
-    if (!card || !container) return
-    const cardRect = card.getBoundingClientRect()
-    const containerRect = container.getBoundingClientRect()
-    // Disable smooth so the page loads already centred — no slide-in animation
-    container.style.scrollBehavior = 'auto'
-    container.scrollLeft += cardRect.left - containerRect.left - containerRect.width / 2 + cardRect.width / 2
-    container.style.scrollBehavior = ''
-  }, [currentRaceRound])
-
-  useEffect(() => {
-    const container = calendarScrollRef.current
-    if (!container) return
-    const onWheel = (e) => {
-      const delta = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX
-      if (delta === 0) return
-      e.preventDefault()
-      container.style.scrollSnapType = 'none'
-      container.style.scrollBehavior = 'auto'
-      container.scrollLeft += delta
-      // After the wheel goes idle restore CSS — browser will smooth-snap to nearest card
-    }
-    container.addEventListener('wheel', onWheel, { passive: false })
-    return () => container.removeEventListener('wheel', onWheel)
-  }, [])
-
-  const scrollCalendar = (direction) => {
-    const container = calendarScrollRef.current
-    if (!container) return
-    const scrollAmount = Math.min(container.clientWidth * 0.72, 640)
-    container.scrollBy({
-      left: direction * scrollAmount,
-      behavior: 'smooth',
-    })
-  }
 
   return (
     <div className="home-page min-h-screen bg-[#0C0C0E] text-[#F4F4F5] flex flex-col">
@@ -395,28 +333,15 @@ export default function Home({ onNavigate }) {
       {/* 2026 Calendar */}
       <section className="section-band home-calendar-section" style={{ paddingTop: isMobile ? '40px' : '80px', paddingBottom: isMobile ? '40px' : '80px' }}>
         <div className="section-shell" style={{ padding: isMobile ? '0 16px' : '0 32px' }}>
-          <div className="home-calendar-header">
-            <h2 className="section-heading home-calendar-title">
-              Race Calendar
-            </h2>
-            <div className="home-calendar-controls" aria-label="Race calendar controls">
-              <button className="home-calendar-control" type="button" aria-label="Scroll calendar left" onClick={() => scrollCalendar(-1)}>
-                ‹
-              </button>
-              <button className="home-calendar-control" type="button" aria-label="Scroll calendar right" onClick={() => scrollCalendar(1)}>
-                ›
-              </button>
-            </div>
-          </div>
-          <div id="home-race-calendar" className="home-calendar-frame">
-            <div className="calendar-scroll home-calendar-scroll overflow-x-auto" ref={calendarScrollRef}>
-              <div className="home-calendar-track">
-              {races.map((race) => (
-                <RaceCard key={race.round} {...race} cardRef={race.status === 'current' ? currentRaceRef : null} />
-              ))}
-              </div>
-            </div>
-          </div>
+          <RaceCalendar
+            races={races}
+            frameId="home-race-calendar"
+            heading={(
+              <h2 className="section-heading home-calendar-title">
+                Race Calendar
+              </h2>
+            )}
+          />
         </div>
       </section>
 
