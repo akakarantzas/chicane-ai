@@ -120,6 +120,19 @@ def test_stale_data_is_not_served_forever(clock):
     assert exc.value.status_code == 409
 
 
+def test_dropped_row_is_accepted_after_the_stale_limit_without_a_blank_snapshot(clock):
+    get(clock)
+    def dropped(*args):
+        data = payload()
+        data["rows"] = data["rows"][:-1]
+        return data
+    clock[0] = cache.MAX_STALE_SECONDS + 1
+    expired = get(clock, dropped)
+    assert len(expired["rows"]) == 3
+    assert expired["freshness"]["status"] != "unavailable"
+    assert expired["freshness"]["refresh_error"] == "results_refresh_incomplete"
+
+
 def test_slow_failed_refresh_cannot_cross_the_stale_age_limit(clock):
     get(clock)
     clock[0] = cache.MAX_STALE_SECONDS - 1

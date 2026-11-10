@@ -151,8 +151,8 @@ def get_season_snapshot(year, events, now, loader, *, snapshot_id=None):
             previous.attempted_signature = signature
             previous.last_attempt_at = now.isoformat()
             return _public(previous, events, now, signature)
-        if error == "results_refresh_incomplete":
-            rows, standings = [], unavailable_standings()
+        # Past the stale limit, serve what the providers now publish (still flagged
+        # by refresh_error) rather than an empty bundle the next refresh would replace.
 
         coverage = race_coverage(events, rows, now)
         partial = bool(error or coverage["missing_rounds"] or (signature and standings.get("status") != "available"))
