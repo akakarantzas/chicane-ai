@@ -69,8 +69,9 @@ single winning position with `Finished` status and a completed race time. An emp
 feed, grid, incomplete table or unmatched/rescheduled event stays pending.
 
 The actual winner, classification and source link appear with the archived
-prediction. Later published corrections update the result and winner check;
-forecast values are immutable. Truncated refreshes and provider outages preserve
+prediction. Corrections published within seven days of the race start update
+the result and winner check; after that a stored result is final and the race
+is no longer polled. Forecast values are immutable. Truncated refreshes and provider outages preserve
 the last stored result. Provider release timing determines when the card can
 appear, so completion alone does not promise an immediate card.
 

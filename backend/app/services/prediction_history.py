@@ -2,7 +2,7 @@
 
 import argparse
 from contextlib import contextmanager
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import hashlib
 import json
 import logging
@@ -23,6 +23,7 @@ from app.services.h2h_schedule import get_season_schedule, utc_now
 logger = logging.getLogger(__name__)
 MODELS_DIR = Path(__file__).resolve().parents[1] / "models"
 DEFAULT_DB = Path(__file__).resolve().parents[2] / "data" / "prediction-history.sqlite"
+CORRECTION_WINDOW = timedelta(days=7)
 _refresh_lock = Lock()
 _last_refresh = {}
 
@@ -256,10 +257,18 @@ def settle_results(*, path=None, now=None, loader=None):
     supplied_now = now
     now = utc_now() if now is None else now
     records = forecast_records(path)
+    settled = set()
+    if records:
+        with database(path) as connection:
+            settled = {row["event_id"] for row in connection.execute("SELECT event_id FROM history_results")}
     events = {}
     for record in records:
         event = json.loads(record["event_json"])
-        if timestamp(event["starts_at"]) <= now:
+        start = timestamp(event["starts_at"])
+        # Settled races only take corrections for a week; never poll them forever.
+        if record["event_id"] in settled and start < now - CORRECTION_WINDOW:
+            continue
+        if start <= now:
             payload = json.loads(record["payload_json"])
             key = record["event_id"]
             count = max(len(payload["predictions"]), events.get(key, ({}, 0))[1])
