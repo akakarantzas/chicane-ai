@@ -4,6 +4,13 @@ import { getRaceCalendar, useRaceCalendar } from './races'
 
 afterEach(() => { vi.useRealTimers() })
 
+test('the next race changes at the official start, not at the end of the UTC day', () => {
+  const australia = getRaceCalendar(new Date('2026-01-01'))[0]
+  expect(australia.raceAt).toBe('2026-03-08T04:00:00Z')
+  const afterStart = getRaceCalendar(new Date('2026-03-08T04:00:01Z'))
+  expect(afterStart.find((race) => race.status === 'current').name).toBe('Chinese GP')
+})
+
 test('the calendar keeps the same array until a race changes status', () => {
   vi.useFakeTimers()
   const races = getRaceCalendar(new Date('2026-01-01'))

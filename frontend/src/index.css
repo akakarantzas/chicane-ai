@@ -675,6 +675,15 @@ button.nav-link.nav-link-active.nav-link-active-history:hover {
   -webkit-backdrop-filter: blur(18px);
   scrollbar-width: thin;
   scrollbar-color: var(--red-driver) rgba(12,12,14,0.76);
+  animation: h2h-driver-dropdown-in 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes h2h-driver-dropdown-in {
+  from { opacity: 0; transform: translateY(-8px) scale(0.985); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .h2h-driver-dropdown-menu { animation: none; }
 }
 
 .h2h-driver-dropdown-menu::-webkit-scrollbar {

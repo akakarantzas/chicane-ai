@@ -136,6 +136,16 @@ def test_json_api_serves_published_stage_without_loading_model(setup_refresh, ar
     assert response.json()["predictions"] == pq.read_update(*artifacts[:2])["predictions"]
 
 
+def test_published_update_is_finished_hours_after_its_race_start_not_at_midnight(setup_refresh, monkeypatch, client):
+    from app.routers import predictions
+    from app.services.h2h_schedule import RESULT_DELAY
+    assert pq.refresh() == "published"
+    monkeypatch.setattr(predictions, "utc_now", lambda: EVENT.starts_at + RESULT_DELAY - timedelta(minutes=1))
+    assert client.get("/api/predictions/next-race").json()["status"] == "Post-Qualifying"
+    monkeypatch.setattr(predictions, "utc_now", lambda: EVENT.starts_at + RESULT_DELAY)
+    assert client.get("/api/predictions/next-race").json()["status"] == "Race finished"
+
+
 def test_corrupt_update_falls_back_to_baseline(setup_refresh, artifacts, client):
     assert pq.refresh() == "published"
     pq.update_path(*artifacts[:2]).write_text("broken", encoding="utf-8")

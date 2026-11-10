@@ -85,3 +85,18 @@ def test_contact_success_uses_mocked_resend(client, monkeypatch):
     assert response.status_code == 200
     assert response.json() == {"success": True}
     assert len(calls) == 1
+
+
+def test_contact_subject_is_plain_text_and_body_is_escaped(client, monkeypatch):
+    import json
+    sent = []
+    monkeypatch.setenv("RESEND_API_KEY", "re_test_key")
+    monkeypatch.setenv("CONTACT_EMAIL", "owner@example.com")
+    monkeypatch.setattr(contact, "urlopen", lambda req, timeout=10: sent.append(json.loads(req.data)) or FakeResendResponse())
+
+    response = client.post("/api/contact", json={"name": " O'Brien <b> ", "email": "test@example.com", "message": "Hi\nthere"})
+
+    assert response.status_code == 200
+    assert sent[0]["subject"] == "ChicaneAI - message from O'Brien <b>"
+    assert "O&#x27;Brien &lt;b&gt;" in sent[0]["html"]
+    assert "Hi<br>there" in sent[0]["html"]

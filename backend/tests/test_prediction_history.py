@@ -181,6 +181,20 @@ def test_provider_failure_and_truncation_preserve_history_and_corrections_update
     assert history.forecast_records(archive) == original
 
 
+def test_settled_races_stop_polling_the_provider_after_the_correction_window(archive):
+    save(archive)
+    calls = []
+    def loader(year):
+        calls.append(year)
+        return [published()]
+    history.settle_results(path=archive, now=AFTER, loader=loader)
+    history.settle_results(path=archive, now=START + history.CORRECTION_WINDOW - timedelta(hours=1), loader=loader)
+    assert calls == [2026, 2026]  # corrections are still checked within the window
+    history.settle_results(path=archive, now=START + history.CORRECTION_WINDOW + timedelta(hours=1), loader=loader)
+    assert calls == [2026, 2026]
+    assert history.read_history(path=archive, now=AFTER + timedelta(days=30))["races"][0]["actualWinner"] == "Russell"
+
+
 def test_missing_archive_does_not_create_database_or_fabricate_forecasts(archive):
     assert history.read_history(path=archive) == {"races": [], "pending_count": 0}
     assert not archive.exists()

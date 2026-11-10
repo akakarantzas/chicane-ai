@@ -120,6 +120,57 @@ def test_stale_data_is_not_served_forever(clock):
     assert exc.value.status_code == 409
 
 
+def test_dropped_row_backs_off_full_reloads(clock, monkeypatch):
+    # Outages still retry after RETRY_SECONDS: see test_failed_or_regressed_refresh_keeps_whole_last_good_bundle.
+    monkeypatch.setenv("H2H_CACHE_TTL_SECONDS", "21600")
+    calls = []
+    def dropped(*args):
+        calls.append("dropped")
+        data = payload()
+        data["rows"] = data["rows"][:-1]
+        return data
+    get(clock)
+    clock[0] = 21601
+    assert get(clock, dropped)["freshness"]["refresh_error"] == "results_refresh_incomplete"
+    clock[0] += cache.RETRY_SECONDS + 1
+    get(clock, dropped)
+    assert calls == ["dropped"]  # no full reload a minute later
+    clock[0] += cache.DEFAULT_H2H_CACHE_TTL_SECONDS
+    get(clock, dropped)
+    assert calls == ["dropped", "dropped"]
+    # An empty response is usually an outage, not a dropped row: keep the one-minute retry.
+    clock[0] += cache.DEFAULT_H2H_CACHE_TTL_SECONDS + 1
+    get(clock, lambda *args: {"rows": [], "standings": unavailable_standings()})
+    clock[0] += cache.RETRY_SECONDS + 1
+    assert get(clock)["freshness"]["status"] == "fresh"
+
+
+def test_newly_due_race_with_a_dropped_row_still_retries_each_minute(clock, monkeypatch):
+    monkeypatch.setenv("H2H_CACHE_TTL_SECONDS", "21600")
+    get(clock, events=EVENTS[:1], loader=lambda *args: {**payload(), "rows": payload()["rows"][:2]})
+    def new_race_but_dropped_row(*args):
+        data = payload()
+        data["rows"] = data["rows"][1:]  # round 2 arrives, one round-1 row is lost
+        return data
+    stale = get(clock, new_race_but_dropped_row)
+    assert stale["coverage"]["missing_rounds"] == [2]
+    clock[0] += cache.RETRY_SECONDS + 1
+    assert get(clock)["coverage"]["missing_rounds"] == []
+
+
+def test_dropped_row_is_accepted_after_the_stale_limit_without_a_blank_snapshot(clock):
+    get(clock)
+    def dropped(*args):
+        data = payload()
+        data["rows"] = data["rows"][:-1]
+        return data
+    clock[0] = cache.MAX_STALE_SECONDS + 1
+    expired = get(clock, dropped)
+    assert len(expired["rows"]) == 3
+    assert expired["freshness"]["status"] != "unavailable"
+    assert expired["freshness"]["refresh_error"] == "results_refresh_incomplete"
+
+
 def test_slow_failed_refresh_cannot_cross_the_stale_age_limit(clock):
     get(clock)
     clock[0] = cache.MAX_STALE_SECONDS - 1

@@ -136,7 +136,9 @@ def settle_results(rows, now, *, path=None, source_times=None):
     events = {event["event_id"]: event for event in normalized_events(rows)} if rows else {}
     new, pending = 0, 0
     with database(path, write=True) as connection:
-        for stored in connection.execute("SELECT * FROM forecasts ORDER BY recorded_at, id").fetchall():
+        # Never load input_json here: it is the largest column and settlement does not read it.
+        for stored in connection.execute("""SELECT id, event_id, event_json, driver1, driver2, rule_version,
+                recorded_at, prediction_json FROM forecasts ORDER BY recorded_at, id""").fetchall():
             if stored["rule_version"] != H2H_RULE_VERSION:
                 pending += 1  # Never reinterpret an archived forecast under different settlement rules.
                 continue
@@ -225,7 +227,8 @@ def summary(*, path=None):
         return {"status": "no_records", "groups": []}
     groups = defaultdict(list)
     with database(path) as connection:
-        stored = connection.execute("""SELECT f.*, o.outcome_json, o.observed_at,
+        stored = connection.execute("""SELECT f.event_id, f.event_json, f.model_version, f.rule_version,
+            f.policy_version, f.prediction_json, o.outcome_json, o.observed_at,
             (SELECT count(*) FROM outcomes WHERE forecast_id=f.id) AS revision_count
             FROM forecasts f LEFT JOIN outcomes o ON o.revision=(
                 SELECT max(revision) FROM outcomes WHERE forecast_id=f.id)

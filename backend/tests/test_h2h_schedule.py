@@ -119,16 +119,43 @@ def test_calendar_fallback_and_cache_expiration(monkeypatch, caplog):
     assert calls == [2026, 2026]
 
 
-def test_failed_calendar_is_not_cached_or_reported_as_an_empty_season(monkeypatch):
+def test_failed_calendar_is_retried_once_a_minute_and_never_reported_as_an_empty_season(monkeypatch):
+    clock = [0.0]
+    calls = []
+    monkeypatch.setattr(schedules.time, "monotonic", lambda: clock[0])
     def failed(year):
+        calls.append(year)
         raise RuntimeError("offline")
     monkeypatch.setattr(schedules, "_fastf1_schedule", failed)
     monkeypatch.setattr(schedules, "_jolpica_schedule", failed)
-    with pytest.raises(HTTPException) as exc:
-        schedules.get_season_schedule(2026)
-    assert exc.value.status_code == 502
+    for _ in range(2):
+        with pytest.raises(HTTPException) as exc:
+            schedules.get_season_schedule(2026)
+        assert exc.value.status_code == 502
+    assert len(calls) == 2  # the second caller fails fast instead of retrying both providers
     monkeypatch.setattr(schedules, "_jolpica_schedule", lambda year: [event(1, NOW)])
+    clock[0] = schedules.SCHEDULE_RETRY_SECONDS + 1
     assert schedules.get_season_schedule(2026)[0].round == 1
+
+
+def test_outage_keeps_serving_the_last_good_calendar(monkeypatch):
+    clock = [0.0]
+    calls = []
+    monkeypatch.setattr(schedules.time, "monotonic", lambda: clock[0])
+    monkeypatch.setattr(schedules, "_fastf1_schedule", lambda year: [event(1, NOW)])
+    assert schedules.get_season_schedule(2026)[0].round == 1
+    def failed(year):
+        calls.append(year)
+        raise RuntimeError("offline")
+    monkeypatch.setattr(schedules, "_fastf1_schedule", failed)
+    monkeypatch.setattr(schedules, "_jolpica_schedule", failed)
+    clock[0] = schedules.SCHEDULE_TTL_SECONDS + 1
+    assert schedules.get_season_schedule(2026)[0].round == 1
+    assert schedules.get_season_schedule(2026)[0].round == 1
+    assert len(calls) == 2  # one attempt per provider, then a one-minute pause
+    clock[0] += schedules.SCHEDULE_RETRY_SECONDS + 1
+    schedules.get_season_schedule(2026)
+    assert len(calls) == 4
 
 
 def test_jolpica_schedule_parsing_and_truncation(monkeypatch):

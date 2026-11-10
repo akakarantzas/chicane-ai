@@ -51,7 +51,7 @@ The following choices are fixed before running the real-data benchmark:
 From `backend`, install the optional evaluation dependencies and export data:
 
 ```powershell
-.\venv\Scripts\python.exe -m pip install -r requirements-evaluation.txt
+.\venv\Scripts\python.exe -m pip install -r requirements-dev.txt
 .\venv\Scripts\python.exe -m app.services.h2h_dataset --output evaluation/step8-results-2026-09-26.json
 .\venv\Scripts\python.exe -m app.services.h2h_models --input evaluation/step8-results-2026-09-26.json --output evaluation/step8-model-report.json --validation-start 2025-01-01 --test-start 2026-01-01 --include-pairs
 .\venv\Scripts\python.exe -m pytest tests -q
@@ -72,9 +72,9 @@ Preserve these local artifacts to reproduce the exact run; refetching later may
 return corrected results and a different hash. Bare JSON result arrays also work,
 but have no exported provenance attached to the report.
 
-Tests with only core requirements skip the optional model test module. Install
-`requirements-evaluation.txt` for the full model checks; exporter/backtest tests
-remain part of the core suite.
+scikit-learn is a runtime requirement, so `requirements-dev.txt` installs
+everything the model checks need; the model and calibration tests run as part
+of the normal suite.
 
 ## Interpretation limits
 

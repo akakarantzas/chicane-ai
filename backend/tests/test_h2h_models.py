@@ -3,7 +3,7 @@ import json
 
 import pytest
 
-pytest.importorskip("sklearn", reason="install requirements-evaluation.txt for candidate evaluation tests")
+pytest.importorskip("sklearn", reason="install requirements-dev.txt for candidate evaluation tests")
 import numpy as np
 
 from app.services import h2h_models as models

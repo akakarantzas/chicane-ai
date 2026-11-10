@@ -88,8 +88,8 @@ rules after a future rule migration.
 ## Read-only monitoring and interpretation
 
 `GET /api/h2h/monitoring` reads aggregate records without contacting providers,
-recording a forecast or creating a missing database. The UI fetches it only when
-the user clicks **Show prediction monitoring** or refreshes it.
+recording a forecast or creating a missing database. The app has no page for it;
+read it with the endpoint or `python -m app.services.h2h_monitor summary`.
 
 Keep each model/rule/policy combination separate. Report:
 

@@ -53,7 +53,7 @@ accuracy under the versioned serving policy.
 
 ## Offline calibration development audit
 
-From `backend`, after installing `requirements-evaluation.txt`:
+From `backend`, after installing `requirements-dev.txt`:
 
 ```powershell
 .\venv\Scripts\python.exe -m app.services.h2h_calibration --input evaluation/step8-results-2026-09-26.json --output evaluation/step9-calibration-report.json

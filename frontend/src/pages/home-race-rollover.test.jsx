@@ -13,7 +13,7 @@ vi.mock('../hooks/usePredictionFeed', () => ({
 
 afterEach(() => { vi.useRealTimers() })
 
-test('the mounted card advances through all 23 race boundaries with matching details and animation', () => {
+test('the mounted card advances through every race boundary with matching details and animation', () => {
   vi.useFakeTimers()
   // Drive calendar time independently of SVG playback, which jsdom cannot render.
   let frame = 0

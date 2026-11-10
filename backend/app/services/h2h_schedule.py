@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 SEASON = 2026  # The app's driver roster and season overview are for this season.
 HISTORY_YEARS = (2024, 2025, SEASON)
 SCHEDULE_TTL_SECONDS = 30 * 60
+SCHEDULE_RETRY_SECONDS = 60
 USER_AGENT = f"ChicaneAI/0.1 FastF1/{fastf1.__version__}"
 # A start timestamp is not an end timestamp. Allow time for the race and result
 # publication, then require published results as well. This is not a live feed.
@@ -127,6 +128,8 @@ def get_season_schedule(year: int) -> list[RaceEvent]:
     with _schedule_lock:
         cached = _schedule_cache.get(year)
         if cached and time.monotonic() - cached[0] < SCHEDULE_TTL_SECONDS:
+            if cached[1] is None:
+                raise HTTPException(status_code=502, detail=f"Race schedule unavailable for {year}.")
             return list(cached[1])
         providers = (("fastf1", _fastf1_schedule), ("jolpica", _jolpica_schedule))
         for provider, loader in providers:
@@ -141,6 +144,12 @@ def get_season_schedule(year: int) -> list[RaceEvent]:
                 continue
             _schedule_cache[year] = (time.monotonic(), tuple(events))
             return list(events)
+        # Every caller waits on this lock: retry the providers once a minute, not per call,
+        # and keep serving the last good calendar meanwhile.
+        retry_stamp = time.monotonic() - SCHEDULE_TTL_SECONDS + SCHEDULE_RETRY_SECONDS
+        _schedule_cache[year] = (retry_stamp, cached[1] if cached else None)
+        if cached and cached[1] is not None:
+            return list(cached[1])
     raise HTTPException(status_code=502, detail=f"Race schedule unavailable for {year}.")
 
 

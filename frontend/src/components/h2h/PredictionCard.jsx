@@ -41,7 +41,8 @@ export default function PredictionCard({ prediction, d1Abbrev, d2Abbrev, loading
 
   const historyYears = prediction.history_scope?.years ?? []
   const historyLabel = historyYears.length ? historyYears.join(', ') : 'Available seasons'
-  const predictionTitle = `${prediction.next_race ?? 'Next Grand Prix'} · Finish-ahead prediction`
+  const targetDate = prediction.next_event?.date ? ` (${prediction.next_event.date})` : ''
+  const predictionTitle = `${prediction.next_race ?? 'Next Grand Prix'}${targetDate} · Finish-ahead prediction`
   const unavailableLabels = {
     insufficient_data: 'Insufficient data',
     insufficient_evidence: 'Insufficient evidence',

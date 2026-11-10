@@ -42,6 +42,14 @@ def test_next_race_predictions_preserve_current_singapore_values(client):
     assert antonelli["probability"] == pytest.approx(0.0872)
 
 
+def test_forecast_for_a_finished_race_is_not_labelled_as_upcoming(client, monkeypatch):
+    from datetime import datetime, timezone
+    monkeypatch.setattr(predictions, "utc_now", lambda: datetime(2026, 10, 12, tzinfo=timezone.utc))
+    assert client.get("/api/predictions/next-race").json()["status"] == "Race finished"
+    monkeypatch.setattr(predictions, "utc_now", lambda: datetime(2026, 10, 11, 23, tzinfo=timezone.utc))
+    assert client.get("/api/predictions/next-race").json()["status"] == "Pre-Qualifying"
+
+
 def test_next_race_predictions_use_json_without_model_import(client, monkeypatch):
     sys.modules.pop("app.models.predict", None)
 

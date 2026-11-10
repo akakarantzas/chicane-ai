@@ -147,12 +147,18 @@ def get_season_snapshot(year, events, now, loader, *, snapshot_id=None):
                 and time.monotonic() - previous.loaded_at < MAX_STALE_SECONDS):
             previous.refresh_error = error
             previous.stale_fallback = True
-            previous.retry_at = time.monotonic() + RETRY_SECONDS
+            # A source that dropped a row usually keeps returning the same shorter data;
+            # don't reload every provider each minute while it does. A newly due race
+            # keeps the one-minute retry so its results are not held back.
+            backoff = (max(RETRY_SECONDS, min(previous.ttl, DEFAULT_H2H_CACHE_TTL_SECONDS))
+                       if error == "results_refresh_incomplete" and rows and previous.signature == signature
+                       else RETRY_SECONDS)
+            previous.retry_at = time.monotonic() + backoff
             previous.attempted_signature = signature
             previous.last_attempt_at = now.isoformat()
             return _public(previous, events, now, signature)
-        if error == "results_refresh_incomplete":
-            rows, standings = [], unavailable_standings()
+        # Past the stale limit, serve what the providers now publish (still flagged
+        # by refresh_error) rather than an empty bundle the next refresh would replace.
 
         coverage = race_coverage(events, rows, now)
         partial = bool(error or coverage["missing_rounds"] or (signature and standings.get("status") != "available"))

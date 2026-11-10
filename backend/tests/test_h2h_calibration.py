@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-pytest.importorskip("sklearn", reason="install requirements-evaluation.txt for calibration diagnostics")
+pytest.importorskip("sklearn", reason="install requirements-dev.txt for calibration diagnostics")
 
 from app.services.h2h_calibration import audit_calibration, calibrated_score, main, reliability
 

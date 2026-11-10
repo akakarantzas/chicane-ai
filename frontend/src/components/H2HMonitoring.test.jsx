@@ -1,6 +1,6 @@
-import { fireEvent, render, screen, within } from '@testing-library/react'
-import { expect, test, vi } from 'vitest'
-import MonitoringPanel, { RecordingStatus, ScoreExplanation } from './H2HMonitoring'
+import { render, screen, within } from '@testing-library/react'
+import { expect, test } from 'vitest'
+import { RecordingStatus, ScoreExplanation } from './H2HMonitoring'
 
 
 test('explanation labels driver order, inputs and omitted evidence without probabilities', () => {
@@ -33,43 +33,3 @@ test.each([['disabled', 'tracking is disabled'], ['unavailable', 'was not saved'
     expect(screen.getByRole('status')).toHaveTextContent(text)
   },
 )
-
-test('monitoring is read only and fetched only on demand', async () => {
-  const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue({ ok: true, json: async () => ({ status: 'no_records', groups: [] }) })
-  render(<MonitoringPanel />)
-  expect(fetchMock).not.toHaveBeenCalled()
-  fireEvent.click(screen.getByRole('button', { name: 'Show prediction monitoring' }))
-  expect(await screen.findByText(/No measured accuracy is available/)).toBeInTheDocument()
-  expect(fetchMock).toHaveBeenCalledWith('http://localhost:8000/api/h2h/monitoring')
-  expect(screen.queryByText(/0\.0%/)).not.toBeInTheDocument()
-})
-
-test('monitoring separates pending, excluded and abstained forecasts from accuracy', async () => {
-  vi.spyOn(globalThis, 'fetch').mockResolvedValue({ ok: true, json: async () => ({ status: 'available', groups: [{
-    model_version: 'h2h-heuristic-v1', rule_version: 'finish-ahead-v1', policy_version: 'h2h-evidence-v1',
-    overall: { logged_pairs: 4, pending_pairs: 1, excluded_pairs: 1, eligible_pairs: 2, accuracy: null,
-      abstention_rate: .5, decision_coverage: 0 },
-    scored_races: 0, race_macro_accuracy: null, result_revisions: 1, latest_outcome_at: null,
-    trend: { status: 'insufficient_races' },
-    races: [{ event_id: '2026:Race:1', date: '2026-03-08', race: 'Example GP',
-      decided_pairs: 0, eligible_pairs: 2, pending_pairs: 1, excluded_pairs: 1, accuracy: null }],
-  }] }) })
-  render(<MonitoringPanel />)
-  fireEvent.click(screen.getByRole('button', { name: 'Show prediction monitoring' }))
-  expect(await screen.findByText(/Pending: 1 · Excluded: 1 · Eligible: 2/)).toBeInTheDocument()
-  expect(screen.getByText(/Pair accuracy:/)).toHaveTextContent('Not yet measured')
-  expect(screen.getByText(/Abstentions among logged forecasts:/)).toHaveTextContent('50.0%')
-  expect(screen.getByText(/Performance trend needs at least 10/)).toBeInTheDocument()
-  expect(screen.getByText(/self-selected and correlated/)).toBeInTheDocument()
-  expect(screen.getByText('Results by race')).toBeInTheDocument()
-  expect(screen.getByText('2026-03-08 · Example GP')).toBeInTheDocument()
-})
-
-test('monitoring failures allow retry and do not create fake results', async () => {
-  vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({ ok: false }).mockResolvedValueOnce({ ok: true, json: async () => ({ status: 'disabled', groups: [] }) })
-  render(<MonitoringPanel />)
-  fireEvent.click(screen.getByRole('button', { name: 'Show prediction monitoring' }))
-  expect(await screen.findByRole('alert')).toHaveTextContent('Monitoring unavailable')
-  fireEvent.click(screen.getByRole('button', { name: 'Show prediction monitoring' }))
-  expect(await screen.findByText('Prediction tracking is disabled on this server.')).toBeInTheDocument()
-})

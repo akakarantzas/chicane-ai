@@ -211,7 +211,7 @@ export default function Predictions({ onNavigate, animationKey = 0 }) {
   }
 
   const { race, circuit, predictions, status } = data
-  const raceTitle = race !== 'TBD' ? race.replace(/\bGP\b/g, 'Grand Prix') : 'Next Race'
+  const raceTitle = race.replace(/\bGP\b/g, 'Grand Prix')
   const visiblePredictions = showAllPredictions ? predictions : predictions.slice(0, 5)
   const hiddenCount = Math.max(predictions.length - 5, 0)
 
@@ -235,26 +235,24 @@ export default function Predictions({ onNavigate, animationKey = 0 }) {
           <h1 className="page-title">
             {raceTitle} Predictions
           </h1>
-          {circuit !== 'TBD' && (
-            <div className="prediction-subhead flex items-center gap-3 mt-2">
-              <p className="text-[#A1A1AA]" style={{ fontSize: '1.1rem' }}>{circuit}</p>
-              <span className="next-race-pill-primary" style={{
-                borderRadius: '8px',
-                padding: '4px 12px',
-                fontSize: '13px',
-                fontWeight: 600,
-                whiteSpace: 'nowrap',
-                flexShrink: 0,
-              }}>
-                {status}
-              </span>
-            </div>
-          )}
+          <div className="prediction-subhead flex items-center gap-3 mt-2">
+            <p className="text-[#A1A1AA]" style={{ fontSize: '1.1rem' }}>{circuit}</p>
+            <span className="next-race-pill-primary" style={{
+              borderRadius: '8px',
+              padding: '4px 12px',
+              fontSize: '13px',
+              fontWeight: 600,
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
+            }}>
+              {status}
+            </span>
+          </div>
           {status === 'Post-Qualifying' ? (
             <p className="text-[#A1A1AA] mt-3 text-sm">
               Based on published qualifying positions. Grid penalties may change the starting order.
             </p>
-          ) : data.automatic_update_enabled && (
+          ) : status === 'Pre-Qualifying' && data.automatic_update_enabled && (
             <p className="text-[#A1A1AA] mt-3 text-sm">
               Automatically updates after qualifying finishes and the full results are published.
             </p>

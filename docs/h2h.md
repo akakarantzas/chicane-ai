@@ -25,7 +25,9 @@ completeness. Swapping drivers preserves eligibility and swaps their wins.
 ## Calendars and result sources
 
 The app supports history from 2024–2026 and a 2026 driver roster. Calendars come
-from FastF1, with Jolpica as a fallback, and are cached for 30 minutes. Calendar
+from FastF1, with Jolpica as a fallback, and are cached for 30 minutes. If both
+providers fail, the last good calendar keeps being served (or the 502 is
+repeated) and the providers are retried once a minute, not on every call. Calendar
 discovery does not automatically update the roster for another season.
 
 Grand Prix sessions are selected using UTC dates, including on sprint weekends.
@@ -107,13 +109,16 @@ callers receive independent copies.
 | Historical-season cache | Six hours by default |
 | `H2H_CACHE_TTL_SECONDS` | Positive override for both, capped at 24 hours |
 | Partial/failed loads | Retry on a later request after a cooldown of up to 60 seconds |
+| Source returned fewer results | Same due races: retry after the cache lifetime, at most 15 minutes; a newly due race keeps the 60-second retry |
 | Newly due round | Bypasses the normal cache lifetime |
 | Stale fallback | Compatible last-good snapshot, explicitly labelled, for at most 24 hours |
 | Retained snapshot versions | Up to three per season, each for at most 24 hours |
 
 Refreshes are request-driven. Failed or regressed refreshes can retain the last
 good bundle, with its original retrieval time; old results are not combined with
-new standings. Missing-round coverage is recalculated, and standings that no
+new standings. Once that bundle is 24 hours old, a refresh that still returns
+fewer results is accepted as the providers' current data, with
+`refresh_error: results_refresh_incomplete` kept so the gap stays visible. Missing-round coverage is recalculated, and standings that no
 longer cover the latest due GP are withheld. Without usable cached evidence, a
 failure is unavailable rather than a successful empty season.
 

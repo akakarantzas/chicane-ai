@@ -1,6 +1,7 @@
 """Explicit ordering and pre-target boundaries for reconciled H2H history."""
 
 from collections import defaultdict
+from functools import lru_cache
 import json
 
 from app.services.h2h_contract import eligible_prediction_rows, final_position
@@ -11,10 +12,17 @@ from app.services.h2h_schedule import RaceEvent, parse_utc
 RECENT_FORM_WINDOW = 3
 
 
+@lru_cache(maxsize=4096)
+def _utc_date(value):
+    # Sorting calls race_date thousands of times per request; pandas parsing dominated it.
+    stamp = parse_utc(value)
+    return stamp.date() if stamp else None
+
+
 def race_date(row):
     value = clean_text(row.get("race_date"))
-    stamp = parse_utc(value) if value else None
-    return stamp.date() if stamp and stamp.year == final_position(row.get("year")) else None
+    day = _utc_date(value) if value else None
+    return day if day and day.year == final_position(row.get("year")) else None
 
 
 def ordered_history(rows: list[dict]) -> tuple[list[dict], str]:
