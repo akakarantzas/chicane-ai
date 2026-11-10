@@ -64,11 +64,12 @@ which drops the Saudi round and moves Bahrain to October 4 as round 16.
    scoring. Run the affected backend and frontend checks.
    Suggested commit: `test: cover h2h target and result coverage boundaries`.
 
-3. Display the actual H2H target and the latest race used by its history. Explain
-   genuine missing earlier results with race dates so users can distinguish a
-   season coverage warning from the event being predicted. Resolve the target
-   from the H2H calendar and response rather than the saved full-grid forecast.
-   Suggested commit: `fix: clarify h2h prediction target and history`.
+3. Done. The prediction card already took its title from the H2H response's
+   `next_race`, not the saved full-grid forecast, and the recent-form table
+   lists the races each driver's history uses. The missing piece was dates:
+   `fix: show dates for the h2h target and missing races` now shows the target's
+   `next_event.date` in the card title and each missing race's date in the
+   season overview warning.
 
 4. Only if a step 2 test fails: make prediction coverage explicitly use the same
    pre-target boundary as scoring. Today coverage counts only rounds whose
