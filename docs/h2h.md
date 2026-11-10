@@ -25,7 +25,9 @@ completeness. Swapping drivers preserves eligibility and swaps their wins.
 ## Calendars and result sources
 
 The app supports history from 2024–2026 and a 2026 driver roster. Calendars come
-from FastF1, with Jolpica as a fallback, and are cached for 30 minutes. Calendar
+from FastF1, with Jolpica as a fallback, and are cached for 30 minutes. If both
+providers fail, the last good calendar keeps being served (or the 502 is
+repeated) and the providers are retried once a minute, not on every call. Calendar
 discovery does not automatically update the roster for another season.
 
 Grand Prix sessions are selected using UTC dates, including on sprint weekends.
