@@ -254,7 +254,7 @@ export default function Predictions({ onNavigate, animationKey = 0 }) {
             <p className="text-[#A1A1AA] mt-3 text-sm">
               Based on published qualifying positions. Grid penalties may change the starting order.
             </p>
-          ) : data.automatic_update_enabled && (
+          ) : status === 'Pre-Qualifying' && data.automatic_update_enabled && (
             <p className="text-[#A1A1AA] mt-3 text-sm">
               Automatically updates after qualifying finishes and the full results are published.
             </p>

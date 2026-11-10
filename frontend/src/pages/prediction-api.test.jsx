@@ -51,6 +51,21 @@ describe('prediction api rendering', () => {
     expect(screen.queryByText(/predictions now live!/)).not.toBeInTheDocument()
   })
 
+  test('predictions page does not promise a qualifying update for a finished race', async () => {
+    mockPredictionFetch({ ...predictionPayload, automatic_update_enabled: true, status: 'Race finished' })
+    render(<Predictions onNavigate={vi.fn()} />)
+
+    expect(await screen.findByText('Race finished')).toBeInTheDocument()
+    expect(screen.queryByText(/Automatically updates after qualifying/)).not.toBeInTheDocument()
+  })
+
+  test('predictions page explains the automatic update before qualifying', async () => {
+    mockPredictionFetch({ ...predictionPayload, automatic_update_enabled: true })
+    render(<Predictions onNavigate={vi.fn()} />)
+
+    expect(await screen.findByText(/Automatically updates after qualifying/)).toBeInTheDocument()
+  })
+
   test('predictions page renders fetched race predictions', async () => {
     render(<Predictions onNavigate={vi.fn()} />)
 
