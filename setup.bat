@@ -33,8 +33,10 @@ if errorlevel 1 goto :fail
 if errorlevel 1 goto :fail
 
 echo [3/4] Setting up the frontend...
+rem npm ci installs the locked versions and never rewrites package-lock.json.
+echo Close any running ChicaneAI server windows first: npm ci replaces node_modules.
 pushd frontend
-cmd /c npm install
+cmd /c npm ci
 if errorlevel 1 (
     popd
     goto :fail
