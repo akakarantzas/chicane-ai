@@ -11,7 +11,7 @@ from app.services.h2h_schedule import RaceEvent, clear_schedule_cache
 @pytest.fixture(autouse=True)
 def fixed_h2h_calendar(monkeypatch, tmp_path):
     """API/unit tests never depend on a live schedule or the wall-clock date."""
-    from app.routers import h2h
+    from app.routers import h2h, predictions
     from app.services import h2h_providers
     from app.services.h2h_standings import unavailable_standings
     monkeypatch.setenv("H2H_MONITOR_ENABLED", "false")  # Tests never write the installation's real journal.
@@ -31,6 +31,7 @@ def fixed_h2h_calendar(monkeypatch, tmp_path):
     for module in (h2h, h2h_providers):
         monkeypatch.setattr(module, "utc_now", now)
         monkeypatch.setattr(module, "get_season_schedule", schedule)
+    monkeypatch.setattr(predictions, "utc_now", now)
 
 
 @pytest.fixture(autouse=True)

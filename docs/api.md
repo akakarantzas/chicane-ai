@@ -55,7 +55,7 @@ not imply automatic selection of the next calendar race. Returns `Cache-Control:
 | `race`, `circuit` | Race and circuit names |
 | `predictions` | Descending probability order; each item has `driver`, `team`, and numeric `probability` on a 0–1 scale |
 | `model_version`, `generated_at` | Model identifier and generation timestamp; may be null |
-| `status` | `Pre-Qualifying` or `Post-Qualifying` |
+| `status` | `Pre-Qualifying` or `Post-Qualifying`; `Race finished` once the forecast's `race_date` has passed (UTC) |
 | `automatic_update_enabled` | Whether both automatic updates and forecast history are enabled; does not guarantee an update is available |
 | `metadata` | Training counts plus `validation`, `prediction_postprocess`, `prediction_input`, and `backtest_summary` objects |
 

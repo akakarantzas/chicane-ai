@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 from app.data.drivers import PREDICTION_DRIVER_GRID_2026
 from app.services.prediction_history import history_response
 from app.services import post_qualifying
+from app.services.h2h_schedule import utc_now
 
 router = APIRouter(prefix="/api/predictions")
 
@@ -125,6 +126,10 @@ def _raise_invalid_prediction_metadata():
 
 
 def _prediction_status(metadata: dict) -> str:
+    race_date = metadata.get("race_date")
+    # A forecast for a race that is over must not be labelled as upcoming.
+    if isinstance(race_date, str) and race_date < utc_now().date().isoformat():
+        return "Race finished"
     prediction_input = metadata.get("prediction_input", {})
     if prediction_input.get("grid_source") == "qualifying_grid":
         return "Post-Qualifying"

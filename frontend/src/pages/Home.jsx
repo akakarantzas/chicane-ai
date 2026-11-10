@@ -274,8 +274,8 @@ export default function Home({ onNavigate }) {
   const [statsVisible, setStatsVisible] = useState(false)
   const { data: predictionData, loading: predictionLoading } = usePredictionFeed()
   const predictionPreview = predictionData ? { ...predictionData, loading: false } : {
-    race: 'Singapore GP',
-    status: predictionLoading ? 'Pre-Qualifying' : 'Unavailable',
+    race: 'Next race',
+    status: predictionLoading ? 'Loading' : 'Unavailable',
     predictions: [],
     loading: predictionLoading,
   }
@@ -352,10 +352,12 @@ export default function Home({ onNavigate }) {
         <div className="hero-lighting" style={{ position: 'absolute', inset: 0, zIndex: 1 }} />
         {/* Content */}
         <div className="hero-content relative max-w-2xl mx-auto space-y-6" style={{ zIndex: 2, textAlign: 'center' }}>
-          {/* Badge */}
-          <span className="hero-badge inline-flex items-center font-medium rounded-full" style={{ fontSize: '0.9rem', padding: '6px 14px' }}>
-            Singapore predictions now live!
-          </span>
+          {/* Badge: only for a forecast whose race is still ahead */}
+          {predictionData && predictionData.status !== 'Race finished' && (
+            <span className="hero-badge inline-flex items-center font-medium rounded-full" style={{ fontSize: '0.9rem', padding: '6px 14px' }}>
+              {predictionData.race.replace(/\s*GP$/, '')} predictions now live!
+            </span>
+          )}
 
           <h1 className="hero-title tracking-tight" style={{ fontSize: isMobile ? '42px' : '72px' }}>
             Predict. Verify. Repeat.
