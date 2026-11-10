@@ -1,6 +1,6 @@
 """Offline candidate selection on validation races, followed by one locked test.
 
-Install requirements-evaluation.txt before running this module. Nothing here is
+Install requirements-dev.txt before running this module. Nothing here is
 imported by the serving API, and no fitted model is deployed or deserialized.
 """
 
