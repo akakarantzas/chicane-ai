@@ -6,9 +6,9 @@ from pathlib import Path
 
 from pydantic import BaseModel, Field
 
-from app.services.prediction_history import history_response
+from app.services.prediction_history import history_response, timestamp
 from app.services import post_qualifying
-from app.services.h2h_schedule import utc_now
+from app.services.h2h_schedule import RESULT_DELAY, utc_now
 
 router = APIRouter(prefix="/api/predictions")
 
@@ -124,10 +124,15 @@ def _raise_invalid_prediction_metadata():
     )
 
 
-def _prediction_status(metadata: dict) -> str:
+def _prediction_status(metadata: dict, race_start: str | None = None) -> str:
+    # A forecast for a race that is over must not be labelled as upcoming. A
+    # post-qualifying update records the exact start; base files only carry the date.
+    now = utc_now()
     race_date = metadata.get("race_date")
-    # A forecast for a race that is over must not be labelled as upcoming.
-    if isinstance(race_date, str) and race_date < utc_now().date().isoformat():
+    if race_start:
+        if now >= timestamp(race_start) + RESULT_DELAY:
+            return "Race finished"
+    elif isinstance(race_date, str) and race_date < now.date().isoformat():
         return "Race finished"
     prediction_input = metadata.get("prediction_input", {})
     if prediction_input.get("grid_source") == "qualifying_grid":
@@ -163,7 +168,7 @@ def get_next_race_prediction(response: Response):
         "model_version": metadata.get("model_version"),
         "generated_at": metadata.get("generated_at"),
         "automatic_update_enabled": post_qualifying.enabled() and post_qualifying.history.enabled(),
-        "status": _prediction_status(metadata),
+        "status": _prediction_status(metadata, update["race_start"] if update else None),
         "metadata": _public_metadata(metadata),
     }
 
