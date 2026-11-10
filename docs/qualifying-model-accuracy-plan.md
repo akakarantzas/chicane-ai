@@ -92,68 +92,17 @@ information. Changing a target race's result must not change its features or
 forecast roster. A missing-history fallback must not copy an actual future grid
 into the pre-qualifying feature set.
 
-## 3. Compare a small, staged set of models
+## 3. Measure the current qualifying update
 
-Suggested files: `evaluation/features.py`, `evaluation/candidates.py`,
-`tests/test_forecast_features.py`. Share preprocessing between offline evaluation
-and exported inference to prevent training/serving differences.
+Suggested model-repository files: `evaluation/walk_forward.py`,
+`evaluation/metrics.py`, `tests/test_temporal_validation.py`.
 
-| Candidate | Purpose |
-| --- | --- |
-| Uniform and qualifying-only forecasts | Simple reference points for whether the extra stats help |
-| Current model with projected versus qualifying positions | Measure the existing updater's effect with the same trained model |
-| Stage-specific models, position only | Train pre-qualifying on historical projected positions and post-qualifying on historical qualifying positions |
-| Stage-specific model without the form-score blend | Test whether the extra form score improves probabilities |
-| Stage-specific model with a learned blend | Fit blend weight and smoothing on earlier validation forecasts, allowing a model-only weight of 1 |
-| Position plus qualifying pace | Test the incremental value of lap-time gaps after position is already known |
-
-Use the current boosting family as the starting point; include a regularized
-simple model as a reference before searching more complex architectures.
-
-Candidate features:
-
-- Qualifying rank and rank relative to field size.
-- Per-segment pace gap: `(driver_time - fastest_time_in_segment) /
-  fastest_time_in_segment`, computed separately for Q1, Q2 and Q3. Add segment
-  participation/missingness flags. Do not compare a Q1 lap directly with a Q3 lap.
-- Recent driver form and team form, computed strictly from prior races.
-- Circuit identity/type and pooled circuit interactions. Use shared race history
-  across circuits; a few Singapore races alone cannot support a complex model.
-- In a later ablation, prior mechanical-retirement rate and teammate-relative
-  qualifying pace. Record status-mapping and same-segment comparison rules.
-- Shrink sparse circuit win-rate estimates toward a broader prior; do not give
-  a one-race record the same evidential strength as a long history.
-
-Keep weather-dependent pace comparisons separate in diagnostics. Add penalties,
-practice race pace or weather forecast features only when timestamped historical
-and live data can be obtained consistently. They are outside the first release.
-
-Acceptance: every candidate produces one valid probability distribution over
-the forecast entrants. Feature-group removal tests quantify the value of
-qualifying position, pace, form, circuit context and the extra blend. The same
-paired race cohort is used when comparing candidates; also report full coverage.
-
-## 4. Validate chronologically and calibrate the final probabilities
-
-Suggested files: `evaluation/walk_forward.py`, `evaluation/metrics.py`,
-`evaluation/report.py`, `tests/test_temporal_validation.py`.
-
-- Use expanding windows of complete races. At every simulated cutoff, fit on
-  earlier races only. Hyperparameter search, blend fitting and calibration must
-  use earlier chronological windows inside the training period.
-- Generate calibration inputs from predictions made without training on those
-  races. Replace the nonchronological calibration split. Never split drivers
-  from the same race between training, calibration and evaluation.
-- Evaluate the complete final pipeline after blending, calibration and
-  normalization. Calibrated binary outputs are not automatically calibrated
-  after being blended and normalized into a race distribution.
-- Prefer a simple calibration method given the small number of independent
-  races. Select its parameters using only earlier forecasts. Include explicit
-  warm-up requirements and a documented fallback when history is insufficient.
-- Develop using historical seasons through 2025. Report already-observed 2026
-  races as retrospective evaluation and diagnostics, not a pristine holdout.
-  Reserve subsequent, unseen races for prospective confirmation after freezing
-  the selected candidate.
+Compare three forecasts on the same chronological race cohort: a uniform
+reference, a qualifying-position-only reference, and the current model run once
+with projected and once with qualifying positions. Use expanding windows of
+complete races and fit only on earlier races. Develop on seasons through 2025;
+report already-observed 2026 races as retrospective diagnostics, not a pristine
+holdout.
 
 Primary metric, averaged equally across races:
 
@@ -165,106 +114,35 @@ example a reserve driver who replaced an entrant after the cutoff) has no
 assigned probability: exclude it from log loss and Brier score, and report the
 number of excluded races next to every comparison.
 
-Secondary metrics:
+Secondary metrics: multiclass Brier score per race (sum of squared errors across
+the field, then mean across races; this differs from the current flattened
+driver-level score), top-one accuracy, top-three coverage and mean winner rank.
+Report paired pre-versus-post differences with uncertainty from resampling whole
+race weekends, never individual drivers, and give sample sizes in races.
 
-- Multiclass Brier score per race: sum of squared errors across the field,
-  then mean across races. State this convention, which differs from the current
-  flattened driver-level binary score.
-- Top-one winner accuracy, top-three coverage and mean winner rank.
-- Reliability plots comparing forecast probabilities with observed win rates,
-  including bin counts and uncertainty.
-- Coverage and provider delay; breakdowns by season, circuit group, weather
-  availability and qualifying irregularities. Small subgroups are descriptive.
-
-Report paired differences for pre versus post and for each candidate versus the
-current updater. Estimate uncertainty by resampling whole race weekends, never
-individual drivers; use consecutive-race blocks as a sensitivity check for
-within-season dependence. Report the sample count in races, not just driver rows.
-
-Acceptance: leakage tests cover feature generation, training, calibration, blend
-selection and all fallbacks. A reproducible report provides race-level forecasts,
-metric differences, uncertainty, exclusions and all tested configurations.
-
-## 5. Select a candidate and export it for shadow operation
-
-First rank candidates on the prespecified chronological development folds using
-race log loss. Prefer the simpler model when differences are not distinguishable.
-Inspect Brier score, reliability and winner accuracy alongside the primary metric.
-
-Before prospective evaluation, freeze the selected candidate and these default
-promotion gates:
-
-- Lower paired mean race log loss than the current updater, with the 95%
-  race-level uncertainty interval for the difference below zero.
-- No worsening of mean Brier score or top-one accuracy on the paired evaluation
-  cohort. Report how few races drive each difference and the corresponding
-  uncertainty; top-one accuracy is a guardrail, not the tuning objective.
-- No data-leakage failures, invalid distributions or silent coverage loss.
-- The live input builder reproduces the offline feature definitions and the
-  exported inference matches evaluation probabilities.
-
-These are conservative decision rules, not a claim of statistical certainty.
-If evidence is inconclusive, continue shadow evaluation or retain the existing
-model. Do not retune against a failed test period and call it untouched again.
-
-Export a versioned bundle containing the stage, feature schema, missing-value
-rules, model/calibration artifacts, dependency versions, training cutoff and
-evaluation-manifest hash. Maintain support for the existing bundle during rollout.
-
-## 6. Integrate the selected pipeline and measure live outcomes
-
-App files likely affected:
-
-- `backend/app/services/qualifying_results.py`: expose validated qualifying times
-  and their availability flags if the selected candidate needs them.
-- `backend/app/services/post_qualifying.py`: dispatch by bundle schema/stage and
-  run the exact exported feature and probability pipeline.
-- `scripts/sync_azerbaijan_model.ps1`: validate and publish the complete compatible
-  artifact set together.
-- `backend/app/routers/predictions.py` and `post_qualifying.py`: replace the
-  hard-coded `singapore` file names (router paths and the worker's default
-  `name`) with one current-race setting that both read, and take the home page
-  banner text from the API instead of naming the race in `Home.jsx`. Today each
-  new GP needs code edits in these places, and missing one serves a stale race.
-- `backend/app/services/prediction_history.py`: retain stage/model/input versions
-  and link paired forecasts without altering historical records.
-- Model and backend regression tests for bundle compatibility, timestamp cutoffs,
-  missing fields, corrections, provider failures and rollback.
-
-Run the candidate in shadow beside the current updater. Save prospective
-pre/post forecasts before the race and score them after official results are
-available. Keep candidate records separately identified from forecasts shown to
-users. Never write shadow artifacts to `backend/app/models`: every 60 seconds
-`prediction_history.scan_forecasts` archives any `*_metadata.json` and
-`*_predictions.json` pair there, archived forecasts cannot be deleted, and the
-History page shows the newest one as the published forecast. Keep them in a
-separate directory such as `backend/data/shadow/`, and add a test that the
-scanner ignores it. Update the live comparison report as results arrive; do not promote based
-on a single successful weekend or repeated unplanned significance checks.
-
-After the promotion gates are satisfied, make the candidate the active bundle
-and retain the previous compatible bundle for rollback. Preserve the existing
-session-completion check, full-roster validation, race-start cutoff, atomic
-publication, 60-second refresh and last-successful-forecast fallback. For each
-new GP, require a matching stage bundle and preflight validation before activation.
-
-Acceptance: end-to-end replay demonstrates pre-qualifying -> post-qualifying ->
-scored outcome; both forecasts remain accessible; restart and rollback work;
-the API still serves JSON without loading models in request handlers. Frontend
-stage labels and polling continue to work. No new monitoring panel is required.
-
-## Delivery order
-
-1. Baseline manifest, experiment configuration and historical coverage audit.
-2. Timestamped snapshot builder and fair position-only pre/post backtest.
-3. Model-only/blend comparison, then qualifying-pace ablations.
-4. Chronological calibration, race-level scoring and comparison report.
-5. Frozen candidate bundle, shadow inference and prospective outcome tracking.
-6. Evidence-based promotion and reusable setup for subsequent GPs.
-
-The first useful deliverable is item 2: a measured answer to whether the current
+Acceptance: a reproducible race-level report that answers whether the current
 qualifying substitution improves probabilities relative to projected positions.
-Remaining model changes depend on that evidence.
+
+## Later, only if step 3 shows a gain
+
+Decide the next model work from step 3's evidence; do not plan it in detail now.
+Whatever follows (stage-specific models, a learned blend, qualifying-pace
+features, chronological calibration, shadow operation and promotion) must keep
+these rules:
+
+- Never write shadow or candidate artifacts to `backend/app/models`: every 60
+  seconds `prediction_history.scan_forecasts` archives any `*_metadata.json` and
+  `*_predictions.json` pair there, archived forecasts cannot be deleted, and the
+  History page shows the newest one as the published forecast. Keep them in a
+  separate directory such as `backend/data/shadow/`, with a test that the
+  scanner ignores it.
+- Replace the hard-coded `singapore` file names in
+  `backend/app/routers/predictions.py` and the post-qualifying worker's default
+  `name` with one current-race setting both read, so a new GP needs no code edit.
+- Freeze promotion rules before looking at prospective results, never retune
+  against a failed test period, and keep the existing updater's safeguards
+  (session-completion check, full-roster validation, race-start cutoff, atomic
+  publication and last-successful-forecast fallback).
 
 ## References
 
