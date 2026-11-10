@@ -229,7 +229,12 @@ App files likely affected:
 Run the candidate in shadow beside the current updater. Save prospective
 pre/post forecasts before the race and score them after official results are
 available. Keep candidate records separately identified from forecasts shown to
-users. Update the live comparison report as results arrive; do not promote based
+users. Never write shadow artifacts to `backend/app/models`: every 60 seconds
+`prediction_history.scan_forecasts` archives any `*_metadata.json` and
+`*_predictions.json` pair there, archived forecasts cannot be deleted, and the
+History page shows the newest one as the published forecast. Keep them in a
+separate directory such as `backend/data/shadow/`, and add a test that the
+scanner ignores it. Update the live comparison report as results arrive; do not promote based
 on a single successful weekend or repeated unplanned significance checks.
 
 After the promotion gates are satisfied, make the candidate the active bundle
