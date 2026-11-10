@@ -120,6 +120,31 @@ def test_stale_data_is_not_served_forever(clock):
     assert exc.value.status_code == 409
 
 
+def test_dropped_row_backs_off_full_reloads(clock, monkeypatch):
+    # Outages still retry after RETRY_SECONDS: see test_failed_or_regressed_refresh_keeps_whole_last_good_bundle.
+    monkeypatch.setenv("H2H_CACHE_TTL_SECONDS", "21600")
+    calls = []
+    def dropped(*args):
+        calls.append("dropped")
+        data = payload()
+        data["rows"] = data["rows"][:-1]
+        return data
+    get(clock)
+    clock[0] = 21601
+    assert get(clock, dropped)["freshness"]["refresh_error"] == "results_refresh_incomplete"
+    clock[0] += cache.RETRY_SECONDS + 1
+    get(clock, dropped)
+    assert calls == ["dropped"]  # no full reload a minute later
+    clock[0] += cache.DEFAULT_H2H_CACHE_TTL_SECONDS
+    get(clock, dropped)
+    assert calls == ["dropped", "dropped"]
+    # An empty response is usually an outage, not a dropped row: keep the one-minute retry.
+    clock[0] += cache.DEFAULT_H2H_CACHE_TTL_SECONDS + 1
+    get(clock, lambda *args: {"rows": [], "standings": unavailable_standings()})
+    clock[0] += cache.RETRY_SECONDS + 1
+    assert get(clock)["freshness"]["status"] == "fresh"
+
+
 def test_dropped_row_is_accepted_after_the_stale_limit_without_a_blank_snapshot(clock):
     get(clock)
     def dropped(*args):

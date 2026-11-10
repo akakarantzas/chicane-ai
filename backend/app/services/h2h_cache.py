@@ -147,7 +147,11 @@ def get_season_snapshot(year, events, now, loader, *, snapshot_id=None):
                 and time.monotonic() - previous.loaded_at < MAX_STALE_SECONDS):
             previous.refresh_error = error
             previous.stale_fallback = True
-            previous.retry_at = time.monotonic() + RETRY_SECONDS
+            # A source that dropped a row usually keeps returning the same shorter data;
+            # don't reload every provider each minute while it does.
+            backoff = (max(RETRY_SECONDS, min(previous.ttl, DEFAULT_H2H_CACHE_TTL_SECONDS))
+                       if error == "results_refresh_incomplete" and rows else RETRY_SECONDS)
+            previous.retry_at = time.monotonic() + backoff
             previous.attempted_signature = signature
             previous.last_attempt_at = now.isoformat()
             return _public(previous, events, now, signature)
