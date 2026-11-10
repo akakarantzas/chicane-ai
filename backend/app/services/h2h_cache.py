@@ -148,9 +148,11 @@ def get_season_snapshot(year, events, now, loader, *, snapshot_id=None):
             previous.refresh_error = error
             previous.stale_fallback = True
             # A source that dropped a row usually keeps returning the same shorter data;
-            # don't reload every provider each minute while it does.
+            # don't reload every provider each minute while it does. A newly due race
+            # keeps the one-minute retry so its results are not held back.
             backoff = (max(RETRY_SECONDS, min(previous.ttl, DEFAULT_H2H_CACHE_TTL_SECONDS))
-                       if error == "results_refresh_incomplete" and rows else RETRY_SECONDS)
+                       if error == "results_refresh_incomplete" and rows and previous.signature == signature
+                       else RETRY_SECONDS)
             previous.retry_at = time.monotonic() + backoff
             previous.attempted_signature = signature
             previous.last_attempt_at = now.isoformat()

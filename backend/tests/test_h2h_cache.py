@@ -145,6 +145,19 @@ def test_dropped_row_backs_off_full_reloads(clock, monkeypatch):
     assert get(clock)["freshness"]["status"] == "fresh"
 
 
+def test_newly_due_race_with_a_dropped_row_still_retries_each_minute(clock, monkeypatch):
+    monkeypatch.setenv("H2H_CACHE_TTL_SECONDS", "21600")
+    get(clock, events=EVENTS[:1], loader=lambda *args: {**payload(), "rows": payload()["rows"][:2]})
+    def new_race_but_dropped_row(*args):
+        data = payload()
+        data["rows"] = data["rows"][1:]  # round 2 arrives, one round-1 row is lost
+        return data
+    stale = get(clock, new_race_but_dropped_row)
+    assert stale["coverage"]["missing_rounds"] == [2]
+    clock[0] += cache.RETRY_SECONDS + 1
+    assert get(clock)["coverage"]["missing_rounds"] == []
+
+
 def test_dropped_row_is_accepted_after_the_stale_limit_without_a_blank_snapshot(clock):
     get(clock)
     def dropped(*args):
