@@ -42,7 +42,8 @@ Spain uses `spain-track-white.svg`, traced from the supplied Madrid reference
 `spanish-gp-circuit.png`. Its SVG image and marker share the same geometry.
 The older `spain-track-white.png` depicts Barcelona and is not used for Madrid.
 
-All 24 calendar races have registered animations. Miami, United States, and Las
+All 23 calendar races have registered animations; the Saudi Arabian circuit stays
+registered although that round is not on the 2026 calendar. Miami, United States, and Las
 Vegas have separate IDs, as do Barcelona and the Spanish GP. Suzuka's closed
 path follows both straight-through passes of its figure-eight crossover.
 

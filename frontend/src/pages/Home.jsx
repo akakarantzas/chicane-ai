@@ -464,7 +464,7 @@ export default function Home({ onNavigate }) {
         <div className="section-shell" style={{ padding: isMobile ? '0 16px' : '0 32px' }}>
           <div ref={statsRef} className="stats-grid" style={{ gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)' }}>
               {[
-                { number: useCountUp(24, 1500, statsVisible), label: 'Races' },
+                { number: useCountUp(23, 1500, statsVisible), label: 'Races' },
                 { number: useCountUp(11, 1500, statsVisible), label: 'Teams' },
                 { number: useCountUp(22, 1500, statsVisible), label: 'Drivers' },
                 { number: useCountUp(6,  1500, statsVisible), label: 'Sprints' },
