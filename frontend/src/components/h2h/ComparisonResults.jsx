@@ -27,7 +27,7 @@ export default function ComparisonResults({ result, prediction, driver1, driver2
 
       {result.coverage?.missing_rounds?.length > 0 && (
         <p role="status" className="mb-6 text-sm text-[#A1A1AA]">
-          Results are incomplete. Missing races: {result.coverage.missing_races?.map((race) => race.race).join(', ') || result.coverage.missing_rounds.join(', ')}.
+          Results are incomplete. Missing races: {result.coverage.missing_races?.map((race) => (race.date ? `${race.race} (${race.date})` : race.race)).join(', ') || result.coverage.missing_rounds.join(', ')}.
         </p>
       )}
 

@@ -41,7 +41,14 @@ test.each([
 
 test('missing race results are visible instead of implying a complete season', async () => {
   await compareWith(null, { missing_rounds: [5], missing_races: [{ race: 'Missing Grand Prix' }] })
-  expect(await screen.findByText(/Results are incomplete. Missing races: Missing Grand Prix/)).toBeInTheDocument()
+  expect(await screen.findByText(/Results are incomplete. Missing races: Missing Grand Prix\./)).toBeInTheDocument()
+})
+
+test('missing races and the prediction target show their dates', async () => {
+  await compareWith({ next_race: 'Bahrain Grand Prix', next_event: { race: 'Bahrain Grand Prix', date: '2026-10-04' } },
+    { missing_rounds: [15], missing_races: [{ race: 'Azerbaijan Grand Prix', date: '2026-09-26' }] })
+  expect(await screen.findByText('Bahrain Grand Prix (2026-10-04) · Finish-ahead prediction')).toBeInTheDocument()
+  expect(screen.getByText(/Missing races: Azerbaijan Grand Prix \(2026-09-26\)\./)).toBeInTheDocument()
 })
 
 test('unavailable championship values display dashes, not zero or a fabricated rank', async () => {
