@@ -1,5 +1,4 @@
 import { useEffect, useId, useRef, useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
 import { Check, ChevronDown } from 'lucide-react'
 
 export default function DriverDropdown({ value, onChange, options, label }) {
@@ -95,47 +94,41 @@ export default function DriverDropdown({ value, onChange, options, label }) {
         />
       </button>
 
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            ref={menuRef}
-            id={listboxId}
-            role="listbox"
-            aria-label={label}
-            aria-activedescendant={`${listboxId}-option-${activeIndex}`}
-            className="h2h-driver-dropdown-menu"
-            initial={{ opacity: 0, y: -8, scale: 0.985 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -6, scale: 0.985 }}
-            transition={{ duration: 0.18, ease: [0.2, 0.8, 0.2, 1] }}
-          >
-            {options.map((driver, index) => {
-              const isSelected = driver.abbrev === value
-              const isActive = index === activeIndex
+      {isOpen && (
+        <div
+          ref={menuRef}
+          id={listboxId}
+          role="listbox"
+          aria-label={label}
+          aria-activedescendant={`${listboxId}-option-${activeIndex}`}
+          className="h2h-driver-dropdown-menu"
+        >
+          {options.map((driver, index) => {
+            const isSelected = driver.abbrev === value
+            const isActive = index === activeIndex
 
-              return (
-                <button
-                  key={driver.abbrev}
-                  id={`${listboxId}-option-${index}`}
-                  type="button"
-                  role="option"
-                  aria-selected={isSelected}
-                  data-option-index={index}
-                  className={`h2h-driver-dropdown-option ${isSelected ? 'h2h-driver-dropdown-option-selected' : ''} ${isActive ? 'h2h-driver-dropdown-option-active' : ''}`}
-                  onMouseEnter={() => setActiveIndex(index)}
-                  onClick={() => chooseDriver(index)}
-                >
-                  <span className="h2h-driver-dropdown-option-main">
-                    <span className="h2h-driver-dropdown-option-name">{driver.fullName}</span>
-                    <span className="h2h-driver-dropdown-option-team">{driver.team}</span>
-                  </span>
-                  {isSelected && <Check aria-hidden="true" size={17} strokeWidth={2.4} className="h2h-driver-dropdown-check" />}
-                </button>
-              )
-            })}
-          </motion.div>
-        )}
-      </AnimatePresence>
+            return (
+              <button
+                key={driver.abbrev}
+                id={`${listboxId}-option-${index}`}
+                type="button"
+                role="option"
+                aria-selected={isSelected}
+                data-option-index={index}
+                className={`h2h-driver-dropdown-option ${isSelected ? 'h2h-driver-dropdown-option-selected' : ''} ${isActive ? 'h2h-driver-dropdown-option-active' : ''}`}
+                onMouseEnter={() => setActiveIndex(index)}
+                onClick={() => chooseDriver(index)}
+              >
+                <span className="h2h-driver-dropdown-option-main">
+                  <span className="h2h-driver-dropdown-option-name">{driver.fullName}</span>
+                  <span className="h2h-driver-dropdown-option-team">{driver.team}</span>
+                </span>
+                {isSelected && <Check aria-hidden="true" size={17} strokeWidth={2.4} className="h2h-driver-dropdown-check" />}
+              </button>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }
