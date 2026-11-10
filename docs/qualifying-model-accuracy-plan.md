@@ -221,6 +221,11 @@ App files likely affected:
   run the exact exported feature and probability pipeline.
 - `scripts/sync_azerbaijan_model.ps1`: validate and publish the complete compatible
   artifact set together.
+- `backend/app/routers/predictions.py` and `post_qualifying.py`: replace the
+  hard-coded `singapore` file names (router paths and the worker's default
+  `name`) with one current-race setting that both read, and take the home page
+  banner text from the API instead of naming the race in `Home.jsx`. Today each
+  new GP needs code edits in these places, and missing one serves a stale race.
 - `backend/app/services/prediction_history.py`: retain stage/model/input versions
   and link paired forecasts without altering historical records.
 - Model and backend regression tests for bundle compatibility, timestamp cutoffs,
