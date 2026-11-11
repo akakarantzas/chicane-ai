@@ -11,7 +11,7 @@ export default function Season({ onNavigate }) {
     <div
       className="page-bg relative min-h-screen text-[#F4F4F5] flex flex-col"
       style={{
-        backgroundImage: 'url(/season-bg.png)',
+        backgroundImage: `url(${import.meta.env.BASE_URL}season-bg.png)`,
       }}
     >
       {/* Dark overlay */}

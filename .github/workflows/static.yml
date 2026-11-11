@@ -33,11 +33,25 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v5
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Build frontend
+        working-directory: frontend
+        env:
+          BASE_PATH: /chicane-ai/
+          # shortcut: set repo variable API_BASE_URL to the hosted backend; unset falls back to localhost
+          VITE_API_BASE_URL: ${{ vars.API_BASE_URL }}
+        run: |
+          npm ci
+          npm run build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload entire repository
-          path: '.'
+          path: frontend/dist
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5

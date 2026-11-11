@@ -77,7 +77,7 @@ export default function AppNav({ activePage, onNavigate, variant }) {
       <div className="app-nav-inner" style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: '52px', gap: '16px' }}>
         <div className="brand-wrap" style={{ flex: isMobile ? '0 1 auto' : 1 }}>
           <button onClick={() => onNavigate?.('home')} className="brand-button" aria-label="Go to home">
-            <img src="/logo-mark.png" alt="" className="brand-logo" />
+            <img src={`${import.meta.env.BASE_URL}logo-mark.png`} alt="" className="brand-logo" />
             <span className="brand-wordmark">ChicaneAI</span>
           </button>
         </div>
