@@ -141,7 +141,7 @@ export default function Contact({ onNavigate }) {
       <main className="contact-shell">
         <header className="contact-header">
           <div className="contact-header-brand" aria-label="ChicaneAI">
-            <img src="/logo-mark.png" alt="" className="brand-logo" />
+            <img src={`${import.meta.env.BASE_URL}logo-mark.png`} alt="" className="brand-logo" />
             <span className="brand-wordmark">ChicaneAI</span>
           </div>
           <h1>Get in touch</h1>

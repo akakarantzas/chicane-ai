@@ -295,7 +295,7 @@ export default function History({ onNavigate }) {
     <div
       className="page-bg relative min-h-screen text-[#F4F4F5] flex flex-col"
       style={{
-        backgroundImage: 'url(/prediction-history.png)',
+        backgroundImage: `url(${import.meta.env.BASE_URL}prediction-history.png)`,
       }}
     >
       <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: 'rgba(12,12,14,0.88)', zIndex: 0 }} />

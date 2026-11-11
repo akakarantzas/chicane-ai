@@ -25,7 +25,7 @@ export default function H2H({ onNavigate }) {
       style={{
         minHeight: '100vh',
         color: HEADING_TEXT_COLOR,
-        backgroundImage: 'url(/h2h-bg.png)',
+        backgroundImage: `url(${import.meta.env.BASE_URL}h2h-bg.png)`,
         position: 'relative',
       }}
     >
@@ -143,7 +143,7 @@ export default function H2H({ onNavigate }) {
               justifyContent: 'center',
               gap: '16px',
             }}>
-              <img src="/white-f1-car.png" alt="F1 car" style={{ width: '120px', height: 'auto', opacity: 0.6 }} />
+              <img src={`${import.meta.env.BASE_URL}white-f1-car.png`} alt="F1 car" style={{ width: '120px', height: 'auto', opacity: 0.6 }} />
               <div>
                 <div style={{ fontSize: '16px', fontWeight: 700, color: HEADING_TEXT_COLOR, margin: '0' }}>
                   Pick your drivers

@@ -279,7 +279,7 @@ export default function Home({ onNavigate }) {
       <section className="hero-section home-hero flex-1 flex flex-col items-center justify-center text-center px-6" style={{ position: 'relative', minHeight: '100vh', height: '100vh', overflow: 'hidden', backgroundColor: '#0C0C0E', paddingTop: isMobile ? '84px' : '96px', paddingBottom: isMobile ? '72px' : '96px', paddingLeft: isMobile ? '20px' : '80px', paddingRight: isMobile ? '20px' : '80px', textAlign: 'center' }}>
         {/* Background video */}
         <video
-          src="/hero-video.mp4"
+          src={`${import.meta.env.BASE_URL}hero-video.mp4`}
           autoPlay={true}
           muted={true}
           loop={true}

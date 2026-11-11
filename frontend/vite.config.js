@@ -17,6 +17,8 @@ export default defineConfig(({ mode }) => {
     }
   }
   return {
+    // Pages serves project sites under /<repo>/; set BASE_PATH in that build only.
+    base: process.env.BASE_PATH ?? '/',
     plugins: [react()],
     build: { sourcemap: false },
     test: {
